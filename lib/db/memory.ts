@@ -1,3 +1,4 @@
+import "server-only";
 // In-memory Repo. Used by unit tests, and by local development / offline demo fallback when
 // DATA_BACKEND=memory (seeded from data/*.json). Not for production: data lives in one process.
 

@@ -1,3 +1,4 @@
+import "server-only";
 // The seven dashboard metrics (docs/stack/06 §2). Pure functions over event arrays, so every
 // formula is unit-tested. Evaluation traffic (trigger = "eval") is always excluded.
 

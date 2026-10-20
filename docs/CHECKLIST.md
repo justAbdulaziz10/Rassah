@@ -506,7 +506,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P6.27** (M3) Cache miss path: extractor called, extraction event + facts upsert written.
 - [x] **P6.28** (M3) `needs_measurement` path. `no_box` path. Unknown order 404.
 - [x] **P6.29** (M3) DB write failure → 200 with `monitoring.saved=false`.
-- [ ] **P6.30** (M3) Simulated outage only when `DEMO_MODE=true`.
+- [x] **P6.30** (M3) Simulated outage only when `DEMO_MODE=true`.
 - [x] **P6.31** (M3) Action route: confirm and edit write the correct rows.
 
 ### 6G. Checkpoint ⛳ (Wed 13:00)
@@ -576,7 +576,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.40** (M2) All buttons have readable labels. Color is never the only signal (chips have text).
 - [x] **P7.41** (M2) Keyboard: the order input submits on Enter.
 - [x] **P7.42** (M2) Page titles set per route.
-- [ ] **P7.43** (M2) No console errors in the browser on the main flow.
+- [x] **P7.43** (M2) No console errors in the browser on the main flow.
 
 ### 7G. Verification
 - [ ] **P7.44** (M3) Review PR on the preview: full flow for the 3 demo orders.
@@ -714,7 +714,7 @@ CI needs **no** secrets because tests never call external services.
 ### 10A. Security checklist
 - [x] **P10.1** (M3) No secret in git history: search the repo for key prefixes and `SERVICE_ROLE`. Nothing found.
 - [x] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
-- [ ] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
+- [x] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
 - [ ] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses.
 - [ ] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production).
 - [x] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
@@ -724,7 +724,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.10** (M3) No real personal or customer data anywhere (synthetic only).
 
 ### 10B. Abuse and cost protection on the public URL
-- [ ] **P10.11** (M3) Simple per-IP rate limit on the pack route (in-DB counter or a small token bucket), or documented acceptance of the risk for a 2-day demo.
+- [x] **P10.11** (M3) Simple per-IP rate limit on the pack route (in-DB counter or a small token bucket), or documented acceptance of the risk for a 2-day demo.
 - [ ] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert).
 - [x] **P10.13** (M3) Extraction is only triggered for products in the seeded store (no arbitrary text input on the public URL).
 

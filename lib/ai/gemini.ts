@@ -1,6 +1,7 @@
+import "server-only";
 // The real Gemini call, adapted to the GenerateFn interface used by the extractor.
-// Not marked server-only so the eval script can use it too; it is only imported by
-// server code (route handlers via lib/ai/catalog) and scripts. Never import it from a client component.
+// Server-only: imported by route handlers (via lib/ai/catalog) and by scripts. Scripts run under
+// `tsx --conditions=react-server`, which resolves `server-only` to its no-op build.
 
 import { ApiError, FinishReason, GoogleGenAI } from "@google/genai";
 import { GenerateError, type GenerateFn } from "./extractor";

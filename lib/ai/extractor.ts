@@ -1,3 +1,4 @@
+import "server-only";
 // Core extraction logic. The network call is injected (`generate`), so this file is fully
 // unit-testable with recorded responses. lib/ai/gemini.ts provides the real Gemini call.
 

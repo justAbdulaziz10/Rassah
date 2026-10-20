@@ -19,3 +19,7 @@ jobs:
       - run: npm run typecheck
       - run: npm run validate-data
       - run: npm test
+      # Builds without secrets: pages read data at request time, and env is validated lazily.
+      - run: npm run build
+      # Offline (no network, no secrets). Writes a JSON report into the throwaway CI checkout only.
+      - run: npm run eval:packing

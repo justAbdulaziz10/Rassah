@@ -1,3 +1,4 @@
+import "server-only";
 // Everything the /monitoring page needs, computed server-side: metrics for the selected window,
 // the latency series, recent runs, and alerts (re-evaluated on every load).
 

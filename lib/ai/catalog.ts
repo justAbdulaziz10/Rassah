@@ -1,3 +1,4 @@
+import "server-only";
 // Catalog cache: return stored facts when fresh, extract the rest with Gemini (bounded concurrency).
 // Manual or corrected facts are never overwritten by extraction.
 

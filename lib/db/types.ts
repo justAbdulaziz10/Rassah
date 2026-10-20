@@ -1,3 +1,4 @@
+import "server-only";
 // Domain types for persisted data. The Repo interface speaks these (camelCase);
 // the Supabase adapter maps them to snake_case columns.
 

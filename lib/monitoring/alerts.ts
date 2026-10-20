@@ -1,3 +1,4 @@
+import "server-only";
 // Alert rules (docs/stack/06 §3). evaluateRules() is pure; syncAlerts() opens/resolves alerts in the repo.
 // Rules use rolling "last N events" windows, independent of the dashboard's time filter.
 

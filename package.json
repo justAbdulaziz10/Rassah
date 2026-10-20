@@ -18,7 +18,7 @@
     "gen-fixtures": "tsx scripts/gen-packing-fixtures.ts",
     "check": "npm run lint && npm run typecheck && npm run validate-data && npm test",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
-    "eval:extraction": "tsx --env-file-if-exists=.env.local scripts/eval-extraction.ts",
+    "eval:extraction": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/eval-extraction.ts",
     "eval:packing": "tsx --env-file-if-exists=.env.local scripts/eval-packing.ts"
   },
   "dependencies": {
