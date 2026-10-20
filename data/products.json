@@ -1,0 +1,245 @@
+{
+  "_note": "SYNTHETIC DATA. Written by the Rassah team in the style of Saudi e-commerce product pages (Salla/Zid). Not copied from any real store; no real merchant data. URLs use the reserved example domain. Group A states dimensions/weight in varied formats, group B gives only indirect clues, group C has no usable information.",
+  "products": [
+    {
+      "id": "p-01",
+      "group": "A",
+      "name": "عطر عود ملكي 100 مل",
+      "category": "perfume",
+      "url": "https://store.example/products/p-01",
+      "description": "عطر عود ملكي فاخر بتركيز عالٍ يدوم طويلاً، معبأ في زجاجة كريستال مصقولة يدوياً داخل علبة هدايا مخملية. أبعاد العلبة: ٧ × ٧ × ١٦ سم، والوزن مع التغليف ٤٢٠ جرام. مناسب للمناسبات والإهداء."
+    },
+    {
+      "id": "p-02",
+      "group": "A",
+      "name": "كتاب فن التفكير الهادئ",
+      "category": "books",
+      "url": "https://store.example/products/p-02",
+      "description": "كتاب في تطوير الذات، طبعة عربية جديدة بغلاف ورقي. المقاس: 21 x 14 x 2 سم | الوزن: 350 غ. عدد الصفحات 256."
+    },
+    {
+      "id": "p-03",
+      "group": "A",
+      "name": "مبخرة خزف مزخرفة",
+      "category": "incense",
+      "url": "https://store.example/products/p-03",
+      "description": "مبخرة من الخزف المزخرف بنقوش نجدية تقليدية، تضيف لمسة فخامة لمجلسك. الطول ١٨ سم، العرض ١٢ سم، الارتفاع ٢٢ سم. الوزن ١٫٢ كجم شامل العلبة."
+    },
+    {
+      "id": "p-04",
+      "group": "A",
+      "name": "Power Bank 20000mAh",
+      "category": "electronics",
+      "url": "https://store.example/products/p-04",
+      "description": "Fast-charging power bank with USB-C PD 22.5W and two USB-A ports. Dimensions: 15 × 7.5 × 2.8 cm, Weight: 430 g. يدعم الشحن السريع لجميع الجوالات."
+    },
+    {
+      "id": "p-05",
+      "group": "A",
+      "name": "شمعة معطرة في كوب زجاجي",
+      "category": "candles",
+      "url": "https://store.example/products/p-05",
+      "description": "Scented soy candle in a thick glass tumbler, hand-poured. Box size: 4 x 4 x 5 in, weight 1.1 lb. رائحة العود والفانيلا، مدة الاشتعال ٤٠ ساعة."
+    },
+    {
+      "id": "p-06",
+      "group": "A",
+      "name": "كفر جوال سيليكون",
+      "category": "phone-accessories",
+      "url": "https://store.example/products/p-06",
+      "description": "كفر سيليكون ناعم يحمي الجوال من الصدمات والخدوش، متوفر بعدة ألوان. أبعاد العبوة 18×10×2 سم ووزنها 80 جرام."
+    },
+    {
+      "id": "p-07",
+      "group": "A",
+      "name": "عسل سدر جبلي 500 جرام",
+      "category": "honey",
+      "url": "https://store.example/products/p-07",
+      "description": "عسل سدر جبلي أصلي من جبال الجنوب، معبأ في برطمان زجاجي محكم الإغلاق. أبعاد العبوة ٩ × ٩ × ١٣ سم والوزن الإجمالي ٨٥٠ جرام."
+    },
+    {
+      "id": "p-08",
+      "group": "A",
+      "name": "سماعة بلوتوث محمولة",
+      "category": "electronics",
+      "url": "https://store.example/products/p-08",
+      "description": "سماعة لاسلكية بصوت قوي وباس عميق، مقاومة لرذاذ الماء وتعمل حتى ١٢ ساعة. تأتي في علبة كرتونية أنيقة حجمها 20×10×10 سم مع كيبل شحن، ويبلغ وزنها مع العلبة 650 جرام تقريباً، مثالية للرحلات والكشتات."
+    },
+    {
+      "id": "p-09",
+      "group": "A",
+      "name": "طقم كوبين بورسلين",
+      "category": "kitchen",
+      "url": "https://store.example/products/p-09",
+      "description": "طقم كوبين قهوة من البورسلين الأبيض بحواف ذهبية. المقاس: الطول 25 سم - العرض 12 سم - الارتفاع 11 سم، الوزن 900 جرام."
+    },
+    {
+      "id": "p-10",
+      "group": "A",
+      "name": "زيت زيتون بكر ممتاز 1 لتر",
+      "category": "food",
+      "url": "https://store.example/products/p-10",
+      "description": "Extra virgin olive oil, cold pressed, in a dark glass bottle. Bottle box: 3.5 x 3.5 x 12 in, 3.3 lb. زيت زيتون من مزارع الجوف."
+    },
+    {
+      "id": "p-11",
+      "group": "A",
+      "name": "عبوة دفاتر جامعية (3 دفاتر)",
+      "category": "stationery",
+      "url": "https://store.example/products/p-11",
+      "description": "عبوة ٣ دفاتر جامعية بغلاف مقوى، ١٠٠ ورقة لكل دفتر. المقاس 30x21x3 cm، الوزن 1 كجم."
+    },
+    {
+      "id": "p-12",
+      "group": "A",
+      "name": "ساعة ذكية رياضية",
+      "category": "electronics",
+      "url": "https://store.example/products/p-12",
+      "description": "ساعة ذكية تقيس النبض والأكسجين والنوم، مع أكثر من ١٠٠ وضع رياضي. علبة الساعة الأنيقة بأبعاد 12 × 9 × 8 سم تحتوي على الساعة وشاحن مغناطيسي ودليل الاستخدام، والوزن الكلي 300 غرام."
+    },
+    {
+      "id": "p-13",
+      "group": "A",
+      "name": "علبة تمر خلاص فاخر 1 كجم",
+      "category": "dates",
+      "url": "https://store.example/products/p-13",
+      "description": "تمر خلاص القصيم فاخر، منتقى بعناية ومعبأ في علبة كرتونية فاخرة. مقاس العلبة: 28 × 20 × 6 سم، الوزن 1.15 كجم."
+    },
+    {
+      "id": "p-14",
+      "group": "A",
+      "name": "سيروم فيتامين سي 30 مل",
+      "category": "skincare",
+      "url": "https://store.example/products/p-14",
+      "description": "سيروم فيتامين سي لتفتيح البشرة، في عبوة بلاستيكية آمنة بمضخة. أبعاد العلبة: 4 x 4 x 12 سم، الوزن 120 جرام."
+    },
+    {
+      "id": "p-15",
+      "group": "A",
+      "name": "مجفف شعر احترافي",
+      "category": "appliances",
+      "url": "https://store.example/products/p-15",
+      "description": "Professional hair dryer 2200W with ionic technology and 3 heat settings. Package size: 26 × 22 × 10 cm | Weight: 1.2 kg. ضمان سنتين."
+    },
+    {
+      "id": "p-16",
+      "group": "B",
+      "name": "عطر أو دو بارفان 50 مل",
+      "category": "perfume",
+      "url": "https://store.example/products/p-16",
+      "description": "عطر أو دو بارفان 50 مل بنفحات الورد الطائفي والمسك الأبيض، في زجاجة أنيقة داخل علبة كرتونية."
+    },
+    {
+      "id": "p-17",
+      "group": "B",
+      "name": "رواية ساق البامبو",
+      "category": "books",
+      "url": "https://store.example/products/p-17",
+      "description": "رواية عربية حائزة على جائزة، ٤٠٠ صفحة، غلاف ورقي، الطبعة العاشرة."
+    },
+    {
+      "id": "p-18",
+      "group": "B",
+      "name": "زيت أرغان مغربي 30 مل",
+      "category": "skincare",
+      "url": "https://store.example/products/p-18",
+      "description": "زيت أرغان مغربي نقي ١٠٠٪ للشعر والبشرة، ٣٠ مل في قارورة زجاجية بقطارة."
+    },
+    {
+      "id": "p-19",
+      "group": "B",
+      "name": "شاحن جداري سريع 20W",
+      "category": "phone-accessories",
+      "url": "https://store.example/products/p-19",
+      "description": "شاحن جداري USB-C بقدرة 20 واط، متوافق مع الآيفون والأندرويد، قابس سعودي ثلاثي."
+    },
+    {
+      "id": "p-20",
+      "group": "B",
+      "name": "قهوة مختصة إثيوبية 250 جرام",
+      "category": "coffee",
+      "url": "https://store.example/products/p-20",
+      "description": "حبوب قهوة مختصة من إثيوبيا يرغاتشيفي، تحميص فاتح، ٢٥٠ جرام في علبة كرتونية مع صمام لحفظ النكهة."
+    },
+    {
+      "id": "p-21",
+      "group": "B",
+      "name": "بخور معمول (12 قطعة)",
+      "category": "incense",
+      "url": "https://store.example/products/p-21",
+      "description": "بخور معمول فاخر بدهن العود، علبة تحتوي على ١٢ قطعة مغلفة."
+    },
+    {
+      "id": "p-22",
+      "group": "B",
+      "name": "قارورة ماء زجاجية 750 مل",
+      "category": "kitchen",
+      "url": "https://store.example/products/p-22",
+      "description": "قارورة ماء زجاجية سعة ٧٥٠ مل مع غطاء خشبي وغلاف سيليكون، تُباع فارغة."
+    },
+    {
+      "id": "p-23",
+      "group": "B",
+      "name": "ماء ورد طائفي 250 مل",
+      "category": "skincare",
+      "url": "https://store.example/products/p-23",
+      "description": "ماء ورد طائفي طبيعي ٢٥٠ مل في عبوة بخاخ بلاستيكية، للبشرة والضيافة."
+    },
+    {
+      "id": "p-24",
+      "group": "B",
+      "name": "سماعات أذن لاسلكية",
+      "category": "electronics",
+      "url": "https://store.example/products/p-24",
+      "description": "سماعات أذن لاسلكية بخاصية عزل الضوضاء، مع علبة شحن صغيرة تكفي ٢٤ ساعة."
+    },
+    {
+      "id": "p-25",
+      "group": "B",
+      "name": "طقم صحون بورسلين (4 قطع)",
+      "category": "kitchen",
+      "url": "https://store.example/products/p-25",
+      "description": "طقم ٤ صحون عشاء من البورسلين الفاخر، قطر الصحن ٢٧ سم، مناسب للضيافة."
+    },
+    {
+      "id": "p-26",
+      "group": "B",
+      "name": "شاي أخضر (100 كيس)",
+      "category": "food",
+      "url": "https://store.example/products/p-26",
+      "description": "شاي أخضر بالنعناع، علبة كرتونية تحتوي ١٠٠ كيس شاي."
+    },
+    {
+      "id": "p-27",
+      "group": "B",
+      "name": "حامل جوال مكتبي معدني",
+      "category": "phone-accessories",
+      "url": "https://store.example/products/p-27",
+      "description": "حامل جوال مكتبي من الألمنيوم قابل للطي وتعديل الزاوية، يناسب جميع الجوالات والأجهزة اللوحية الصغيرة."
+    },
+    {
+      "id": "p-28",
+      "group": "C",
+      "name": "هدية فاخرة",
+      "category": "gifts",
+      "url": "https://store.example/products/p-28",
+      "description": "هدية فاخرة مميزة لمن تحب، بتغليف أنيق يليق بالمناسبة."
+    },
+    {
+      "id": "p-29",
+      "group": "C",
+      "name": "منتج مختار",
+      "category": "general",
+      "url": "https://store.example/products/p-29",
+      "description": "منتج أصلي بجودة عالية، شحن سريع لجميع مناطق المملكة."
+    },
+    {
+      "id": "p-30",
+      "group": "C",
+      "name": "مجموعة مختارة",
+      "category": "gifts",
+      "url": "https://store.example/products/p-30",
+      "description": "مجموعة مختارة بعناية تناسب جميع الأذواق والمناسبات."
+    }
+  ]
+}

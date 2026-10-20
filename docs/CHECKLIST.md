@@ -20,7 +20,7 @@
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 29 | 🟨 In progress |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 0 | ⬜ Not started |
-| 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 0 | ⬜ Not started |
+| 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 0 | ⬜ Not started |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **83** | |
+| **Total** | | | | **517** | **110** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -272,45 +272,45 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M1 (descriptions), M2 (ground truth) · **Target:** Tue night → Wed morning · **Gate:** G3 · **Spec:** [stack/07 §1](stack/07-evaluation.md)
 
 ### 3A. Schemas
-- [ ] **P3.1** (M1) Zod schemas in `lib/data/schemas.ts` for `products.json`, `ground_truth.json`, `cartons.json`, `orders.json`, `packing_fixtures.json`.
-- [ ] **P3.2** (M1) `scripts/validate-data.ts` validates all data files and cross-references (every order product exists, every product has ground truth). Add it to `npm run check`.
+- [x] **P3.1** (M1) Zod schemas in `lib/data/schemas.ts` for `products.json`, `ground_truth.json`, `cartons.json`, `orders.json`, `packing_fixtures.json`.
+- [x] **P3.2** (M1) `scripts/validate-data.ts` validates all data files and cross-references (every order product exists, every product has ground truth). Add it to `npm run check`.
 
 ### 3B. Products (`data/products.json`, 30)
-- [ ] **P3.3** (M1, →T6) Group A, 15 explicit products: dimensions + weight stated in the text.
-- [ ] **P3.4** (M1) Group A format variety: at least 3 with Arabic-Indic digits, 2 in inches/lb, 2 using "الطول/العرض/الارتفاع", 2 with dims buried mid-paragraph, 2 with "x" and 2 with "×".
-- [ ] **P3.5** (M1) Group B, 12 inferable products: no dimensions, but clues (ml, page count, size label, pieces per box, known type).
-- [ ] **P3.6** (M1) Group C, 3 no-info products: vague marketing text only.
-- [ ] **P3.7** (M1) Category coverage: perfumes, oud/incense burners (ceramic), skincare glass + plastic, honey/olive oil glass, books, mugs, phone accessories, power banks, small appliance, dates box, glass candle.
-- [ ] **P3.8** (M1) At least 8 fragile, 6 liquid (some both), 4 sensitive, and some products with none.
-- [ ] **P3.9** (M1) At least 2 "implicit fragile" products where fragility is only implied ("كريستال", "خزف") with no word "قابل للكسر".
-- [ ] **P3.10** (M1) Each product has `id`, `name`, `description`, `category`, illustrative `url`.
-- [ ] **P3.11** (M1) A header note in the file states: synthetic, written by the team, modeled on Saudi store pages.
+- [x] **P3.3** (M1, →T6) Group A, 15 explicit products: dimensions + weight stated in the text.
+- [x] **P3.4** (M1) Group A format variety: at least 3 with Arabic-Indic digits, 2 in inches/lb, 2 using "الطول/العرض/الارتفاع", 2 with dims buried mid-paragraph, 2 with "x" and 2 with "×".
+- [x] **P3.5** (M1) Group B, 12 inferable products: no dimensions, but clues (ml, page count, size label, pieces per box, known type).
+- [x] **P3.6** (M1) Group C, 3 no-info products: vague marketing text only.
+- [x] **P3.7** (M1) Category coverage: perfumes, oud/incense burners (ceramic), skincare glass + plastic, honey/olive oil glass, books, mugs, phone accessories, power banks, small appliance, dates box, glass candle.
+- [x] **P3.8** (M1) At least 8 fragile, 6 liquid (some both), 4 sensitive, and some products with none.
+- [x] **P3.9** (M1) At least 2 "implicit fragile" products where fragility is only implied ("كريستال", "خزف") with no word "قابل للكسر".
+- [x] **P3.10** (M1) Each product has `id`, `name`, `description`, `category`, illustrative `url`.
+- [x] **P3.11** (M1) A header note in the file states: synthetic, written by the team, modeled on Saudi store pages.
 
 ### 3C. Ground truth (`data/ground_truth.json`)
 - [ ] **P3.12** (M2) Written by **M2** (not the author of the descriptions) for all 30 products.
-- [ ] **P3.13** (M2) Fields: `lengthCm, widthCm, heightCm` (sorted L ≥ W ≥ H), `weightG`, `fragile`, `liquid`, `sensitive`, `expectedDimsSource`.
-- [ ] **P3.14** (M2) Group B ground-truth sizes are realistic for the product type (sanity-checked against similar real items).
-- [ ] **P3.15** (M1) Pick 10 products as the **holdout** set (mixed groups). Mark them in ground truth (`holdout: true`).
+- [x] **P3.13** (M2) Fields: `lengthCm, widthCm, heightCm` (natural upright orientation, `heightCm` = vertical side; the eval sorts before comparing), `weightG`, `fragile`, `liquid`, `sensitive`, `expectedDimsSource`.
+- [x] **P3.14** (M2) Group B ground-truth sizes are realistic for the product type (sanity-checked against similar real items).
+- [x] **P3.15** (M1) Pick 10 products as the **holdout** set (mixed groups). Mark them in ground truth (`holdout: true`).
 - [ ] **P3.16** (M1+M2) Disagreements between author and labeler resolved and noted.
 
 ### 3D. Cartons (`data/cartons.json`)
-- [ ] **P3.17** (M2) 5 cartons per stack/07 (S, FLAT, M, L, XL): inner dims, max weight, tare weight, synthetic cost.
-- [ ] **P3.18** (M2) Shipping constants (`BASE_SAR`, `PER_KG_SAR`) in the same file, labeled synthetic.
+- [x] **P3.17** (M2) 5 cartons per stack/07 (S, FLAT, M, L, XL): inner dims, max weight, tare weight, synthetic cost.
+- [x] **P3.18** (M2) Shipping constants (`BASE_SAR`, `PER_KG_SAR`) in the same file, labeled synthetic.
 
 ### 3E. Orders (`data/orders.json`, 20)
-- [ ] **P3.19** (M1) 20 orders, 2–6 products each, quantities 1–3.
-- [ ] **P3.20** (M1) Includes a fragile + heavy mix.
-- [ ] **P3.21** (M1) Includes an order with two liquids.
-- [ ] **P3.22** (M1) Includes an order with an inferred-dimension product.
-- [ ] **P3.23** (M1) Includes an order with a group-C product (→ `needs_measurement`).
-- [ ] **P3.24** (M1) Includes an order too large for every carton (→ `no_box`).
-- [ ] **P3.25** (M1) Includes a single-item order (simplest demo).
-- [ ] **P3.26** (M1) Mark 3 orders as **demo orders** in a comment/README: quick success, fragile + liquid + estimated, impossible.
+- [x] **P3.19** (M1) 20 orders, 2–6 products each, quantities 1–3.
+- [x] **P3.20** (M1) Includes a fragile + heavy mix.
+- [x] **P3.21** (M1) Includes an order with two liquids.
+- [x] **P3.22** (M1) Includes an order with an inferred-dimension product.
+- [x] **P3.23** (M1) Includes an order with a group-C product (→ `needs_measurement`).
+- [x] **P3.24** (M1) Includes an order too large for every carton (→ `no_box`).
+- [x] **P3.25** (M1) Includes a single-item order (simplest demo).
+- [x] **P3.26** (M1) Mark 3 orders as **demo orders** in a comment/README: quick success, fragile + liquid + estimated, impossible.
 
 ### 3F. Packing fixtures
-- [ ] **P3.27** (M2) `scripts/gen-packing-fixtures.ts` with a fixed seed creates `data/packing_fixtures.json`: 20 known-feasible (guillotine split, fragile only in the top layer), 20 impossible (oversize / overweight / liquid too tall), 20 random.
-- [ ] **P3.28** (M2) Each known-feasible fixture stores its witness carton id. Each impossible fixture stores its reason.
-- [ ] **P3.29** (M2) Re-running the generator produces a byte-identical file.
+- [x] **P3.27** (M2) `scripts/gen-packing-fixtures.ts` with a fixed seed creates `data/packing_fixtures.json`: 20 known-feasible (guillotine split, fragile only in the top layer), 20 impossible (oversize / overweight / liquid too tall), 20 random.
+- [x] **P3.28** (M2) Each known-feasible fixture stores its witness carton id. Each impossible fixture stores its reason.
+- [x] **P3.29** (M2) Re-running the generator produces a byte-identical file.
 
 ### 3G. Verification
 - [ ] **P3.30** (M1) `scripts/validate-data.ts` passes. The seed (P2.25) succeeds with the final data.

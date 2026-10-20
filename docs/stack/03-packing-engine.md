@@ -69,12 +69,23 @@ for carton in cartons sorted by (cartonCost, volume):
 pick candidate with lowest estimated total cost (tie → smallest carton volume)
 ```
 
-`STRATEGIES` (fragile units always go **last**, so they end up on top and R5 holds):
+`STRATEGIES` are tried in order. Each is (item ordering, whether fragile units go last, position score):
 
-1. volume, descending
-2. base area (`L × W`), descending
-3. weight, descending (heavy at the bottom)
-4. longest side, descending
+| # | Ordering (desc) | Fragile last | Score |
+|---|---|---|---|
+| 1 | volume | yes | lowest top |
+| 2 | base area (`L × W`) | yes | lowest top |
+| 3 | weight (heavy at the bottom) | yes | lowest top |
+| 4 | longest side | yes | lowest top |
+| 5 | volume | yes | lowest base |
+| 6 | volume | no | lowest top |
+| 7 | base area | no | lowest base |
+
+- **Lowest top** picks the position with the smallest resulting top surface (`z + dz`), then `z`, `y`, `x`. It keeps flat, even layers and stops wasteful placements, such as a book stood on its edge.
+- **Lowest base** is classic gravity-first: smallest `z`, then `y`, then `x`.
+- **Fragile last** usually makes R5 easy to satisfy. But a large fragile item sometimes needs the floor first (e.g. a plate set next to a box of dates), so strategies 6–7 drop that ordering. R5 is still enforced by the placement check in every strategy.
+
+Found on the sanity run over the 20 seeded orders: with only z-first scoring and fragile-last, order 1012 wasted an L carton (chose XL) and order 1013 found no carton at all. Both are fixed by strategies 1 and 6.
 
 `greedyPlace`:
 
@@ -88,7 +99,7 @@ for unit in ordering:
             if fitsInBounds(box) and noOverlap(box, placed)
                and supportRatio(box, placed) ≥ MIN_SUPPORT
                and not restsOnFragile(box, placed):
-                score = (box.z, box.y, box.x)          # lowest, then back, then left
+                score = (box.z + box.dz, box.z, box.y, box.x)   # "lowest top" mode (see table)
                 keep box if score < best.score
     if best is null: return INCOMPLETE
     placed.push(best)

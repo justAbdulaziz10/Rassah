@@ -1,0 +1,25 @@
+{
+  "_note": "SYNTHETIC orders for the mock store. 'demo' marks the three orders used in the live pitch. 'expect' is the intended scenario (documentation only; the eval and smoke test check actual behavior).",
+  "orders": [
+    { "id": "1001", "demo": "quick-success", "expect": "single page-sourced item, smallest carton", "items": [{ "productId": "p-02", "qty": 1 }] },
+    { "id": "1002", "demo": "fragile-liquid-estimated", "expect": "inferred perfume (fragile + liquid) with a book and a charger", "items": [{ "productId": "p-16", "qty": 1 }, { "productId": "p-17", "qty": 1 }, { "productId": "p-19", "qty": 1 }] },
+    { "id": "1003", "expect": "two liquids (honey + olive oil) must stay upright", "items": [{ "productId": "p-07", "qty": 1 }, { "productId": "p-10", "qty": 1 }] },
+    { "id": "1004", "expect": "fragile + heavy mix: ceramic burner with dates and notebooks", "items": [{ "productId": "p-03", "qty": 1 }, { "productId": "p-13", "qty": 1 }, { "productId": "p-11", "qty": 1 }] },
+    { "id": "1005", "expect": "electronics bundle (sensitive padding)", "items": [{ "productId": "p-04", "qty": 1 }, { "productId": "p-08", "qty": 1 }, { "productId": "p-12", "qty": 1 }] },
+    { "id": "1006", "expect": "group C product → needs_measurement", "items": [{ "productId": "p-28", "qty": 1 }, { "productId": "p-02", "qty": 1 }] },
+    { "id": "1007", "expect": "small flat items, should pick a small or flat carton", "items": [{ "productId": "p-06", "qty": 2 }, { "productId": "p-02", "qty": 1 }] },
+    { "id": "1008", "expect": "porcelain mugs + glass candle (two fragile items)", "items": [{ "productId": "p-09", "qty": 1 }, { "productId": "p-05", "qty": 1 }] },
+    { "id": "1009", "expect": "skincare set: plastic liquid + glass liquid (inferred)", "items": [{ "productId": "p-14", "qty": 2 }, { "productId": "p-18", "qty": 1 }, { "productId": "p-23", "qty": 1 }] },
+    { "id": "1010", "expect": "coffee, tea and incense (inferred, non-fragile)", "items": [{ "productId": "p-20", "qty": 2 }, { "productId": "p-26", "qty": 1 }, { "productId": "p-21", "qty": 2 }] },
+    { "id": "1011", "expect": "hair dryer + accessories", "items": [{ "productId": "p-15", "qty": 1 }, { "productId": "p-27", "qty": 1 }, { "productId": "p-24", "qty": 1 }] },
+    { "id": "1012", "expect": "empty glass bottle (fragile, not liquid) + books", "items": [{ "productId": "p-22", "qty": 1 }, { "productId": "p-17", "qty": 2 }] },
+    { "id": "1013", "expect": "large porcelain plate set + dates", "items": [{ "productId": "p-25", "qty": 1 }, { "productId": "p-13", "qty": 1 }] },
+    { "id": "1014", "expect": "three perfumes (page + inferred)", "items": [{ "productId": "p-01", "qty": 1 }, { "productId": "p-16", "qty": 2 }] },
+    { "id": "1015", "expect": "stationery bulk order", "items": [{ "productId": "p-11", "qty": 3 }, { "productId": "p-02", "qty": 3 }] },
+    { "id": "1016", "expect": "mixed gift basket: honey, dates, incense burner, coffee", "items": [{ "productId": "p-07", "qty": 1 }, { "productId": "p-13", "qty": 1 }, { "productId": "p-03", "qty": 1 }, { "productId": "p-20", "qty": 1 }] },
+    { "id": "1017", "expect": "two group C products → needs_measurement", "items": [{ "productId": "p-29", "qty": 1 }, { "productId": "p-30", "qty": 1 }] },
+    { "id": "1018", "expect": "phone accessories bundle", "items": [{ "productId": "p-06", "qty": 1 }, { "productId": "p-19", "qty": 2 }, { "productId": "p-27", "qty": 1 }, { "productId": "p-04", "qty": 1 }] },
+    { "id": "1019", "expect": "olive oil ×2 + serum ×2 (liquids, one tall)", "items": [{ "productId": "p-10", "qty": 2 }, { "productId": "p-14", "qty": 2 }] },
+    { "id": "1020", "demo": "impossible", "expect": "≈20.5 kg exceeds every carton's limit → no_box (overweight)", "items": [{ "productId": "p-25", "qty": 3 }, { "productId": "p-10", "qty": 3 }, { "productId": "p-13", "qty": 3 }, { "productId": "p-15", "qty": 3 }] }
+  ]
+}

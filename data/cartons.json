@@ -1,0 +1,15 @@
+{
+  "_note": "SYNTHETIC carton catalog and shipping rates for the demo. Inner dimensions in cm, weights in grams, costs in SAR. Rates are illustrative, not a real courier tariff; the UI and report label every cost as estimated.",
+  "shipping": {
+    "baseSar": 18,
+    "perKgSar": 3,
+    "volumetricDivisor": 5000
+  },
+  "cartons": [
+    { "id": "S", "name": "صغير S", "inner": [20, 15, 10], "maxWeightG": 3000, "tareG": 120, "costSar": 0.9 },
+    { "id": "FLAT", "name": "مسطح FLAT", "inner": [35, 25, 6], "maxWeightG": 3000, "tareG": 150, "costSar": 1.1 },
+    { "id": "M", "name": "وسط M", "inner": [30, 20, 15], "maxWeightG": 8000, "tareG": 250, "costSar": 1.6 },
+    { "id": "L", "name": "كبير L", "inner": [40, 30, 25], "maxWeightG": 15000, "tareG": 450, "costSar": 2.6 },
+    { "id": "XL", "name": "كبير جداً XL", "inner": [50, 40, 35], "maxWeightG": 20000, "tareG": 700, "costSar": 3.8 }
+  ]
+}
