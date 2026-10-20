@@ -30,7 +30,7 @@ export interface PackOptions {
  *   This stops tall/standing placements that waste space (e.g. a book stood on its edge).
  * - "lowest_base": classic gravity-first (minimise z), then back, then left.
  */
-type ScoreMode = "lowest_top" | "lowest_base";
+type ScoreMode = "lowest_top" | "lowest_base" | "tight_x" | "tight_y";
 
 interface Strategy {
   name: string;
@@ -54,7 +54,11 @@ export const STRATEGIES: Strategy[] = [
   { name: "volume_base_first", key: byVolume, fragileLast: true, score: "lowest_base" },
   { name: "volume_fragile_anywhere", key: byVolume, fragileLast: false, score: "lowest_top" },
   { name: "base_area_fragile_anywhere", key: byBaseArea, fragileLast: false, score: "lowest_base" },
+  { name: "volume_tight_x", key: byVolume, fragileLast: true, score: "tight_x" },
+  { name: "volume_tight_y", key: byVolume, fragileLast: true, score: "tight_y" },
 ];
+
+const RESTART_SCORES: ScoreMode[] = ["lowest_top", "tight_x", "lowest_base", "tight_y"];
 
 export function orderUnits(units: Unit[], strategy: Strategy): Unit[] {
   const byKey = (a: Unit, b: Unit) => strategy.key(b) - strategy.key(a) || a.unitId.localeCompare(b.unitId);
@@ -64,9 +68,23 @@ export function orderUnits(units: Unit[], strategy: Strategy): Unit[] {
   return [...normal, ...fragile];
 }
 
-/** Lexicographic score; smaller is better. */
+/**
+ * Lexicographic score; smaller is better.
+ * - tight_x / tight_y: gravity first, then the smallest far edge along x (or y). This prefers
+ *   standing a thin item on its side to fill a strip exactly, which flat-first scores never do
+ *   (found on fixture feasible-05: a 3.4 cm strip that only fits a standing item).
+ */
 function scoreOf(p: Placement, mode: ScoreMode): [number, number, number, number] {
-  return mode === "lowest_top" ? [p.z + p.dz, p.z, p.y, p.x] : [p.z, p.y, p.x, p.z + p.dz];
+  switch (mode) {
+    case "lowest_top":
+      return [p.z + p.dz, p.z, p.y, p.x];
+    case "lowest_base":
+      return [p.z, p.y, p.x, p.z + p.dz];
+    case "tight_x":
+      return [p.z, p.x + p.dx, p.y + p.dy, p.z + p.dz];
+    case "tight_y":
+      return [p.z, p.y + p.dy, p.x + p.dx, p.z + p.dz];
+  }
 }
 
 function better(a: [number, number, number, number], b: [number, number, number, number], eps: number): boolean {
@@ -102,14 +120,13 @@ function greedyPlace(
   const [L, W, H] = carton.inner;
   const placed: Placement[] = [];
   const placedUnits: Unit[] = [];
-  let points: Point[] = [[0, 0, 0]];
 
   for (const unit of order) {
     if (state.now() > state.deadline) return { kind: "timeout" };
     let best: Placement | null = null;
     let bestScore: [number, number, number, number] | null = null;
 
-    for (const [x, y, z] of points) {
+    for (const [x, y, z] of cornerGrid(placed, carton, eps)) {
       for (const [dx, dy, dz] of rotations(unit)) {
         state.candidatesChecked++;
         // R1 in bounds
@@ -140,37 +157,68 @@ function greedyPlace(
     if (!best) return { kind: "incomplete" };
     placed.push(best);
     placedUnits.push(unit);
-
-    const { x, y, z, dx, dy, dz } = best;
-    const next: Point[] = [
-      [x + dx, y, z],
-      [x, y + dy, z],
-      [x, y, z + dz],
-      [x + dx, 0, z],
-      [0, y + dy, z],
-    ];
-    const keyOf = (p: Point) => p.map((v) => v.toFixed(4)).join(",");
-    const seen = new Set(points.map(keyOf));
-    for (const p of next) {
-      if (p[0] >= L - eps || p[1] >= W - eps || p[2] >= H - eps) continue;
-      const k = keyOf(p);
-      if (!seen.has(k)) {
-        seen.add(k);
-        points.push(p);
-      }
-    }
-    // Drop points that now sit inside a placed box.
-    points = points.filter(
-      ([px, py, pz]) =>
-        !placed.some(
-          (b) =>
-            px > b.x + eps && px < b.x + b.dx - eps &&
-            py > b.y + eps && py < b.y + b.dy - eps &&
-            pz > b.z + eps && pz < b.z + b.dz - eps,
-        ),
-    );
   }
   return { kind: "complete", placements: placed };
+}
+
+/**
+ * Candidate positions: every combination of x ∈ {0, right edges}, y ∈ {0, back edges},
+ * z ∈ {0, top faces} of the boxes placed so far. This "corner grid" contains all classic
+ * extreme points, plus the projected positions that tight packings need. The checks in
+ * greedyPlace reject the ones that overlap or float.
+ */
+function cornerGrid(placed: Placement[], carton: Carton, eps: number): Point[] {
+  const [L, W, H] = carton.inner;
+  const uniq = (vals: number[], limit: number) => {
+    const out: number[] = [];
+    for (const v of vals.sort((a, b) => a - b)) {
+      if (v >= limit - eps) continue;
+      if (out.length === 0 || v - out[out.length - 1] > eps) out.push(v);
+    }
+    return out;
+  };
+  const xs = uniq([0, ...placed.map((b) => b.x + b.dx)], L);
+  const ys = uniq([0, ...placed.map((b) => b.y + b.dy)], W);
+  const zs = uniq([0, ...placed.map((b) => b.z + b.dz)], H);
+  const points: Point[] = [];
+  for (const z of zs) for (const y of ys) for (const x of xs) points.push([x, y, z]);
+  return points;
+}
+
+/** Small deterministic PRNG (mulberry32), so restarts are reproducible for the same order. */
+function prng(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seedOf(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+/** Seeded random orderings tried after the fixed strategies fail (deterministic per order + carton). */
+function restartOrders(units: Unit[], cartonId: string, count: number): Array<{ name: string; order: Unit[]; score: ScoreMode }> {
+  const rand = prng(seedOf(units.map((u) => u.unitId).join("|") + "@" + cartonId));
+  const out: Array<{ name: string; order: Unit[]; score: ScoreMode }> = [];
+  for (let k = 0; k < count; k++) {
+    const shuffled = [...units].sort((a, b) => a.unitId.localeCompare(b.unitId));
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    // Alternate fragile-last and fragile-anywhere, and both position scores.
+    const fragileLast = k % 2 === 0;
+    const order = fragileLast ? [...shuffled.filter((u) => !u.fragile), ...shuffled.filter((u) => u.fragile)] : shuffled;
+    out.push({ name: `restart_${k + 1}`, order, score: RESTART_SCORES[Math.floor(k / 2) % RESTART_SCORES.length] });
+  }
+  return out;
 }
 
 export function packUnits(units: Unit[], cartons: Carton[], opts: PackOptions): PackSuccess | PackNoBox {
@@ -206,8 +254,17 @@ export function packUnits(units: Unit[], cartons: Carton[], opts: PackOptions): 
 
     let packedWith: string | null = null;
     let rejectedHere = false;
-    for (const strategy of STRATEGIES) {
-      const result = greedyPlace(orderUnits(units, strategy), carton, cfg, state, strategy.score);
+    // Fixed strategies first, then seeded restarts. Restarts for this carton stop at its fair
+    // share of the remaining budget, so larger cartons later in the list still get searched.
+    const cartonsLeft = ordered.length - ordered.indexOf(carton);
+    const cartonSoftDeadline = now() + (state.deadline - now()) / cartonsLeft;
+    const tries = [
+      ...STRATEGIES.map((s) => ({ name: s.name, order: orderUnits(units, s), score: s.score, restart: false })),
+      ...restartOrders(units, carton.id, cfg.restarts).map((r) => ({ ...r, restart: true })),
+    ];
+    for (const strategy of tries) {
+      if (strategy.restart && now() > cartonSoftDeadline) break;
+      const result = greedyPlace(strategy.order, carton, cfg, state, strategy.score);
       if (result.kind === "timeout") {
         timedOut = true;
         break;

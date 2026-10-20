@@ -69,6 +69,12 @@ for carton in cartons sorted by (cartonCost, volume):
 pick candidate with lowest estimated total cost (tie → smallest carton volume)
 ```
 
+> **Implemented version (after evaluation-driven iteration, see `docs/report/results.md`):**
+> - **Candidate positions = corner grid.** Every combination of x ∈ {0, right edges}, y ∈ {0, back edges}, z ∈ {0, top faces} of placed boxes. This is a superset of classic extreme points.
+> - **9 fixed strategies.** The 7 below plus `volume_tight_x` and `volume_tight_y`, which use a "tight" score: gravity, then the smallest far edge along x or y. That score stands a thin item on its side to fill an exact strip.
+> - **Then up to 40 seeded restarts per carton.** Random orderings from a fixed seed (order + carton id), cycling the 4 scores and fragile-last on/off. Each carton's restarts stop at its fair share of the remaining budget, so larger cartons still get searched. Same input → same output.
+> - Known-feasible recall on the 100%-fill fixtures: 3/20 (extreme points) → 9/20 (corner grid + restarts) → **15/20** (tight scores). Engine validity stays 100%, false claims on impossible cases stay 0, p95 runtime is about 31 ms.
+
 `STRATEGIES` are tried in order. Each is (item ordering, whether fragile units go last, position score):
 
 | # | Ordering (desc) | Fragile last | Score |

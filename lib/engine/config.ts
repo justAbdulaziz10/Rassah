@@ -9,6 +9,8 @@ export const ENGINE_CONFIG = {
   minSupport: 0.7,
   /** Search time budget per order. */
   maxSearchMs: 1500,
+  /** Seeded random orderings tried per carton after the 7 fixed strategies fail. */
+  restarts: 40,
   /** Carton wall thickness used to derive outer dimensions for volumetric weight. */
   wallCm: 0.5,
   /** Max units per order (input cap). */
@@ -22,6 +24,7 @@ export type EngineConfig = {
   paddingCm: number;
   minSupport: number;
   maxSearchMs: number;
+  restarts: number;
   wallCm: number;
   maxUnits: number;
   eps: number;

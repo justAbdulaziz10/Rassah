@@ -24,13 +24,13 @@
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 30 | 🟨 In progress |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 0 | ⬜ Not started |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 25 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 0 | ⬜ Not started |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 38 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 40 | 🟨 In progress |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 9 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **228** | |
+| **Total** | | | | **517** | **290** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -524,58 +524,58 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M2 · **Reviewer:** M3 · **Target:** Wed afternoon · **Gate:** G7 · **Spec:** [stack/01](stack/01-nextjs-typescript.md), [stack/05](stack/05-3d-visualization.md)
 
 ### 7A. Shared UI
-- [ ] **P7.1** (M2) `SourceBadge` (page / inferred "تقديري" / manual / unknown), with consistent colors.
-- [ ] **P7.2** (M2) Flag chips: fragile, liquid, sensitive (fixed colors).
-- [ ] **P7.3** (M2) Loading states (skeletons) and error states (Arabic messages + run id for support).
-- [ ] **P7.4** (M2) Numbers in Western digits with units. Dimensions formatted "30 × 20 × 15 سم".
+- [x] **P7.1** (M2) `SourceBadge` (page / inferred "تقديري" / manual / unknown), with consistent colors.
+- [x] **P7.2** (M2) Flag chips: fragile, liquid, sensitive (fixed colors).
+- [x] **P7.3** (M2) Loading states (skeletons) and error states (Arabic messages + run id for support).
+- [x] **P7.4** (M2) Numbers in Western digits with units. Dimensions formatted "30 × 20 × 15 سم".
 - [ ] **P7.5** (M2) RTL check: spacing uses logical Tailwind classes. No mirrored layout bugs.
 - [ ] **P7.6** (M2) Responsive at phone width (the packer may use a phone or tablet).
 
 ### 7B. Orders page (`/orders`)
-- [ ] **P7.7** (M2, →T12) Input "رقم الطلب" + button "جهّز الطلب".
-- [ ] **P7.8** (M2) List of seeded orders with item count (click to pack).
-- [ ] **P7.9** (M2) Demo orders highlighted (from P3.26).
-- [ ] **P7.10** (M2) `DEMO_MODE` only: "Simulate Gemini outage" toggle, clearly labeled as a demo control.
-- [ ] **P7.11** (M2) Calls the pack API, then navigates to the result page with `runId`.
+- [x] **P7.7** (M2, →T12) Input "رقم الطلب" + button "جهّز الطلب".
+- [x] **P7.8** (M2) List of seeded orders with item count (click to pack).
+- [x] **P7.9** (M2) Demo orders highlighted (from P3.26).
+- [x] **P7.10** (M2) `DEMO_MODE` only: "Simulate Gemini outage" toggle, clearly labeled as a demo control.
+- [x] **P7.11** (M2) Calls the pack API, then navigates to the result page with `runId`.
 
 ### 7C. Result page (`/orders/[id]`)
-- [ ] **P7.12** (M2) Header: carton id, name, inner dims, big and clear.
-- [ ] **P7.13** (M2) Products table: name, qty, dims, weight, flags, source badges, confidence, `evidence` on hover/tap.
-- [ ] **P7.14** (M2) Effective dims shown when a margin or padding was applied ("+15% safety margin", "+padding").
-- [ ] **P7.15** (M2) Numbered packing instructions (from the API).
-- [ ] **P7.16** (M2) Estimated cost box: carton, volumetric kg, chargeable kg, shipping, total, all labeled "تقديري".
-- [ ] **P7.17** (M2) Timing + cache info line (e.g. "2 cached · 1 extracted · 2.0 s").
-- [ ] **P7.18** (M2) "Monitoring degraded" badge when `monitoring.saved=false`.
-- [ ] **P7.19** (M2) `needs_measurement` view: lists the products to measure, with an inline measurement form → PATCH facts → re-pack.
-- [ ] **P7.20** (M2) `no_box` view: the honest message + reasons per carton.
-- [ ] **P7.21** (M2) `error` view: the message + run id.
-- [ ] **P7.22** (M2) **Confirm** button → action API → success state.
-- [ ] **P7.23** (M2) **Edit** per product: form for dims, weight, flags → action API → re-pack button.
-- [ ] **P7.24** (M2) Run id shown small at the bottom (links to the run trace on the dashboard).
+- [x] **P7.12** (M2) Header: carton id, name, inner dims, big and clear.
+- [x] **P7.13** (M2) Products table: name, qty, dims, weight, flags, source badges, confidence, `evidence` on hover/tap.
+- [x] **P7.14** (M2) Effective dims shown when a margin or padding was applied ("+15% safety margin", "+padding").
+- [x] **P7.15** (M2) Numbered packing instructions (from the API).
+- [x] **P7.16** (M2) Estimated cost box: carton, volumetric kg, chargeable kg, shipping, total, all labeled "تقديري".
+- [x] **P7.17** (M2) Timing + cache info line (e.g. "2 cached · 1 extracted · 2.0 s").
+- [x] **P7.18** (M2) "Monitoring degraded" badge when `monitoring.saved=false`.
+- [x] **P7.19** (M2) `needs_measurement` view: lists the products to measure, with an inline measurement form → PATCH facts → re-pack.
+- [x] **P7.20** (M2) `no_box` view: the honest message + reasons per carton.
+- [x] **P7.21** (M2) `error` view: the message + run id.
+- [x] **P7.22** (M2) **Confirm** button → action API → success state.
+- [x] **P7.23** (M2) **Edit** per product: form for dims, weight, flags → action API → re-pack button.
+- [x] **P7.24** (M2) Run id shown small at the bottom (links to the run trace on the dashboard).
 
 ### 7D. 3D view (→T13)
-- [ ] **P7.25** (M2) `PackingView3D` loaded via `next/dynamic` with `ssr: false`, and a text fallback.
-- [ ] **P7.26** (M2) Engine (z-up) → three.js (y-up) mapping helper + unit test.
-- [ ] **P7.27** (M2) Box center = origin + size/2 helper + unit test.
-- [ ] **P7.28** (M2) Carton drawn as a wireframe. Items as solid boxes with edges.
-- [ ] **P7.29** (M2) Colors by flag. Estimated items get a dashed outline + label suffix.
-- [ ] **P7.30** (M2) Hover/tap label with the item name.
-- [ ] **P7.31** (M2) OrbitControls. The camera fits the carton on load.
-- [ ] **P7.32** (M2) Step slider: reveals items in placement order, matching the instruction numbers.
+- [x] **P7.25** (M2) `PackingView3D` loaded via `next/dynamic` with `ssr: false`, and a text fallback.
+- [x] **P7.26** (M2) Engine (z-up) → three.js (y-up) mapping helper + unit test.
+- [x] **P7.27** (M2) Box center = origin + size/2 helper + unit test.
+- [x] **P7.28** (M2) Carton drawn as a wireframe. Items as solid boxes with edges.
+- [x] **P7.29** (M2) Colors by flag. Estimated items get a dashed outline + label suffix.
+- [x] **P7.30** (M2) Hover/tap label with the item name.
+- [x] **P7.31** (M2) OrbitControls. The camera fits the carton on load.
+- [x] **P7.32** (M2) Step slider: reveals items in placement order, matching the instruction numbers.
 - [ ] **P7.33** (M2) Works on a phone browser (touch rotate/zoom).
 - [ ] **P7.34** (M2) Visual check with 3 fixture orders on the preview (screenshots in the PR).
 
 ### 7E. Catalog page (`/catalog`)
-- [ ] **P7.35** (M2) Table of `product_facts`: name, dims, weight, flags, sources, confidence, origin, extracted_at.
-- [ ] **P7.36** (M2) Products without facts are listed as "not extracted yet".
-- [ ] **P7.37** (M2) Edit/measure action (reuses the edit form).
-- [ ] **P7.38** (M2) `DEMO_MODE` only: "Re-extract" and "Clear cached facts" buttons per product (for the cache-miss demo).
-- [ ] **P7.39** (M2) Filter by source (page / inferred / manual / unknown).
+- [x] **P7.35** (M2) Table of `product_facts`: name, dims, weight, flags, sources, confidence, origin, extracted_at.
+- [x] **P7.36** (M2) Products without facts are listed as "not extracted yet".
+- [x] **P7.37** (M2) Edit/measure action (reuses the edit form).
+- [x] **P7.38** (M2) `DEMO_MODE` only: "Re-extract" and "Clear cached facts" buttons per product (for the cache-miss demo).
+- [x] **P7.39** (M2) Filter by source (page / inferred / manual / unknown).
 
 ### 7F. Accessibility and polish (minimum)
-- [ ] **P7.40** (M2) All buttons have readable labels. Color is never the only signal (chips have text).
-- [ ] **P7.41** (M2) Keyboard: the order input submits on Enter.
-- [ ] **P7.42** (M2) Page titles set per route.
+- [x] **P7.40** (M2) All buttons have readable labels. Color is never the only signal (chips have text).
+- [x] **P7.41** (M2) Keyboard: the order input submits on Enter.
+- [x] **P7.42** (M2) Page titles set per route.
 - [ ] **P7.43** (M2) No console errors in the browser on the main flow.
 
 ### 7G. Verification
@@ -621,23 +621,23 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.26** (M3) Tests: fires at threshold + 1, not at threshold. Dedup. Resolve. Min sample.
 
 ### 8C. Dashboard page (`/monitoring`)
-- [ ] **P8.27** (M3) Window selector + visible sample sizes.
-- [ ] **P8.28** (M3) Alert banner(s): severity color, message, value vs threshold, n, "view events" link.
-- [ ] **P8.29** (M3) KPI tiles: M1, M6, M5 (p95 cached/uncached), M7 (cost + cache hit).
-- [ ] **P8.30** (M3) Chart: M5 latency over time (cached vs uncached).
-- [ ] **P8.31** (M3) Chart: M2 data-source mix (stacked bar).
-- [ ] **P8.32** (M3) Chart: M6 failures by status (bar).
-- [ ] **P8.33** (M3) Tile: M3 validator rejections (shows ✓ when 0, red when > 0, with violation codes).
-- [ ] **P8.34** (M3) Tile: M4 no-carton rate + skip reasons.
-- [ ] **P8.35** (M3) Recent runs table: time, order, status, carton, ms, source mix, action → click opens the run trace.
-- [ ] **P8.36** (M3) Run trace view: order run fields + extraction events (evidence, tokens, latency, status) + corrections.
-- [ ] **P8.37** (M3) "Insufficient data" state for metrics below min n.
-- [ ] **P8.38** (M3) Empty state when there are no events at all.
-- [ ] **P8.39** (M3) Each tile has a one-line "what this tells us" tooltip (helps in Q&A).
+- [x] **P8.27** (M3) Window selector + visible sample sizes.
+- [x] **P8.28** (M3) Alert banner(s): severity color, message, value vs threshold, n, "view events" link.
+- [x] **P8.29** (M3) KPI tiles: M1, M6, M5 (p95 cached/uncached), M7 (cost + cache hit).
+- [x] **P8.30** (M3) Chart: M5 latency over time (cached vs uncached).
+- [x] **P8.31** (M3) Chart: M2 data-source mix (stacked bar).
+- [x] **P8.32** (M3) Chart: M6 failures by status (bar).
+- [x] **P8.33** (M3) Tile: M3 validator rejections (shows ✓ when 0, red when > 0, with violation codes).
+- [x] **P8.34** (M3) Tile: M4 no-carton rate + skip reasons.
+- [x] **P8.35** (M3) Recent runs table: time, order, status, carton, ms, source mix, action → click opens the run trace.
+- [x] **P8.36** (M3) Run trace view: order run fields + extraction events (evidence, tokens, latency, status) + corrections.
+- [x] **P8.37** (M3) "Insufficient data" state for metrics below min n.
+- [x] **P8.38** (M3) Empty state when there are no events at all.
+- [x] **P8.39** (M3) Each tile has a one-line "what this tells us" tooltip (helps in Q&A).
 
 ### 8D. Fault injection demo
-- [ ] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written.
-- [ ] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
+- [x] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written.
+- [x] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
 - [ ] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo).
 - [ ] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves.
 - [ ] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
@@ -684,15 +684,15 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P9.20** (M2) Re-run engine tests after any config change.
 
 ### 9D. Packing eval (`scripts/eval-packing.ts`)
-- [ ] **P9.21** (M2, →T18) Runs the engine and the baseline on all 60 fixtures with the same catalog, cost model and budget.
-- [ ] **P9.22** (M2) Metric: engine layout validity (must be 100%).
-- [ ] **P9.23** (M2) Metric: known-feasible recall.
-- [ ] **P9.24** (M2) Metric: impossible-case false claims (must be 0).
-- [ ] **P9.25** (M2) Metric: baseline invalidity by violation code.
-- [ ] **P9.26** (M2) Metric: cost difference on jointly-valid fixtures only.
-- [ ] **P9.27** (M2) Metric: engine runtime p50/p95.
-- [ ] **P9.28** (M2) Writes `eval_runs` + `eval_results` + `eval/results/packing-<date>-<engine>.json`.
-- [ ] **P9.29** (M2) Results committed.
+- [x] **P9.21** (M2, →T18) Runs the engine and the baseline on all 60 fixtures with the same catalog, cost model and budget.
+- [x] **P9.22** (M2) Metric: engine layout validity (must be 100%).
+- [x] **P9.23** (M2) Metric: known-feasible recall.
+- [x] **P9.24** (M2) Metric: impossible-case false claims (must be 0).
+- [x] **P9.25** (M2) Metric: baseline invalidity by violation code.
+- [x] **P9.26** (M2) Metric: cost difference on jointly-valid fixtures only.
+- [x] **P9.27** (M2) Metric: engine runtime p50/p95.
+- [x] **P9.28** (M2) Writes `eval_runs` + `eval_results` + `eval/results/packing-<date>-<engine>.json`.
+- [x] **P9.29** (M2) Results committed.
 
 ### 9E. Evaluation page (`/evaluation`, →T19)
 - [ ] **P9.30** (M3) Latest extraction run: headline metrics + model + prompt version + date.

@@ -60,6 +60,17 @@ describe("packUnits", () => {
     expect(r.placements.find((p) => p.unitId === "oil#1")!.dz).toBe(14);
   });
 
+  it("stands a thin item on its side to fill an exact strip (regression: fixture feasible-05)", () => {
+    // Exact tiling of FLAT 35x25x6: 12.3 + 19.3 + 3.4 = 35. Only works if the 3.4 cm item stands up.
+    const units = [
+      unit("glass#1", [25, 12.3, 6], { fragile: true, weightG: 825 }),
+      unit("box#1", [25, 19.3, 6], { weightG: 457 }),
+      unit("thin#1", [25, 6, 3.4], { weightG: 575 }),
+    ];
+    const r = packUnits(units, [carton("FLAT", [35, 25, 6], 3000, 1.1, 150)], opts);
+    expect(r.status).toBe("box_found");
+  });
+
   it("is deterministic", () => {
     const units = [unit("a#1", [12, 9, 5]), unit("b#1", [10, 8, 7], { fragile: true }), unit("c#1", [9, 9, 9])];
     const fixedClock = () => 0;
