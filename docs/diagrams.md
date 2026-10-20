@@ -2,7 +2,7 @@
 
 The brief requires two diagrams: **Development Flow** and **Monitoring Flow**. Both must reflect the real implementation. If the implementation changes, update these diagrams in the same PR.
 
-The diagrams are written in Mermaid, which GitHub renders natively. To export PNGs for the report and deck, paste each block into <https://mermaid.live> and download the image into `docs/report/`.
+The diagrams are written in Mermaid, which GitHub renders natively. PNG exports live in `docs/report/` (`diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`), rendered with `@mermaid-js/mermaid-cli` (mmdc). Re-export them whenever a block changes.
 
 ---
 
@@ -14,10 +14,10 @@ How a change goes from idea to production, and how problems found in production 
 flowchart LR
     A[Task from PLAN.md] --> B[Create branch<br/>feat/... or fix/...]
     B --> C[Code locally<br/>npm run dev]
-    C --> D[Local checks<br/>lint · typecheck · vitest]
+    C --> D[Local checks<br/>npm run check]
     D -->|fail| C
     D -->|pass| E[Push branch +<br/>open Pull Request]
-    E --> F[GitHub Actions CI<br/>lint · typecheck · vitest]
+    E --> F[GitHub Actions CI<br/>lint · typecheck ·<br/>validate-data · vitest]
     E --> G[Vercel Preview<br/>deployment per PR]
     F -->|fail| C
     G --> H[Teammate review<br/>+ test on preview URL]
@@ -140,7 +140,8 @@ flowchart LR
 
     subgraph Vercel["Vercel: Next.js (Node runtime)"]
         RH[Route handlers /api/*]
-        AI[lib/ai<br/>extractor]
+        PL[lib/pipeline<br/>pack orchestration · facts cache]
+        AI[lib/ai<br/>extractor · prompt · schema]
         EN[lib/engine<br/>packer · validator · cost · instructions]
         MO[lib/monitoring<br/>events · metrics · alerts]
         DBL[lib/db<br/>Supabase server client]
@@ -149,10 +150,18 @@ flowchart LR
     GEM[(Gemini API)]
     SUP[(Supabase Postgres)]
 
+    EVS[scripts/eval-*<br/>+ lib/eval scoring]
+
     P1 & P2 & P3 & P4 & P5 --> RH
-    RH --> AI --> GEM
-    RH --> EN
-    RH --> MO --> DBL
-    AI --> DBL
+    RH --> PL
+    PL --> AI --> GEM
+    PL --> EN
+    PL --> MO
+    RH --> MO
+    PL --> DBL
+    MO --> DBL
+    EVS --> AI
+    EVS --> EN
+    EVS --> DBL
     DBL --> SUP
 ```

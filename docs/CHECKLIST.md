@@ -28,7 +28,7 @@
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 28 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 9 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 12 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 26 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
 | **Total** | | | | **517** | **331** | |
 
@@ -763,10 +763,10 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** ALL (M1 leads report, M2 leads deck, M3 leads diagrams) · **Target:** Wed night · **Gate:** G11
 
 ### 11A. Diagrams
-- [ ] **P11.1** (M3, →T24) Development flow diagram matches the actual workflow (branches, CI, previews, review, prod, monitoring loop).
-- [ ] **P11.2** (M3) Monitoring flow diagram matches the actual tables, events and alert rules.
-- [ ] **P11.3** (M3) Architecture diagram matches the actual modules.
-- [ ] **P11.4** (M3) All three exported as PNG (mermaid.live) into `docs/report/`.
+- [ ] **P11.1** (M3, →T24) Development flow diagram matches the actual workflow (branches, CI, previews, review, prod, monitoring loop). _CI steps corrected to match `.github/workflows/ci.yml` (incl. validate-data). Still open: confirm Vercel previews per PR and the review rule are what the team actually does._
+- [x] **P11.2** (M3) Monitoring flow diagram matches the actual tables, events and alert rules.
+- [x] **P11.3** (M3) Architecture diagram matches the actual modules. _Added `lib/pipeline` and the eval scripts / `lib/eval`._
+- [x] **P11.4** (M3) All three exported as PNG (mermaid.live) into `docs/report/`. _Rendered with mermaid-cli: `diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`._
 - [ ] **P11.5** (M1+M2) Both teammates review that the diagrams match the code.
 
 ### 11B. Tools & AI-usage log (`docs/report/TOOLS.md`)
@@ -790,30 +790,30 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
 - [x] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback).
 - [ ] **P11.23** (ALL) 13. References: brief, Gemini docs, Supabase docs, Vercel docs, Next.js docs, R3F docs, courier volumetric-weight source, Paccurate, bin-packing references actually read.
-- [ ] **P11.24** (ALL) Diagrams embedded.
+- [x] **P11.24** (ALL) Diagrams embedded.
 - [ ] **P11.25** (ALL) Concise: target ≤ 8–10 pages. Cut anything that isn't evidence.
 - [ ] **P11.26** (ALL) Every number in the report traces back to an eval file or the dashboard.
 - [ ] **P11.27** (M1) Export to PDF. Check that Arabic text and diagrams render.
 
 ### 11D. Pitch deck (3 min)
-- [ ] **P11.28** (M2, →T25) Slide 1: Title + one-line pitch.
-- [ ] **P11.29** (M2) Slide 2: Problem (volumetric weight, breakage, missing data).
-- [ ] **P11.30** (M2) Slide 3: Before / After.
-- [ ] **P11.31** (M2) Slide 4: How it works (LLM → engine → validator), as a simple diagram.
-- [ ] **P11.32** (M2) Slide 5: Live demo placeholder (backup screenshots behind it).
-- [ ] **P11.33** (M2) Slide 6: Evaluation numbers (3–4 headline numbers max).
-- [ ] **P11.34** (M2) Slide 7: Monitoring (dashboard screenshot + the investigation story in one line).
-- [ ] **P11.35** (M2) Slide 8: Limits + next step (pilot ask).
-- [ ] **P11.36** (M2) Appendix slides for Q&A: architecture, development flow, monitoring flow, metric definitions, tools table.
-- [ ] **P11.37** (M2) Speaker assignment: who says what (all 3 speak).
-- [ ] **P11.38** (M2) Exported PDF backup of the deck.
+- [x] **P11.28** (M2, →T25) Slide 1: Title + one-line pitch.
+- [x] **P11.29** (M2) Slide 2: Problem (volumetric weight, breakage, missing data).
+- [x] **P11.30** (M2) Slide 3: Before / After.
+- [x] **P11.31** (M2) Slide 4: How it works (LLM → engine → validator), as a simple diagram.
+- [ ] **P11.32** (M2) Slide 5: Live demo placeholder (backup screenshots behind it). _Demo slide is deck slide 6. Still open: no screenshots exist yet (`docs/report/screens/`)._
+- [x] **P11.33** (M2) Slide 6: Evaluation numbers (3–4 headline numbers max).
+- [ ] **P11.34** (M2) Slide 7: Monitoring (dashboard screenshot + the investigation story in one line). _Investigation line is in (deck slide 8). Still open: a dashboard screenshot from the deployed app replaces the dashed placeholder._
+- [x] **P11.35** (M2) Slide 8: Limits + next step (pilot ask).
+- [x] **P11.36** (M2) Appendix slides for Q&A: architecture, development flow, monitoring flow, metric definitions, tools table.
+- [x] **P11.37** (M2) Speaker assignment: who says what (all 3 speak). _Deck slide 10 + speaker notes on every slide._
+- [x] **P11.38** (M2) Exported PDF backup of the deck. _`docs/report/deck.pdf` (image-only, from slide renders). Re-export from PowerPoint once screenshots and the live URL are in._
 
 ### 11E. Supporting documents
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [ ] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons).
 - [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest).
 - [ ] **P11.42** (ALL) `docs/report/results.md` final.
-- [ ] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
+- [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
 
 ### 11F. Code walkthrough prep (team-participation requirement)
 - [ ] **P11.44** (M1) Can walk through `validator.ts` (written by M2).

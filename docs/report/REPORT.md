@@ -54,7 +54,10 @@ _Screenshots: ⏳ `docs/report/screens/` (orders, result + 3D, catalog, monitori
 
 ## 5. Technical design
 
-_Diagrams: `docs/diagrams.md` (development flow, monitoring flow data + sequence, architecture). ⏳ Export PNGs here._
+Mermaid sources are in `docs/diagrams.md`. PNG exports:
+
+![System architecture](diagram-architecture.png)
+*Figure 1. System architecture: pages → route handlers → pipeline → AI / engine / monitoring → Supabase.*
 
 - **Stack:** Next.js 16 (App Router, Cache Components) + TypeScript strict on Vercel. Supabase Postgres. `@google/genai`. react-three-fiber. Recharts. Vitest.
 - **Pack pipeline** (`lib/pipeline/pack.ts`): order → catalog cache (source-hash freshness; manual/corrected facts never overwritten) → Gemini for misses (concurrency 2, 20 s timeout, retries only on 429/5xx, SDK retries off) → engine → validator → `order_runs` + `extraction_events` → alert refresh. The result is returned even if monitoring writes fail (flagged "monitoring degraded").
@@ -66,6 +69,9 @@ _Diagrams: `docs/diagrams.md` (development flow, monitoring flow data + sequence
 ## 6. Development environment
 
 Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 107 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+
+![Development flow](diagram-dev-flow.png)
+*Figure 2. Development flow: branch → CI + Vercel preview → review → main → production → monitoring → issue.*
 
 ## 7. Selected metrics (monitoring)
 
@@ -80,6 +86,12 @@ Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, da
 | M7 | Cost per order + cache-hit rate | Cache broken, prompt bloat | (shown) |
 
 Every metric shows its sample size and says "insufficient data" below its minimum. Eval traffic is excluded. Alerts open once per rule, auto-resolve, and post to a webhook (never for simulated faults). Each run has a trace (Gemini calls, tokens, timings, corrections).
+
+![Monitoring flow: data](diagram-monitoring-flow.png)
+*Figure 3. Monitoring flow: events written per run, metrics M1–M7 computed over a window, alert rules.*
+
+![Monitoring flow: sequence for one order](diagram-monitoring-sequence.png)
+*Figure 4. One order end to end (uncached product): what is written where.*
 
 ## 8. Benchmarks and evaluation results
 
