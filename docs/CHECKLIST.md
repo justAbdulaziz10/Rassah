@@ -18,8 +18,8 @@
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 29 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 0 | ⬜ Not started |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 30 | 🟨 In progress |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 21 | 🟨 In progress |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **110** | |
+| **Total** | | | | **517** | **132** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -200,7 +200,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P1.25** (M3) Placeholder pages for `/orders`, `/catalog`, `/monitoring`, `/evaluation`. `/` redirects to `/orders`.
 - [x] **P1.26** (M3) Tailwind: define the fixed color tokens (fragile amber, liquid blue, sensitive purple, estimated dashed) as CSS variables.
 - [x] **P1.27** (M3) `app/not-found.tsx` and `app/error.tsx` with friendly Arabic messages.
-- [ ] **P1.28** (M3) `GET /api/health` returns `{ app: "ok", geminiKeyPresent, supabase: "ok" | "error" }`. Never return key values.
+- [x] **P1.28** (M3) `GET /api/health` returns `{ app: "ok", geminiKeyPresent, supabase: "ok" | "error" }`. Never return key values.
 
 ### 1F. CI
 - [x] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test.
@@ -226,38 +226,38 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 · **Target:** Tue night · **Gate:** G2 · **Spec:** [stack/04](stack/04-supabase.md)
 
 ### 2A. Schema
-- [ ] **P2.1** (M3, →T5) Write `supabase/migrations/0001_init.sql` exactly per stack/04 (all 11 tables).
-- [ ] **P2.2** (M3) Check constraints present: sources, statuses, triggers, severities, employee actions, `qty` 1–12.
-- [ ] **P2.3** (M3) Indexes on `extraction_events(created_at desc)` and `order_runs(created_at desc)`.
-- [ ] **P2.4** (M3) Add index `extraction_events(run_id)` and `corrections(run_id)` for the run trace.
+- [x] **P2.1** (M3, →T5) Write `supabase/migrations/0001_init.sql` exactly per stack/04 (all 11 tables).
+- [x] **P2.2** (M3) Check constraints present: sources, statuses, triggers, severities, employee actions, `qty` 1–12.
+- [x] **P2.3** (M3) Indexes on `extraction_events(created_at desc)` and `order_runs(created_at desc)`.
+- [x] **P2.4** (M3) Add index `extraction_events(run_id)` and `corrections(run_id)` for the run trace.
 - [ ] **P2.5** (M3) `gen_random_uuid()` available (the `pgcrypto` extension is enabled by default on Supabase. Verify).
-- [ ] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies.
+- [x] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies.
 - [ ] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README.
 - [ ] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06.
 
 ### 2B. Access layer
-- [ ] **P2.9** (M3) `lib/db/server.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
-- [ ] **P2.10** (M3) Define a small `Db` interface (the queries the app needs) so tests can use an in-memory fake.
-- [ ] **P2.11** (M3) Typed row types for each table in `lib/db/types.ts` (hand-written or generated with `supabase gen types`).
-- [ ] **P2.12** (M3) Queries: `getOrderWithItems(orderId)`.
-- [ ] **P2.13** (M3) Queries: `getProductFacts(productIds[])`, `upsertProductFacts(facts)`.
-- [ ] **P2.14** (M3) Queries: `listCartons()`.
-- [ ] **P2.15** (M3) Queries: `insertExtractionEvent`, `insertOrderRun`, `updateOrderRunAction`, `insertCorrections`.
-- [ ] **P2.16** (M3) Queries: `insertAlert`, `getOpenAlerts`, `resolveAlert`.
-- [ ] **P2.17** (M3) Queries: `insertEvalRun`, `insertEvalResults`, `getLatestEvalRuns(kind)`.
-- [ ] **P2.18** (M3) Queries: `getRunTrace(runId)` returns the order run + extraction events + corrections.
-- [ ] **P2.19** (M3) In-memory fake implementing the `Db` interface (`tests/fakes/db.ts`).
+- [x] **P2.9** (M3) `lib/db/server.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
+- [x] **P2.10** (M3) Define a small `Db` interface (the queries the app needs) so tests can use an in-memory fake.
+- [x] **P2.11** (M3) Typed row types for each table in `lib/db/types.ts` (hand-written or generated with `supabase gen types`).
+- [x] **P2.12** (M3) Queries: `getOrderWithItems(orderId)`.
+- [x] **P2.13** (M3) Queries: `getProductFacts(productIds[])`, `upsertProductFacts(facts)`.
+- [x] **P2.14** (M3) Queries: `listCartons()`.
+- [x] **P2.15** (M3) Queries: `insertExtractionEvent`, `insertOrderRun`, `updateOrderRunAction`, `insertCorrections`.
+- [x] **P2.16** (M3) Queries: `insertAlert`, `getOpenAlerts`, `resolveAlert`.
+- [x] **P2.17** (M3) Queries: `insertEvalRun`, `insertEvalResults`, `getLatestEvalRuns(kind)`.
+- [x] **P2.18** (M3) Queries: `getRunTrace(runId)` returns the order run + extraction events + corrections.
+- [x] **P2.19** (M3) In-memory fake implementing the `Db` interface (`tests/fakes/db.ts`).
 
 ### 2C. Seed and reset
-- [ ] **P2.20** (M3, →T5) `scripts/seed.ts`: upsert products (computing `source_hash`), cartons, orders, order_items from `data/*.json`.
+- [x] **P2.20** (M3, →T5) `scripts/seed.ts`: upsert products (computing `source_hash`), cartons, orders, order_items from `data/*.json`.
 - [ ] **P2.21** (M3) Seed is idempotent: running it twice causes no duplicates and no errors.
-- [ ] **P2.22** (M3) Seed **never** writes `product_facts` or ground truth.
-- [ ] **P2.23** (M3) `scripts/reset-events.ts`: deletes rows from `extraction_events`, `order_runs`, `corrections`, `alerts` (not eval tables, not facts). Asks for `--yes`.
-- [ ] **P2.24** (M3) `scripts/clear-facts.ts --product p-07` for demoing a cache miss (and `--all` with `--yes`).
+- [x] **P2.22** (M3) Seed **never** writes `product_facts` or ground truth.
+- [x] **P2.23** (M3) `scripts/reset-events.ts`: deletes rows from `extraction_events`, `order_runs`, `corrections`, `alerts` (not eval tables, not facts). Asks for `--yes`.
+- [x] **P2.24** (M3) `scripts/clear-facts.ts --product p-07` for demoing a cache miss (and `--all` with `--yes`).
 - [ ] **P2.25** (M3) Run the seed against Supabase. Verify counts: 30 / 5 / 20.
 
 ### 2D. Investigation queries
-- [ ] **P2.26** (M3) `docs/queries.sql` with the investigation queries from stack/04 (failed extractions, most-corrected products, run trace).
+- [x] **P2.26** (M3) `docs/queries.sql` with the investigation queries from stack/04 (failed extractions, most-corrected products, run trace).
 - [ ] **P2.27** (M3) Each query tested in the SQL editor.
 
 ### 2E. Verification
