@@ -28,9 +28,9 @@
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 28 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 9 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 12 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **319** | |
+| **Total** | | | | **517** | **331** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -770,25 +770,25 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P11.5** (M1+M2) Both teammates review that the diagrams match the code.
 
 ### 11B. Tools & AI-usage log (`docs/report/TOOLS.md`)
-- [ ] **P11.6** (ALL) Row per tool: Claude/Claude Code, Gemini API, Google AI Studio, Next.js, Supabase, Vercel, GitHub Actions, Vitest, react-three-fiber, Recharts, Mermaid, any other AI assistant used.
-- [ ] **P11.7** (ALL) For each: what it did, why it was chosen over alternatives, generated / assisted / manual, how it was verified.
-- [ ] **P11.8** (ALL) List which files or parts were AI-generated vs hand-written (honest, per module).
-- [ ] **P11.9** (ALL) Limitations and trade-offs of each AI tool (e.g. Gemini may infer wrongly, mitigated by source tags + margin + eval).
+- [x] **P11.6** (ALL) Row per tool: Claude/Claude Code, Gemini API, Google AI Studio, Next.js, Supabase, Vercel, GitHub Actions, Vitest, react-three-fiber, Recharts, Mermaid, any other AI assistant used.
+- [x] **P11.7** (ALL) For each: what it did, why it was chosen over alternatives, generated / assisted / manual, how it was verified.
+- [x] **P11.8** (ALL) List which files or parts were AI-generated vs hand-written (honest, per module).
+- [x] **P11.9** (ALL) Limitations and trade-offs of each AI tool (e.g. Gemini may infer wrongly, mitigated by source tags + margin + eval).
 
 ### 11C. Report (`docs/report/REPORT.md` → PDF)
 - [ ] **P11.10** (M1, →T23) Title, team, date, live URL, repo URL.
 - [ ] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly).
 - [ ] **P11.12** (M1) 2. Solution and user flow (with screenshots).
-- [ ] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
-- [ ] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout.
-- [ ] **P11.15** (M2) 5. Technical design: architecture, engine rules, validator, cost model (labeled estimates), fallback chain, cache.
-- [ ] **P11.16** (M3) 6. Development environment: repo, branches, CI, previews, tests, decision log.
-- [ ] **P11.17** (M3) 7. Selected metrics: the 7 metrics, why each, what each reveals, alert rules.
+- [x] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
+- [x] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout.
+- [x] **P11.15** (M2) 5. Technical design: architecture, engine rules, validator, cost model (labeled estimates), fallback chain, cache.
+- [x] **P11.16** (M3) 6. Development environment: repo, branches, CI, previews, tests, decision log.
+- [x] **P11.17** (M3) 7. Selected metrics: the 7 metrics, why each, what each reveals, alert rules.
 - [ ] **P11.18** (M1+M2) 8. Benchmarks & evaluation results: extraction + packing tables, before/after prompt, margin decision, holdout.
 - [ ] **P11.19** (M3) 9. Monitoring in action: the investigation story + the outage demo.
 - [ ] **P11.20** (ALL) 10. Tools & AI usage (summary of TOOLS.md).
-- [ ] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
-- [ ] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback).
+- [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
+- [x] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback).
 - [ ] **P11.23** (ALL) 13. References: brief, Gemini docs, Supabase docs, Vercel docs, Next.js docs, R3F docs, courier volumetric-weight source, Paccurate, bin-packing references actually read.
 - [ ] **P11.24** (ALL) Diagrams embedded.
 - [ ] **P11.25** (ALL) Concise: target ≤ 8–10 pages. Cut anything that isn't evidence.
@@ -809,7 +809,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P11.38** (M2) Exported PDF backup of the deck.
 
 ### 11E. Supporting documents
-- [ ] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
+- [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [ ] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons).
 - [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest).
 - [ ] **P11.42** (ALL) `docs/report/results.md` final.
