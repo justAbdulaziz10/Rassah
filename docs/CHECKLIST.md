@@ -17,7 +17,7 @@
 
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
-| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 0 | ⬜ Not started |
+| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 0 | ⬜ Not started |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 0 | ⬜ Not started |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **0** | |
+| **Total** | | | | **517** | **2** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -110,8 +110,8 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 (setup) + ALL · **Target:** Tue 20 Oct evening · **Gate:** G0
 
 ### 0A. Decisions and confirmations
-- [ ] **P0.1** (M3, →T1) Message the instructor: "Our product uses an LLM (Gemini) to extract product dimensions and handling flags from product-page text, and a search-based engine to pack items into the cheapest safe carton. Does this satisfy *AI-powered product*?" Done when: written reply received and pasted into `docs/decisions.md`.
-- [ ] **P0.2** (ALL) If P0.1 is negative, hold an emergency call within 1 hour and record the decision.
+- [x] **P0.1** (M3, →T1) Message the instructor: "Our product uses an LLM (Gemini) to extract product dimensions and handling flags from product-page text, and a search-based engine to pack items into the cheapest safe carton. Does this satisfy *AI-powered product*?" Done when: written reply received and pasted into `docs/decisions.md`. ✅ 20 Oct: **APIs are allowed. No fine-tuning needed.** Recorded in [decisions.md](decisions.md).
+- [x] **P0.2** (ALL) If P0.1 is negative, hold an emergency call within 1 hour and record the decision. ✅ Not needed (P0.1 positive).
 - [ ] **P0.3** (ALL) Re-confirm the stack decision: TypeScript on Vercel (team is stronger in Python). Record it in `docs/decisions.md`.
 - [ ] **P0.4** (ALL) Confirm lane ownership (M1/M2/M3) and review pairs from PLAN §10.
 - [ ] **P0.5** (ALL) Agree on sync times: Tue 23:00, Wed 09:00, Wed 13:00 ⛳, Wed 18:00, Wed 23:00, Thu 08:00.

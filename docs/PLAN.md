@@ -30,7 +30,7 @@ Merchants who ship multi-item orders pick a carton by eye. Three things go wrong
 
 **Line for the judges:** *"The LLM understands, the engine computes, the validator proves."*
 
-> **Action (today):** confirm with the instructor that "LLM extraction + search-based packing" satisfies "AI-powered product". If the answer is no, escalate immediately.
+> **Confirmed (20 Oct):** the instructor confirmed that using AI APIs satisfies the requirement and that no fine-tuning is needed. See [decisions.md](decisions.md).
 
 ## 3. Users
 
