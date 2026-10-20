@@ -22,7 +22,7 @@
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 21 | 🟨 In progress |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
-| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 0 | ⬜ Not started |
+| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 0 | ⬜ Not started |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 0 | ⬜ Not started |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **132** | |
+| **Total** | | | | **517** | **173** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -399,61 +399,61 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M1 · **Reviewer:** M3 · **Target:** Wed morning · **Gate:** G5 · **Spec:** [stack/02](stack/02-gemini-extraction.md)
 
 ### 5A. SDK and client
-- [ ] **P5.1** (M1) Read the `@google/genai` README (googleapis/js-genai). Confirm the exact names for structured output and usage metadata. Note them in stack/02.
-- [ ] **P5.2** (M1) `lib/ai/client.ts`: `import "server-only"`, a `GoogleGenAI` client from `GEMINI_API_KEY`, model from `GEMINI_MODEL`.
-- [ ] **P5.3** (M1) Missing key → typed `config_error` (no crash at import time).
+- [x] **P5.1** (M1) Read the `@google/genai` README (googleapis/js-genai). Confirm the exact names for structured output and usage metadata. Note them in stack/02.
+- [x] **P5.2** (M1) `lib/ai/client.ts`: `import "server-only"`, a `GoogleGenAI` client from `GEMINI_API_KEY`, model from `GEMINI_MODEL`.
+- [x] **P5.3** (M1) Missing key → typed `config_error` (no crash at import time).
 
 ### 5B. Schema
-- [ ] **P5.4** (M1) `lib/ai/schema.ts`: Zod `ProductFactsSchema` (dims, weight, two sources, three flags, confidence, evidence).
-- [ ] **P5.5** (M1) Gemini response schema derived from the same field list (one source of truth).
-- [ ] **P5.6** (M1) Enums: source ∈ {page, inferred, unknown}. Confidence ∈ {high, medium, low}. Nullable numbers.
+- [x] **P5.4** (M1) `lib/ai/schema.ts`: Zod `ProductFactsSchema` (dims, weight, two sources, three flags, confidence, evidence).
+- [x] **P5.5** (M1) Gemini response schema derived from the same field list (one source of truth).
+- [x] **P5.6** (M1) Enums: source ∈ {page, inferred, unknown}. Confidence ∈ {high, medium, low}. Nullable numbers.
 
 ### 5C. Prompt
-- [ ] **P5.7** (M1) `lib/ai/prompt.ts` with `PROMPT_VERSION = "v1"`.
-- [ ] **P5.8** (M1) Prompt rules: outer packaging, cm + g, unit conversion (in, lb, kg), Arabic-Indic digits.
-- [ ] **P5.9** (M1) Rule: page values → `page`; inferable → `inferred` (confidence ≤ medium); no basis → `null` + `unknown`. **"Never invent."**
-- [ ] **P5.10** (M1) Rule: fragile definition (glass, crystal, ceramic, porcelain, mirror, screen, or unsure if glass → true).
-- [ ] **P5.11** (M1) Rule: liquid definition (liquid/gel/cream that can leak). Sensitive definition (electronics, batteries).
-- [ ] **P5.12** (M1) Rule: `evidence` = the shortest phrase used, or what was inferred from.
-- [ ] **P5.13** (M1) Rule: dims ordered L ≥ W ≥ H.
-- [ ] **P5.14** (M1) Product name + description are injected as clearly delimited data (not instructions).
+- [x] **P5.7** (M1) `lib/ai/prompt.ts` with `PROMPT_VERSION = "v1"`.
+- [x] **P5.8** (M1) Prompt rules: outer packaging, cm + g, unit conversion (in, lb, kg), Arabic-Indic digits.
+- [x] **P5.9** (M1) Rule: page values → `page`; inferable → `inferred` (confidence ≤ medium); no basis → `null` + `unknown`. **"Never invent."**
+- [x] **P5.10** (M1) Rule: fragile definition (glass, crystal, ceramic, porcelain, mirror, screen, or unsure if glass → true).
+- [x] **P5.11** (M1) Rule: liquid definition (liquid/gel/cream that can leak). Sensitive definition (electronics, batteries).
+- [x] **P5.12** (M1) Rule: `evidence` = the shortest phrase used, or what was inferred from.
+- [x] **P5.13** (M1) Rule: dims ordered L ≥ W ≥ H.
+- [x] **P5.14** (M1) Product name + description are injected as clearly delimited data (not instructions).
 
 ### 5D. Extractor
-- [ ] **P5.15** (M1) `extractFacts(product, deps)`: the `generate` function is injectable for tests.
-- [ ] **P5.16** (M1) Call with `temperature: 0` and JSON response mode + schema.
-- [ ] **P5.17** (M1) Parse `response.text` → JSON → Zod `safeParse`. Failure → `parse_error`, facts = unknown.
-- [ ] **P5.18** (M1) Sanity checks: dims ≤ 0 or > 150 cm → unknown. Weight ≤ 0 or > 30,000 g → unknown.
-- [ ] **P5.19** (M1) Consistency check: `page` + `low` confidence → downgrade to `inferred`.
-- [ ] **P5.20** (M1) Empty response → `empty`. Safety block → `blocked`.
-- [ ] **P5.21** (M1) Token usage read from usage metadata (input, output, thinking if present). Missing fields → 0.
-- [ ] **P5.22** (M1) `cost_usd` computed from env prices.
-- [ ] **P5.23** (M1) Returns `{ facts, event }`, where the event has every `extraction_events` field (stack/04).
+- [x] **P5.15** (M1) `extractFacts(product, deps)`: the `generate` function is injectable for tests.
+- [x] **P5.16** (M1) Call with `temperature: 0` and JSON response mode + schema.
+- [x] **P5.17** (M1) Parse `response.text` → JSON → Zod `safeParse`. Failure → `parse_error`, facts = unknown.
+- [x] **P5.18** (M1) Sanity checks: dims ≤ 0 or > 150 cm → unknown. Weight ≤ 0 or > 30,000 g → unknown.
+- [x] **P5.19** (M1) Consistency check: `page` + `low` confidence → downgrade to `inferred`.
+- [x] **P5.20** (M1) Empty response → `empty`. Safety block → `blocked`.
+- [x] **P5.21** (M1) Token usage read from usage metadata (input, output, thinking if present). Missing fields → 0.
+- [x] **P5.22** (M1) `cost_usd` computed from env prices.
+- [x] **P5.23** (M1) Returns `{ facts, event }`, where the event has every `extraction_events` field (stack/04).
 
 ### 5E. Reliability
-- [ ] **P5.24** (M1) Timeout per call (~20 s) → `timeout`.
-- [ ] **P5.25** (M1) Retry on 429/503 up to 2 times with backoff (1 s, 3 s) + jitter. Final 429 → `rate_limited`.
-- [ ] **P5.26** (M1) Other API errors → `api_error` with `error_code` and a short `error_message` (no secrets, no full prompt).
-- [ ] **P5.27** (M1) Concurrency limiter (default 2, from P0.12 limits) for extracting multiple products.
-- [ ] **P5.28** (M1) Fault injection: when `DEMO_MODE=true` and `simulateOutage` is set → throw `simulated_outage` before any network call.
+- [x] **P5.24** (M1) Timeout per call (~20 s) → `timeout`.
+- [x] **P5.25** (M1) Retry on 429/503 up to 2 times with backoff (1 s, 3 s) + jitter. Final 429 → `rate_limited`.
+- [x] **P5.26** (M1) Other API errors → `api_error` with `error_code` and a short `error_message` (no secrets, no full prompt).
+- [x] **P5.27** (M1) Concurrency limiter (default 2, from P0.12 limits) for extracting multiple products.
+- [x] **P5.28** (M1) Fault injection: when `DEMO_MODE=true` and `simulateOutage` is set → throw `simulated_outage` before any network call.
 
 ### 5F. Catalog cache
-- [ ] **P5.29** (M1) `getOrExtractFacts(productIds)`: cached facts with matching `source_hash` are used as-is (cache hit).
-- [ ] **P5.30** (M1) A stale `source_hash` → re-extract (cache miss).
-- [ ] **P5.31** (M1) Facts with `origin` `manual` or `ai_corrected` are **never** overwritten by extraction.
-- [ ] **P5.32** (M1) On success, upsert `product_facts` with `origin='ai'`, model, prompt version, `extracted_at`.
-- [ ] **P5.33** (M1) On failure, nothing is written to `product_facts` (the event is still written).
-- [ ] **P5.34** (M1) Returns cache hit/miss counts for the order event.
+- [x] **P5.29** (M1) `getOrExtractFacts(productIds)`: cached facts with matching `source_hash` are used as-is (cache hit).
+- [x] **P5.30** (M1) A stale `source_hash` → re-extract (cache miss).
+- [x] **P5.31** (M1) Facts with `origin` `manual` or `ai_corrected` are **never** overwritten by extraction.
+- [x] **P5.32** (M1) On success, upsert `product_facts` with `origin='ai'`, model, prompt version, `extracted_at`.
+- [x] **P5.33** (M1) On failure, nothing is written to `product_facts` (the event is still written).
+- [x] **P5.34** (M1) Returns cache hit/miss counts for the order event.
 
 ### 5G. Tests (no network)
 - [ ] **P5.35** (M1) Record 6+ real Gemini responses (from AI Studio or a one-off script) into `tests/fixtures/gemini/`.
-- [ ] **P5.36** (M1) Test: explicit-dims fixture parses correctly.
+- [x] **P5.36** (M1) Test: explicit-dims fixture parses correctly.
 - [ ] **P5.37** (M1) Test: inches/lb conversion, Arabic-Indic digits (fixture-based).
-- [ ] **P5.38** (M1) Test: malformed JSON → `parse_error` + unknown.
-- [ ] **P5.39** (M1) Test: out-of-range values → unknown.
-- [ ] **P5.40** (M1) Test: `page` + `low` → `inferred`.
-- [ ] **P5.41** (M1) Test: retry on 429 then success. 3× 429 → `rate_limited`.
-- [ ] **P5.42** (M1) Test: manual facts are not overwritten. Stale hash triggers re-extraction.
-- [ ] **P5.43** (M1) Test: simulated outage produces the right event and no network call.
+- [x] **P5.38** (M1) Test: malformed JSON → `parse_error` + unknown.
+- [x] **P5.39** (M1) Test: out-of-range values → unknown.
+- [x] **P5.40** (M1) Test: `page` + `low` → `inferred`.
+- [x] **P5.41** (M1) Test: retry on 429 then success. 3× 429 → `rate_limited`.
+- [x] **P5.42** (M1) Test: manual facts are not overwritten. Stale hash triggers re-extraction.
+- [x] **P5.43** (M1) Test: simulated outage produces the right event and no network call.
 
 ### 5H. Real-model check and review
 - [ ] **P5.44** (M1) One-off local run over all 30 products (`trigger='admin'`): zero crashes, every attempt has an event.

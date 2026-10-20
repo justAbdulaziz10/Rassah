@@ -32,7 +32,11 @@ export const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 export const MODEL = process.env.GEMINI_MODEL!; // choose a current Flash-tier id in AI Studio
 ```
 
-> Before writing the extractor, open the SDK README (`googleapis/js-genai` on GitHub) and confirm the exact field names for structured output (`responseMimeType`, `responseSchema` / JSON schema) and usage metadata. The sketch below shows intent. Verify the names, don't copy blindly.
+> **Implemented and verified against `@google/genai` 2.30.0 typings** (`node_modules/@google/genai/dist/genai.d.ts`): `config.systemInstruction`, `temperature`, `responseMimeType: "application/json"`, `responseSchema` (built with the `Type` enum and `nullable`), `abortSignal`. The response gives `res.text`, `res.usageMetadata.{promptTokenCount, candidatesTokenCount, thoughtsTokenCount}`, `res.promptFeedback.blockReason` and `candidates[0].finishReason`. Errors are `ApiError` with `.status`.
+> SDK retries are disabled (`httpOptions.retryOptions.attempts = 1`) so the extractor owns retries and every attempt is visible in events.
+> A probe with a fake key confirmed the request shape: Google rejected only the key. Gemini answers an invalid key with **400** "API key not valid" (not 401), which we map to `config_error`.
+>
+> Code: `lib/ai/schema.ts` (Zod + Gemini schema from one field list), `lib/ai/prompt.ts` (`PROMPT_VERSION`), `lib/ai/extractor.ts` (injectable `generate`, retries, timeout, sanitize, cost), `lib/ai/gemini.ts` (real call + error mapping), `lib/ai/catalog.ts` (cache + bounded concurrency), `lib/ai/index.ts` (`serverExtractDeps()`). The sketch below shows the original intent.
 
 ```ts
 // lib/ai/extractor.ts (sketch)
