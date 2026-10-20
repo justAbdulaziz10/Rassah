@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* Fixed color meaning across the whole app (see docs/stack/01):
+   fragile = amber, liquid = blue, sensitive = purple, estimated = dashed outline. */
+:root {
+  --background: #f7f8f7;
+  --surface: #ffffff;
+  --foreground: #1b1f1d;
+  --muted: #5d6662;
+  --border: #dde2df;
+  --brand: #0f766e;
+  --brand-contrast: #ffffff;
+
+  --fragile: #d97706;
+  --fragile-soft: #fef3c7;
+  --liquid: #2563eb;
+  --liquid-soft: #dbeafe;
+  --sensitive: #7c3aed;
+  --sensitive-soft: #ede9fe;
+  --neutral-item: #5f8f8a;
+
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --critical: #b91c1c;
+  --critical-soft: #fee2e2;
+  --info: #1d4ed8;
+  --info-soft: #dbeafe;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1312;
+    --surface: #171c1b;
+    --foreground: #e8ecea;
+    --muted: #9aa5a0;
+    --border: #2a3230;
+    --brand: #2dd4bf;
+    --brand-contrast: #0f1312;
+
+    --fragile-soft: #3b2a0c;
+    --liquid-soft: #172554;
+    --sensitive-soft: #2e1065;
+    --ok-soft: #052e16;
+    --warn-soft: #3b2a0c;
+    --critical-soft: #450a0a;
+    --info-soft: #172554;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-contrast: var(--brand-contrast);
+  --color-fragile: var(--fragile);
+  --color-fragile-soft: var(--fragile-soft);
+  --color-liquid: var(--liquid);
+  --color-liquid-soft: var(--liquid-soft);
+  --color-sensitive: var(--sensitive);
+  --color-sensitive-soft: var(--sensitive-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: var(--font-arabic);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Numbers and dimensions read left-to-right inside RTL text. */
+.ltr-nums {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+}

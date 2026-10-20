@@ -99,7 +99,9 @@ Manual measurement or correction. Writes `corrections` rows, sets `origin = "man
 ## Rendering rules
 
 - Server components fetch data. Interactive pieces (`PackingView3D`, forms, charts) are client components (`"use client"`).
-- Route handlers: `export const runtime = "nodejs"` (Supabase + Gemini SDKs need Node), and `export const dynamic = "force-dynamic"` on anything that reads live data.
+- **Next.js 16 with Cache Components** (`cacheComponents: true`, the create-next-app default): do **not** export `runtime` or `dynamic` from routes. Both are removed under Cache Components, and Node.js is already the default runtime. Use only `maxDuration` where needed.
+- Anything that must run per request (DB reads, `Date.now()`, `crypto.randomUUID()`) calls `await connection()` from `next/server` first. In pages, async data components sit inside `<Suspense>`. Read `node_modules/next/dist/docs/01-app/01-getting-started/08-caching.md` before writing pages.
+- Error boundaries (`error.tsx`) receive `{ error, retry }` in this version.
 - All `lib/ai`, `lib/db`, `lib/monitoring` modules start with `import "server-only";`.
 
 ## UI and RTL

@@ -1,0 +1,2 @@
+// db module. See docs/stack/ for the spec.
+export {};

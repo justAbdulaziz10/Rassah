@@ -18,7 +18,7 @@
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 0 | ⬜ Not started |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 28 | 🟨 In progress |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 0 | ⬜ Not started |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 0 | ⬜ Not started |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **2** | |
+| **Total** | | | | **517** | **30** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -165,45 +165,45 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 · **Target:** Tue night · **Gate:** G1 · **Spec:** [stack/01](stack/01-nextjs-typescript.md), [stack/08](stack/08-testing-quality.md), [stack/09](stack/09-vercel-ci.md)
 
 ### 1A. Project creation
-- [ ] **P1.1** (M3, →T3) `create-next-app` in the repo root with TypeScript, Tailwind, ESLint, App Router, `@/*` alias. Keep `docs/` intact.
-- [ ] **P1.2** (M3) Install runtime deps: `@google/genai @supabase/supabase-js zod recharts three @react-three/fiber @react-three/drei server-only`.
-- [ ] **P1.3** (M3) Install dev deps: `vitest @vitest/coverage-v8 tsx @types/three`.
-- [ ] **P1.4** (M3) Pin exact versions in `package.json` (remove `^`/`~`). Commit `package-lock.json`.
-- [ ] **P1.5** (M3) Add `"engines": { "node": "<LTS major>" }` to `package.json`.
-- [ ] **P1.6** (M3) Add `.nvmrc` with the same Node version.
-- [ ] **P1.7** (M3) Confirm `tsconfig.json` has `"strict": true`.
+- [x] **P1.1** (M3, →T3) `create-next-app` in the repo root with TypeScript, Tailwind, ESLint, App Router, `@/*` alias. Keep `docs/` intact.
+- [x] **P1.2** (M3) Install runtime deps: `@google/genai @supabase/supabase-js zod recharts three @react-three/fiber @react-three/drei server-only`.
+- [x] **P1.3** (M3) Install dev deps: `vitest @vitest/coverage-v8 tsx @types/three`.
+- [x] **P1.4** (M3) Pin exact versions in `package.json` (remove `^`/`~`). Commit `package-lock.json`.
+- [x] **P1.5** (M3) Add `"engines": { "node": "<LTS major>" }` to `package.json`.
+- [x] **P1.6** (M3) Add `.nvmrc` with the same Node version.
+- [x] **P1.7** (M3) Confirm `tsconfig.json` has `"strict": true`.
 
 ### 1B. Repo hygiene files
-- [ ] **P1.8** (M3) `.gitignore` covers `node_modules`, `.next`, `.env*` (except `.env.example`), `coverage`, `.vercel`, OS files.
-- [ ] **P1.9** (M3) `.env.example` lists **every** variable from the env matrix, names only.
-- [ ] **P1.10** (M3) `.gitattributes` with `* text=auto eol=lf` (avoids CRLF noise on Windows).
-- [ ] **P1.11** (M3) `.editorconfig` (2-space indent, LF, UTF-8).
-- [ ] **P1.12** (M3) `LICENSE` file (MIT unless the team decides otherwise).
-- [ ] **P1.13** (M3) README: add **Getting started** (prerequisites, `npm ci`, copy `.env.example` → `.env.local`, `npm run seed`, `npm run dev`).
-- [ ] **P1.14** (M3) Create `docs/decisions.md` (date · decision · reason · alternatives) with the decisions made so far.
-- [ ] **P1.15** (M3) Create `docs/report/` with empty `REPORT.md`, `TOOLS.md`, `results.md`.
+- [x] **P1.8** (M3) `.gitignore` covers `node_modules`, `.next`, `.env*` (except `.env.example`), `coverage`, `.vercel`, OS files.
+- [x] **P1.9** (M3) `.env.example` lists **every** variable from the env matrix, names only.
+- [x] **P1.10** (M3) `.gitattributes` with `* text=auto eol=lf` (avoids CRLF noise on Windows).
+- [x] **P1.11** (M3) `.editorconfig` (2-space indent, LF, UTF-8).
+- [x] **P1.12** (M3) `LICENSE` file (MIT unless the team decides otherwise).
+- [x] **P1.13** (M3) README: add **Getting started** (prerequisites, `npm ci`, copy `.env.example` → `.env.local`, `npm run seed`, `npm run dev`).
+- [x] **P1.14** (M3) Create `docs/decisions.md` (date · decision · reason · alternatives) with the decisions made so far.
+- [x] **P1.15** (M3) Create `docs/report/` with empty `REPORT.md`, `TOOLS.md`, `results.md`.
 
 ### 1C. Folder skeleton (empty modules with a TODO comment + exported types)
-- [ ] **P1.16** (M3) `lib/ai/`, `lib/engine/`, `lib/db/`, `lib/monitoring/` created, each with an `index.ts`.
-- [ ] **P1.17** (M3) `components/`, `data/`, `scripts/`, `supabase/migrations/`, `tests/`, `tests/fixtures/gemini/`, `eval/results/` created (`.gitkeep` where empty).
-- [ ] **P1.18** (M3) `lib/env.ts`: reads and validates env vars with Zod at startup, with a clear error naming the missing variable. Server only.
+- [x] **P1.16** (M3) `lib/ai/`, `lib/engine/`, `lib/db/`, `lib/monitoring/` created, each with an `index.ts`.
+- [x] **P1.17** (M3) `components/`, `data/`, `scripts/`, `supabase/migrations/`, `tests/`, `tests/fixtures/gemini/`, `eval/results/` created (`.gitkeep` where empty).
+- [x] **P1.18** (M3) `lib/env.ts`: reads and validates env vars with Zod at startup, with a clear error naming the missing variable. Server only.
 
 ### 1D. Scripts and quality tooling
-- [ ] **P1.19** (M3) `package.json` scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `check`, `seed`, `eval:extraction`, `eval:packing`.
-- [ ] **P1.20** (M3) `vitest.config.ts` with the `@/*` alias and `environment: "node"`.
-- [ ] **P1.21** (M3) One trivial passing test (`tests/smoke.test.ts`) so CI has something to run.
-- [ ] **P1.22** (M3) Lint command works (`next lint` or `eslint .`, whichever the scaffold supports). Recorded in stack/08.
-- [ ] **P1.23** (M3) `npm run check` passes locally.
+- [x] **P1.19** (M3) `package.json` scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `check`, `seed`, `eval:extraction`, `eval:packing`.
+- [x] **P1.20** (M3) `vitest.config.ts` with the `@/*` alias and `environment: "node"`.
+- [x] **P1.21** (M3) One trivial passing test (`tests/smoke.test.ts`) so CI has something to run.
+- [x] **P1.22** (M3) Lint command works (`next lint` or `eslint .`, whichever the scaffold supports). Recorded in stack/08.
+- [x] **P1.23** (M3) `npm run check` passes locally.
 
 ### 1E. App shell
-- [ ] **P1.24** (M3) `app/layout.tsx`: `<html lang="ar" dir="rtl">`, Arabic font via `next/font/google`, top nav: Orders · Catalog · Monitoring · Evaluation.
-- [ ] **P1.25** (M3) Placeholder pages for `/orders`, `/catalog`, `/monitoring`, `/evaluation`. `/` redirects to `/orders`.
-- [ ] **P1.26** (M3) Tailwind: define the fixed color tokens (fragile amber, liquid blue, sensitive purple, estimated dashed) as CSS variables.
-- [ ] **P1.27** (M3) `app/not-found.tsx` and `app/error.tsx` with friendly Arabic messages.
+- [x] **P1.24** (M3) `app/layout.tsx`: `<html lang="ar" dir="rtl">`, Arabic font via `next/font/google`, top nav: Orders · Catalog · Monitoring · Evaluation.
+- [x] **P1.25** (M3) Placeholder pages for `/orders`, `/catalog`, `/monitoring`, `/evaluation`. `/` redirects to `/orders`.
+- [x] **P1.26** (M3) Tailwind: define the fixed color tokens (fragile amber, liquid blue, sensitive purple, estimated dashed) as CSS variables.
+- [x] **P1.27** (M3) `app/not-found.tsx` and `app/error.tsx` with friendly Arabic messages.
 - [ ] **P1.28** (M3) `GET /api/health` returns `{ app: "ok", geminiKeyPresent, supabase: "ok" | "error" }`. Never return key values.
 
 ### 1F. CI
-- [ ] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test.
+- [x] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test.
 - [ ] **P1.30** (M3) Open a test PR. CI runs and passes.
 
 ### 1G. Vercel
@@ -467,7 +467,7 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 (route + events), M1 (extraction wiring) · **Target:** ⛳ Wed 13:00 · **Gate:** G6 · **Spec:** [stack/01](stack/01-nextjs-typescript.md), [stack/06 §1](stack/06-monitoring.md)
 
 ### 6A. `POST /api/orders/[id]/pack` (→T10)
-- [ ] **P6.1** (M3) `runtime = "nodejs"`, `dynamic = "force-dynamic"`, `maxDuration` set within the Vercel plan limit (P0.22).
+- [ ] **P6.1** (M3) `await connection()` at the start (per-request), no `runtime`/`dynamic` exports (removed under Cache Components), `maxDuration` set within the Vercel plan limit (P0.22).
 - [ ] **P6.2** (M3) Generate a `run_id` and a start timer at entry.
 - [ ] **P6.3** (M3) Unknown order id → 404 with a clear message (still logged as `error` with `error_code='order_not_found'`).
 - [ ] **P6.4** (M3) Load order items + cartons.

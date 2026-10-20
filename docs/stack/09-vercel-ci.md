@@ -24,7 +24,7 @@
 
 - Functions are short-lived. **No in-memory cache across requests**, which is why the catalog cache lives in Supabase.
 - Functions have a maximum duration that depends on the plan. Keep each pack request short: cache, parallel extraction (limit 2), ≤ 12 units, engine budget 1.5 s. Set `export const maxDuration = …` on the pack route within the plan's limit, and check the current Vercel docs for the value.
-- Route handlers that use the Supabase/Gemini SDKs run on the **Node.js runtime** (`export const runtime = "nodejs"`), not Edge.
+- Route handlers run on the default **Node.js runtime**. Under Cache Components, do not export `runtime` (Edge is deprecated anyway).
 - No writable persistent filesystem, so evaluation scripts run **locally** (or in CI manually), not on Vercel.
 
 ## GitHub Actions CI: `.github/workflows/ci.yml`

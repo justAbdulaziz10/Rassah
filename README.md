@@ -7,6 +7,34 @@ A packer types an order number. Rassah reads each product's page with an LLM (Ge
 > Status: **planning**. The implementation follows [`docs/PLAN.md`](docs/PLAN.md).
 > Built for *Project 1: AI Product Development and Monitoring* (Tuwaiq Academy × Startupbootcamp × Meta). Demo day: **Thursday 22 October 2026**.
 
+## Getting started
+
+**Prerequisites:** Node.js 24 LTS (see `.nvmrc`), npm, Git.
+
+```bash
+git clone https://github.com/justAbdulaziz10/Rassah.git
+cd Rassah
+npm ci
+cp .env.example .env.local     # then fill in the values (see docs/CHECKLIST.md, credentials register)
+npm run check                  # lint + typecheck + unit tests
+npm run dev                    # http://localhost:3000
+```
+
+| Script | What it does |
+|---|---|
+| `npm run dev` | Local dev server |
+| `npm run build` / `npm start` | Production build / serve it |
+| `npm run check` | Lint + typecheck + tests. Run before every push. |
+| `npm test` | Unit tests (Vitest, no network) |
+| `npm run validate-data` | Validates the synthetic dataset in `data/` |
+| `npm run seed` | Loads the mock store into Supabase (needs `.env.local`) |
+| `npm run eval:packing` | Packing evaluation (engine vs naive baseline, no network) |
+| `npm run eval:extraction` | Extraction evaluation against ground truth (calls Gemini, costs tokens) |
+
+`GET /api/health` reports whether the Gemini key and Supabase config are present. It never returns their values.
+
+> Next.js 16 with Cache Components is used. Read `AGENTS.md` and the docs in `node_modules/next/dist/docs/` before writing pages or routes. Several APIs differ from older Next.js versions.
+
 ## Documentation
 
 | Document | What it covers |
