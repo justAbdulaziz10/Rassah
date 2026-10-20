@@ -23,14 +23,14 @@
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 0 | ⬜ Not started |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 30 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 0 | ⬜ Not started |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 23 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 25 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 0 | ⬜ Not started |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **196** | |
+| **Total** | | | | **517** | **228** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -467,47 +467,47 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 (route + events), M1 (extraction wiring) · **Target:** ⛳ Wed 13:00 · **Gate:** G6 · **Spec:** [stack/01](stack/01-nextjs-typescript.md), [stack/06 §1](stack/06-monitoring.md)
 
 ### 6A. `POST /api/orders/[id]/pack` (→T10)
-- [ ] **P6.1** (M3) `await connection()` at the start (per-request), no `runtime`/`dynamic` exports (removed under Cache Components), `maxDuration` set within the Vercel plan limit (P0.22).
-- [ ] **P6.2** (M3) Generate a `run_id` and a start timer at entry.
-- [ ] **P6.3** (M3) Unknown order id → 404 with a clear message (still logged as `error` with `error_code='order_not_found'`).
-- [ ] **P6.4** (M3) Load order items + cartons.
-- [ ] **P6.5** (M1) `getOrExtractFacts` for all products (P5.29). Time it as `extract_ms`.
-- [ ] **P6.6** (M3) Every extraction event is written with `run_id` and `trigger='order'`.
-- [ ] **P6.7** (M3) Any product with unknown facts → status `needs_measurement` with product ids. The engine is not run.
-- [ ] **P6.8** (M3) Call `packOrder`. Time it as `pack_ms`.
-- [ ] **P6.9** (M3) Build the response exactly per the stack/01 contract (carton, items with facts + effective dims + placement, instructions, cost, timings, monitoring flag).
-- [ ] **P6.10** (M3) Write one `order_runs` row with every field (status, carton, counts, cache hits/misses, estimated units, timings, candidates, validator rejections + violations, costs, tokens, cost_usd, versions, error code).
-- [ ] **P6.11** (M3) Event-write failure → the response still returns the result, with `monitoring.saved = false`, and `monitoring_degraded` is logged to the console.
-- [ ] **P6.12** (M3) Unexpected exception → status `error`, the run is still logged (best effort), a 500 is returned with `runId`.
-- [ ] **P6.13** (M3) Structured console logs: `{ runId, stage, ms, status }` per stage (Vercel logs).
-- [ ] **P6.14** (M3) Accepts `{ simulateOutage: true }` **only** when `DEMO_MODE=true`. Otherwise it is ignored.
-- [ ] **P6.15** (M3) After writing the run, evaluate the alert rules (P8.x) without blocking the response on failure.
+- [x] **P6.1** (M3) `await connection()` at the start (per-request), no `runtime`/`dynamic` exports (removed under Cache Components), `maxDuration` set within the Vercel plan limit (P0.22).
+- [x] **P6.2** (M3) Generate a `run_id` and a start timer at entry.
+- [x] **P6.3** (M3) Unknown order id → 404 with a clear message (still logged as `error` with `error_code='order_not_found'`).
+- [x] **P6.4** (M3) Load order items + cartons.
+- [x] **P6.5** (M1) `getOrExtractFacts` for all products (P5.29). Time it as `extract_ms`.
+- [x] **P6.6** (M3) Every extraction event is written with `run_id` and `trigger='order'`.
+- [x] **P6.7** (M3) Any product with unknown facts → status `needs_measurement` with product ids. The engine is not run.
+- [x] **P6.8** (M3) Call `packOrder`. Time it as `pack_ms`.
+- [x] **P6.9** (M3) Build the response exactly per the stack/01 contract (carton, items with facts + effective dims + placement, instructions, cost, timings, monitoring flag).
+- [x] **P6.10** (M3) Write one `order_runs` row with every field (status, carton, counts, cache hits/misses, estimated units, timings, candidates, validator rejections + violations, costs, tokens, cost_usd, versions, error code).
+- [x] **P6.11** (M3) Event-write failure → the response still returns the result, with `monitoring.saved = false`, and `monitoring_degraded` is logged to the console.
+- [x] **P6.12** (M3) Unexpected exception → status `error`, the run is still logged (best effort), a 500 is returned with `runId`.
+- [x] **P6.13** (M3) Structured console logs: `{ runId, stage, ms, status }` per stage (Vercel logs).
+- [x] **P6.14** (M3) Accepts `{ simulateOutage: true }` **only** when `DEMO_MODE=true`. Otherwise it is ignored.
+- [x] **P6.15** (M3) After writing the run, evaluate the alert rules (P8.x) without blocking the response on failure.
 
 ### 6B. `POST /api/runs/[runId]/action`
-- [ ] **P6.16** (M3) `confirm` → `employee_action='confirmed'`, `action_at=now()`.
-- [ ] **P6.17** (M3) `edit` → writes `corrections` rows (field, old, new, `prior_origin`) and updates `product_facts` (`origin='ai_corrected'` if it was `ai`, source → `manual` for edited dims/weight).
-- [ ] **P6.18** (M3) `edit` sets `employee_action='edited'` and returns a hint to re-pack.
-- [ ] **P6.19** (M3) Input validated with Zod (allowed fields only, positive numbers, booleans).
-- [ ] **P6.20** (M3) Unknown `runId` → 404.
+- [x] **P6.16** (M3) `confirm` → `employee_action='confirmed'`, `action_at=now()`.
+- [x] **P6.17** (M3) `edit` → writes `corrections` rows (field, old, new, `prior_origin`) and updates `product_facts` (`origin='ai_corrected'` if it was `ai`, source → `manual` for edited dims/weight).
+- [x] **P6.18** (M3) `edit` sets `employee_action='edited'` and returns a hint to re-pack.
+- [x] **P6.19** (M3) Input validated with Zod (allowed fields only, positive numbers, booleans).
+- [x] **P6.20** (M3) Unknown `runId` → 404.
 
 ### 6C. `PATCH /api/products/[id]/facts` (manual measurement)
-- [ ] **P6.21** (M3) Sets dims/weight with source `manual`, origin `manual` (or `ai_corrected` if previously AI), and writes `corrections`.
-- [ ] **P6.22** (M3) Validates ranges (same limits as the sanity checks).
+- [x] **P6.21** (M3) Sets dims/weight with source `manual`, origin `manual` (or `ai_corrected` if previously AI), and writes `corrections`.
+- [x] **P6.22** (M3) Validates ranges (same limits as the sanity checks).
 
 ### 6D. `POST /api/products/[id]/extract` (admin re-extract)
-- [ ] **P6.23** (M1) Forces extraction with `trigger='admin'` and respects the never-overwrite-manual rule.
-- [ ] **P6.24** (M1) Only available when `DEMO_MODE=true` (to keep the public URL safe).
+- [x] **P6.23** (M1) Forces extraction with `trigger='admin'` and respects the never-overwrite-manual rule.
+- [x] **P6.24** (M1) Only available when `DEMO_MODE=true` (to keep the public URL safe).
 
 ### 6E. `GET /api/monitoring/metrics?window=` (used by Phase 8)
-- [ ] **P6.25** (M3) Window param validated (`1h|24h|7d|all`). Returns metric values + sample sizes + open alerts. No raw keys.
+- [x] **P6.25** (M3) Window param validated (`1h|24h|7d|all`). Returns metric values + sample sizes + open alerts. No raw keys.
 
 ### 6F. Pipeline tests (fake DB + fake extractor)
-- [ ] **P6.26** (M3) Happy path: all cached → `box_found`, `cache_misses=0`, one order_run written.
-- [ ] **P6.27** (M3) Cache miss path: extractor called, extraction event + facts upsert written.
-- [ ] **P6.28** (M3) `needs_measurement` path. `no_box` path. Unknown order 404.
-- [ ] **P6.29** (M3) DB write failure → 200 with `monitoring.saved=false`.
+- [x] **P6.26** (M3) Happy path: all cached → `box_found`, `cache_misses=0`, one order_run written.
+- [x] **P6.27** (M3) Cache miss path: extractor called, extraction event + facts upsert written.
+- [x] **P6.28** (M3) `needs_measurement` path. `no_box` path. Unknown order 404.
+- [x] **P6.29** (M3) DB write failure → 200 with `monitoring.saved=false`.
 - [ ] **P6.30** (M3) Simulated outage only when `DEMO_MODE=true`.
-- [ ] **P6.31** (M3) Action route: confirm and edit write the correct rows.
+- [x] **P6.31** (M3) Action route: confirm and edit write the correct rows.
 
 ### 6G. Checkpoint ⛳ (Wed 13:00)
 - [ ] **P6.32** (M3) Deploy to a Vercel preview.
@@ -601,7 +601,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.8** (M3) **M6** Gemini failure rate + breakdown by status.
 - [x] **P8.9** (M3) **M7** cost per order (USD) + cache-hit rate.
 - [x] **P8.10** (M3) Latency time series for the chart (bucketed by hour or by run).
-- [ ] **P8.11** (M3) Recent runs list (last 25) for the table.
+- [x] **P8.11** (M3) Recent runs list (last 25) for the table.
 - [x] **P8.12** (M3) Run trace (`getRunTrace`) for the drill-down view.
 - [x] **P8.13** (M3) Tests: each metric from fixture event arrays.
 - [x] **P8.14** (M3) Tests: below min n → `sufficient=false`. Eval events excluded.
@@ -616,7 +616,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.21** (M3) Min-sample guard per rule.
 - [x] **P8.22** (M3) Dedup: one open alert per rule.
 - [x] **P8.23** (M3) Auto-resolve when the rule evaluates clean.
-- [ ] **P8.24** (M3) Evaluated after each order run (P6.15) and on dashboard load.
+- [x] **P8.24** (M3) Evaluated after each order run (P6.15) and on dashboard load.
 - [x] **P8.25** (M3) Optional webhook POST on open (if `ALERT_WEBHOOK_URL` is set). Skipped for simulated-outage-driven alerts.
 - [x] **P8.26** (M3) Tests: fires at threshold + 1, not at threshold. Dedup. Resolve. Min sample.
 

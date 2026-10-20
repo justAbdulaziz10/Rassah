@@ -53,6 +53,9 @@ lib/
 
 ## API contracts
 
+> **Implemented.** The authoritative response type is `PackResponse` in `lib/pipeline/pack.ts`. The pipeline is framework-free and unit-tested with the in-memory repo. Routes are thin wrappers: `app/api/orders/[id]/pack`, `runs/[runId]/action`, `runs/[runId]/trace`, `products/[id]/facts` (PATCH; DELETE = demo-only clear), `products/[id]/extract` (demo-only), `monitoring/metrics`, `health`.
+> **Local/offline mode:** `DATA_BACKEND=memory` serves the mock store from `data/*.json` in process memory, with no Supabase needed. It is for development and as a demo-day fallback, and it is ignored on Vercel.
+
 ### `POST /api/orders/{id}/pack`
 
 Request body (optional): `{ "simulateOutage": false }` (honored only when `DEMO_MODE=true`).

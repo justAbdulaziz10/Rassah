@@ -64,6 +64,11 @@ export function hasGeminiKey(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim());
 }
 
+/** DATA_BACKEND=memory: local/offline mode backed by data/*.json in process memory. Never on Vercel. */
+export function isLocalBackend(): boolean {
+  return process.env.DATA_BACKEND?.trim() === "memory" && process.env.VERCEL !== "1";
+}
+
 export function hasSupabaseConfig(): boolean {
   return Boolean(process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
 }

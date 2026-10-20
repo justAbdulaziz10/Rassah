@@ -1,27 +1,30 @@
 import { connection } from "next/server";
-import { getRepo } from "@/lib/db/supabase";
-import { appEnv, hasGeminiKey, hasSupabaseConfig } from "@/lib/env";
+import { appEnv, hasGeminiKey, hasSupabaseConfig, isLocalBackend } from "@/lib/env";
+import { repoOrError } from "@/lib/http";
 
 // Reports configuration presence and database reachability. Never returns secret values.
 export async function GET() {
   await connection(); // always evaluate at request time, never prerender
 
-  let supabase: "ok" | "error" | "not_configured" = "not_configured";
-  if (hasSupabaseConfig()) {
+  let database: "ok" | "error" | "not_configured" = "not_configured";
+  if (isLocalBackend() || hasSupabaseConfig()) {
+    const repo = repoOrError();
     try {
-      await getRepo().ping();
-      supabase = "ok";
+      if (repo instanceof Response) throw new Error("unavailable");
+      await repo.ping();
+      database = "ok";
     } catch {
-      supabase = "error";
+      database = "error";
     }
   }
 
   const env = appEnv();
-  const healthy = supabase === "ok" && hasGeminiKey();
+  const healthy = database === "ok" && hasGeminiKey();
   return Response.json(
     {
       app: "ok",
-      supabase,
+      backend: isLocalBackend() ? "memory" : "supabase",
+      database,
       geminiKeyPresent: hasGeminiKey(),
       demoMode: env.DEMO_MODE,
       engineVersion: env.ENGINE_VERSION,
