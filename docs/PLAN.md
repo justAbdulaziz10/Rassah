@@ -2,6 +2,7 @@
 
 > Owner: the whole team (3 members). Last updated: 20 Oct 2026. Demo: Thu 22 Oct 2026 (3-minute pitch + 10-minute Q&A).
 > Every member must be able to explain **every** section of this plan, not only their own part. Judges may ask any member about any component.
+> **Progress is tracked only in [CHECKLIST.md](CHECKLIST.md).** This plan explains the what and why. The checklist tracks what is done.
 
 ---
 

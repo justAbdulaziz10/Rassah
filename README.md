@@ -11,6 +11,7 @@ A packer types an order number. Rassah reads each product's page with an LLM (Ge
 
 | Document | What it covers |
 |---|---|
+| [docs/CHECKLIST.md](docs/CHECKLIST.md) | **Single source of truth for progress**: 517 tasks in 13 phases, gates, credentials register, env matrix, blockers log |
 | [docs/PLAN.md](docs/PLAN.md) | Master plan: problem, MVP scope, architecture, timeline, team ownership, deliverables, risks |
 | [docs/diagrams.md](docs/diagrams.md) | Required diagrams: development flow and monitoring flow, plus the system architecture |
 | [docs/stack/01-nextjs-typescript.md](docs/stack/01-nextjs-typescript.md) | Next.js app: routes, pages, API handlers, folder layout, UI and RTL |
