@@ -44,7 +44,8 @@ export interface PackResponse {
   reason: string | null;
   attempts: CartonAttempt[];
   productsToMeasure: Array<{ productId: string; name: string; failedExtraction: boolean }>;
-  lines: Array<{ productId: string; name: string; qty: number; dimsSource: DataSource }>;
+  /** origin is null when the product has no stored facts. */
+  lines: Array<{ productId: string; name: string; qty: number; dimsSource: DataSource; origin: StoredFacts["origin"] | null }>;
   timings: { extractMs: number; packMs: number; totalMs: number };
   cache: { hits: number; misses: number };
   monitoring: { saved: boolean };
@@ -151,9 +152,10 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
 
       const lines = order.lines.map((l) => ({ productId: l.productId, name: names.get(l.productId) ?? l.productId, qty: l.qty }));
       for (const l of lines) {
-        const src = catalog.facts.get(l.productId)?.dimsSource ?? "unknown";
+        const f = catalog.facts.get(l.productId);
+        const src = f?.dimsSource ?? "unknown";
         run.unitSources[src] += l.qty;
-        response.lines.push({ ...l, dimsSource: src });
+        response.lines.push({ ...l, dimsSource: src, origin: f?.origin ?? null });
       }
       run.itemsCount = lines.reduce((s, l) => s + l.qty, 0);
       run.estimatedUnits = run.unitSources.inferred;

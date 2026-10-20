@@ -58,11 +58,18 @@ async function Catalog() {
     };
   });
   const extracted = rows.filter((r) => r.facts).length;
+  const seeded = rows.filter((r) => r.facts?.origin === "seeded").length;
   return (
     <>
       <p className="text-sm text-muted">
         <span className="ltr-nums">{extracted}</span> من <span className="ltr-nums">{rows.length}</span> منتج لها حقائق محفوظة
       </p>
+      {seeded > 0 && (
+        <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted">
+          وضع بدون اتصال: <span className="ltr-nums">{seeded}</span> منتج حقائقها «بيانات تجريبية» محمّلة مسبقاً من بيانات الاختبار، وليست من
+          الـ AI. لإيقافها: <code className="ltr-nums">MEMORY_SEED_FACTS=false</code>.
+        </p>
+      )}
       <CatalogTable rows={rows} demoMode={appEnv().DEMO_MODE} />
     </>
   );

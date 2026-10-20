@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { DataSource } from "@/lib/engine/types";
-import { fmtDims, fmtTime, fmtWeight, SOURCE_LABEL } from "@/lib/ui/format";
+import { fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_LABEL } from "@/lib/ui/format";
 import { FlagChips, SourceBadge } from "./Badges";
 import FactsForm from "./FactsForm";
 
@@ -29,7 +29,6 @@ export interface CatalogRow {
   } | null;
 }
 
-const ORIGIN_LABEL: Record<string, string> = { ai: "AI", manual: "يدوي", ai_corrected: "AI مصحح" };
 type Filter = "all" | DataSource | "none";
 
 export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; demoMode: boolean }) {

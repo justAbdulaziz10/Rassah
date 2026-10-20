@@ -33,7 +33,7 @@ npm run dev                    # http://localhost:3000
 
 `GET /api/health` reports whether the Gemini key and the database are available. It never returns secret values.
 
-**No Supabase yet?** Put `DATA_BACKEND=memory` (and `DEMO_MODE=true`) in `.env.local`. The app then runs on the mock store from `data/*.json` held in memory. This is local only, ignored on Vercel, and also the offline fallback for demo day. Without a Gemini key, products are reported as "needs measurement" (never guessed), and you can enter measurements manually.
+**No Supabase yet?** Put `DATA_BACKEND=memory` (and `DEMO_MODE=true`) in `.env.local`. The app then runs on the mock store from `data/*.json` held in memory. This is local only, ignored on Vercel, and also the offline fallback for demo day. Without a Gemini key, product facts are pre-loaded from the synthetic test set (`data/ground_truth.json`) and labelled "بيانات تجريبية" (seeded, not AI), so the demo orders pack with no network; group C products still need measurement. Set `MEMORY_SEED_FACTS=false` to turn this off (products are then reported as "needs measurement", never guessed). In this mode `/api/health` answers 200 with `status: "degraded"` and `offline: true`.
 
 > Next.js 16 with Cache Components is used. Read `AGENTS.md` and the docs in `node_modules/next/dist/docs/` before writing pages or routes. Several APIs differ from older Next.js versions.
 

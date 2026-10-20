@@ -16,6 +16,18 @@ export function SourceBadge({ source, title }: { source: DataSource; title?: str
   );
 }
 
+/** Marks facts pre-loaded for the offline demo, so the UI never presents them as AI output. */
+export function SeededBadge() {
+  return (
+    <span
+      title="محمّلة مسبقاً من بيانات الاختبار (وضع بدون اتصال)، ليست من الـ AI"
+      className="ms-1 inline-block rounded border border-dashed border-border px-1.5 py-0.5 text-xs text-muted"
+    >
+      بيانات تجريبية
+    </span>
+  );
+}
+
 export function FlagChips({ fragile, liquid, sensitive }: { fragile: boolean; liquid: boolean; sensitive: boolean }) {
   if (!fragile && !liquid && !sensitive) return <span className="text-xs text-muted">عادي</span>;
   return (

@@ -1,5 +1,6 @@
 // Catalog cache: return stored facts when fresh, extract the rest with Gemini (bounded concurrency).
-// Manual or corrected facts are never overwritten by extraction.
+// Manual or corrected facts are never overwritten by extraction. Offline-seeded facts (memory
+// backend only) count as a cache hit, but an admin re-extract (force) may replace them.
 
 import type { Repo } from "@/lib/db/repo";
 import type { ExtractionEvent, Product, StoredFacts, Trigger } from "@/lib/db/types";
@@ -40,8 +41,13 @@ export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) =>
   return results;
 }
 
+/** Manual and corrected facts are authoritative: extraction never overwrites them. */
+function isAuthoritative(cached: StoredFacts): boolean {
+  return cached.origin === "manual" || cached.origin === "ai_corrected";
+}
+
 function isFresh(cached: StoredFacts, product: Product): boolean {
-  if (cached.origin !== "ai") return true; // manual and corrected facts are authoritative
+  if (cached.origin !== "ai") return true; // manual, corrected and offline-seeded facts don't go stale
   return cached.sourceHash === product.sourceHash; // page text unchanged since extraction
 }
 
@@ -58,7 +64,7 @@ export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogRes
     const product = byId.get(id);
     if (!product) continue;
     const c = cached.get(id);
-    if (c && (c.origin !== "ai" || (!req.force && isFresh(c, product)))) {
+    if (c && (isAuthoritative(c) || (!req.force && isFresh(c, product)))) {
       facts.set(id, c);
       cacheHits++;
     } else {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
 import { fmtDims, fmtMs, fmtNum, fmtSar, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
-import { FlagChips, SourceBadge, StatusPill } from "./Badges";
+import { FlagChips, SeededBadge, SourceBadge, StatusPill } from "./Badges";
 import FactsForm, { type FactsFormValues } from "./FactsForm";
 
 // WebGL needs the browser; show the written instructions while it loads.
@@ -105,6 +105,11 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
             <span className="ltr-nums">{fmtMs(d.timings.totalMs)}</span>
             {!d.monitoring.saved && <span className="ms-2 rounded bg-warn-soft px-1.5 py-0.5 text-warn">المراقبة متعطلة جزئياً</span>}
           </p>
+          {d.lines.some((l) => l.origin === "seeded") && (
+            <p className="mt-1 text-xs text-muted">
+              وضع بدون اتصال: أبعاد المنتجات المعلّمة «بيانات تجريبية» محمّلة مسبقاً من بيانات الاختبار، وليست من الـ AI.
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           <button onClick={pack} className="rounded border border-border px-3 py-1.5 text-sm">
@@ -265,6 +270,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
                     <td>{f ? <FlagChips {...f} /> : "—"}</td>
                     <td>
                       <SourceBadge source={l.dimsSource} />
+                      {l.origin === "seeded" && <SeededBadge />}
                     </td>
                     <td>
                       {f && d.status === "box_found" && (
@@ -281,7 +287,12 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
         </div>
         {editing && itemsByProduct.get(editing) && (
           <div className="mt-3">
-            <p className="mb-2 text-sm font-medium">تصحيح «{itemsByProduct.get(editing)!.name}»: التصحيح يُحسب في مؤشر جودة الـ AI</p>
+            <p className="mb-2 text-sm font-medium">
+              تصحيح «{itemsByProduct.get(editing)!.name}»:{" "}
+              {itemsByProduct.get(editing)!.facts.origin === "seeded"
+                ? "بيانات تجريبية، فالتصحيح ما يُحسب في مؤشر جودة الـ AI"
+                : "التصحيح يُحسب في مؤشر جودة الـ AI"}
+            </p>
             <FactsForm
               mode="edit"
               submitLabel="حفظ التصحيح وإعادة التجهيز"

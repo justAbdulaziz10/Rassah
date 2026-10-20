@@ -26,7 +26,11 @@ export interface OrderWithLines {
   lines: Array<{ productId: string; qty: number }>;
 }
 
-export type FactsOrigin = "ai" | "manual" | "ai_corrected";
+/**
+ * Where stored facts came from. "seeded" = pre-loaded from data/ground_truth.json for the offline
+ * demo (DATA_BACKEND=memory only; never written to Supabase, never counted as AI output).
+ */
+export type FactsOrigin = "ai" | "manual" | "ai_corrected" | "seeded";
 
 export interface StoredFacts extends ProductFacts {
   evidence: string | null;

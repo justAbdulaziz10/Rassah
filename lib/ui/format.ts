@@ -47,6 +47,14 @@ export const SOURCE_LABEL: Record<DataSource, string> = {
   unknown: "غير معروف",
 };
 
+/** Who produced the stored facts. "seeded" = offline-demo data from the test set, never the AI. */
+export const ORIGIN_LABEL: Record<string, string> = {
+  ai: "AI",
+  manual: "يدوي",
+  ai_corrected: "AI مصحح",
+  seeded: "بيانات تجريبية (بدون AI)",
+};
+
 export const STATUS_LABEL: Record<string, string> = {
   box_found: "تم اختيار كرتون",
   no_box: "لا يوجد كرتون مناسب",
