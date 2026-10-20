@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 30 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 38 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 40 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 9 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 28 | 🟨 In progress |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 9 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **290** | |
+| **Total** | | | | **517** | **319** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -640,7 +640,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
 - [ ] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo).
 - [ ] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves.
-- [ ] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
+- [x] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
 
 ### 8E. Investigation story
 - [ ] **P8.45** (M1+M3) Capture a **real** issue found via the dashboard or eval during development (problem → metric → trace → fix → after numbers).
@@ -658,20 +658,20 @@ CI needs **no** secrets because tests never call external services.
 **Owners:** M1 (extraction), M2 (packing) · **Reviewer:** M3 · **Target:** Wed evening · **Gate:** G9 · **Spec:** [stack/07](stack/07-evaluation.md)
 
 ### 9A. Extraction eval (`scripts/eval-extraction.ts`)
-- [ ] **P9.1** (M1, →T17) Bypasses the cache. `trigger='eval'`. Sequential with a small delay (rate limits).
-- [ ] **P9.2** (M1) Compares with ground truth after sorting dims L ≥ W ≥ H.
-- [ ] **P9.3** (M1) Metric: dim accuracy ±1 cm (group A).
-- [ ] **P9.4** (M1) Metric: weight accuracy ±10% (group A).
-- [ ] **P9.5** (M1) Metric: inferred dim MAPE (group B).
-- [ ] **P9.6** (M1) Metric: source correctness (all).
-- [ ] **P9.7** (M1) Metric: honesty rate (group C returned unknown).
-- [ ] **P9.8** (M1) Metric: fragile recall + precision.
-- [ ] **P9.9** (M1) Metric: liquid accuracy. Sensitive accuracy.
-- [ ] **P9.10** (M1) Metric: parse success rate.
-- [ ] **P9.11** (M1) Metric: average latency, tokens, cost per product.
-- [ ] **P9.12** (M1) Holdout metrics reported separately.
-- [ ] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
-- [ ] **P9.14** (M1) Prints a summary table to the console.
+- [x] **P9.1** (M1, →T17) Bypasses the cache. `trigger='eval'`. Sequential with a small delay (rate limits).
+- [x] **P9.2** (M1) Compares with ground truth after sorting dims L ≥ W ≥ H.
+- [x] **P9.3** (M1) Metric: dim accuracy ±1 cm (group A).
+- [x] **P9.4** (M1) Metric: weight accuracy ±10% (group A).
+- [x] **P9.5** (M1) Metric: inferred dim MAPE (group B).
+- [x] **P9.6** (M1) Metric: source correctness (all).
+- [x] **P9.7** (M1) Metric: honesty rate (group C returned unknown).
+- [x] **P9.8** (M1) Metric: fragile recall + precision.
+- [x] **P9.9** (M1) Metric: liquid accuracy. Sensitive accuracy.
+- [x] **P9.10** (M1) Metric: parse success rate.
+- [x] **P9.11** (M1) Metric: average latency, tokens, cost per product.
+- [x] **P9.12** (M1) Holdout metrics reported separately.
+- [x] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
+- [x] **P9.14** (M1) Prints a summary table to the console.
 - [ ] **P9.15** (M1) Run v1 on all 30 products. Results committed.
 
 ### 9B. Prompt iteration (→T20)
@@ -695,11 +695,11 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.29** (M2) Results committed.
 
 ### 9E. Evaluation page (`/evaluation`, →T19)
-- [ ] **P9.30** (M3) Latest extraction run: headline metrics + model + prompt version + date.
-- [ ] **P9.31** (M3) Latest packing run: headline metrics + engine version + date.
-- [ ] **P9.32** (M3) Previous run shown next to the latest for before/after comparison.
-- [ ] **P9.33** (M3) Per-case table (expandable) with pass/fail and details.
-- [ ] **P9.34** (M3) Honesty note on the page: "Synthetic dataset written by the team. See the report."
+- [x] **P9.30** (M3) Latest extraction run: headline metrics + model + prompt version + date.
+- [x] **P9.31** (M3) Latest packing run: headline metrics + engine version + date.
+- [x] **P9.32** (M3) Previous run shown next to the latest for before/after comparison.
+- [x] **P9.33** (M3) Per-case table (expandable) with pass/fail and details.
+- [x] **P9.34** (M3) Honesty note on the page: "Synthetic dataset written by the team. See the report."
 
 ### 9F. Verification
 - [ ] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`.
@@ -712,21 +712,21 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 · **Reviewer:** M2 · **Target:** Wed evening · **Gate:** G10 · **Spec:** [stack/09](stack/09-vercel-ci.md)
 
 ### 10A. Security checklist
-- [ ] **P10.1** (M3) No secret in git history: search the repo for key prefixes and `SERVICE_ROLE`. Nothing found.
-- [ ] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
+- [x] **P10.1** (M3) No secret in git history: search the repo for key prefixes and `SERVICE_ROLE`. Nothing found.
+- [x] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
 - [ ] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
 - [ ] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses.
 - [ ] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production).
-- [ ] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
-- [ ] **P10.7** (M3) Input validation on every route (Zod). Order size cap (≤ 12 units). Numeric ranges.
-- [ ] **P10.8** (M3) Error responses never include stack traces, prompts or keys.
-- [ ] **P10.9** (M3) Product text is treated as data in the prompt (delimited), noted as a prompt-injection consideration in the report.
-- [ ] **P10.10** (M3) No real personal or customer data anywhere (synthetic only).
+- [x] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
+- [x] **P10.7** (M3) Input validation on every route (Zod). Order size cap (≤ 12 units). Numeric ranges.
+- [x] **P10.8** (M3) Error responses never include stack traces, prompts or keys.
+- [x] **P10.9** (M3) Product text is treated as data in the prompt (delimited), noted as a prompt-injection consideration in the report.
+- [x] **P10.10** (M3) No real personal or customer data anywhere (synthetic only).
 
 ### 10B. Abuse and cost protection on the public URL
 - [ ] **P10.11** (M3) Simple per-IP rate limit on the pack route (in-DB counter or a small token bucket), or documented acceptance of the risk for a 2-day demo.
 - [ ] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert).
-- [ ] **P10.13** (M3) Extraction is only triggered for products in the seeded store (no arbitrary text input on the public URL).
+- [x] **P10.13** (M3) Extraction is only triggered for products in the seeded store (no arbitrary text input on the public URL).
 
 ### 10C. Production deployment
 - [ ] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README.
@@ -753,7 +753,7 @@ CI needs **no** secrets because tests never call external services.
 ### 10F. Repository final state
 - [ ] **P10.30** (M3) README complete: description, live URL, screenshots, getting started, scripts, env vars, architecture link, limitations, team.
 - [ ] **P10.31** (M3) All docs links work (no 404s in the GitHub UI).
-- [ ] **P10.32** (M3) No stray TODOs in critical paths (engine, validator, extractor, pack route).
+- [x] **P10.32** (M3) No stray TODOs in critical paths (engine, validator, extractor, pack route).
 - [ ] **P10.33** (M3) Update the dashboard. **Gate G10 check.**
 
 ---
