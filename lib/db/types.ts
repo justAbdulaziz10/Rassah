@@ -90,6 +90,8 @@ export interface OrderRun {
   cacheMisses: number;
   estimatedUnits: number;
   unitSources: Record<DataSource, number>;
+  /** Products whose facts were AI-extracted (origin "ai") when this order was packed. */
+  aiProducts: string[];
   extractMs: number;
   packMs: number;
   totalMs: number;

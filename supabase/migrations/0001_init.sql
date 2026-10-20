@@ -105,6 +105,7 @@ create table if not exists order_runs (
   cache_misses         int,
   estimated_units      int,                   -- units packed with inferred dimensions
   unit_sources         jsonb,                 -- {"page":n,"inferred":n,"manual":n,"unknown":n}
+  ai_products          jsonb,                 -- product ids whose facts were AI-extracted at pack time (M1 denominator)
   extract_ms           int,
   pack_ms              int,
   total_ms             int,

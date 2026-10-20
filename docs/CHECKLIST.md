@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 0 | ⬜ Not started |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 0 | ⬜ Not started |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 0 | ⬜ Not started |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 23 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 0 | ⬜ Not started |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **173** | |
+| **Total** | | | | **517** | **196** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -591,34 +591,34 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 · **Reviewer:** M1 · **Target:** Wed afternoon · **Gate:** G8 · **Spec:** [stack/06](stack/06-monitoring.md)
 
 ### 8A. Metric computation (`lib/monitoring/metrics.ts`)
-- [ ] **P8.1** (M3, →T15) Window filter (`1h|24h|7d|all`) and **exclusion of `trigger='eval'`** applied to every metric.
-- [ ] **P8.2** (M3) Every metric returns `{ value, n, minN, sufficient }`.
-- [ ] **P8.3** (M3) **M1** AI correction rate (per stack/06 formula).
-- [ ] **P8.4** (M3) **M2** data-source mix (units by `dims_source`).
-- [ ] **P8.5** (M3) **M3** validator rejections (sum + breakdown by violation code).
-- [ ] **P8.6** (M3) **M4** no-carton rate + skip-reason breakdown.
-- [ ] **P8.7** (M3) **M5** latency p50/p95, split cached (`cache_misses=0`) vs uncached.
-- [ ] **P8.8** (M3) **M6** Gemini failure rate + breakdown by status.
-- [ ] **P8.9** (M3) **M7** cost per order (USD) + cache-hit rate.
-- [ ] **P8.10** (M3) Latency time series for the chart (bucketed by hour or by run).
+- [x] **P8.1** (M3, →T15) Window filter (`1h|24h|7d|all`) and **exclusion of `trigger='eval'`** applied to every metric.
+- [x] **P8.2** (M3) Every metric returns `{ value, n, minN, sufficient }`.
+- [x] **P8.3** (M3) **M1** AI correction rate (per stack/06 formula).
+- [x] **P8.4** (M3) **M2** data-source mix (units by `dims_source`).
+- [x] **P8.5** (M3) **M3** validator rejections (sum + breakdown by violation code).
+- [x] **P8.6** (M3) **M4** no-carton rate + skip-reason breakdown.
+- [x] **P8.7** (M3) **M5** latency p50/p95, split cached (`cache_misses=0`) vs uncached.
+- [x] **P8.8** (M3) **M6** Gemini failure rate + breakdown by status.
+- [x] **P8.9** (M3) **M7** cost per order (USD) + cache-hit rate.
+- [x] **P8.10** (M3) Latency time series for the chart (bucketed by hour or by run).
 - [ ] **P8.11** (M3) Recent runs list (last 25) for the table.
-- [ ] **P8.12** (M3) Run trace (`getRunTrace`) for the drill-down view.
-- [ ] **P8.13** (M3) Tests: each metric from fixture event arrays.
-- [ ] **P8.14** (M3) Tests: below min n → `sufficient=false`. Eval events excluded.
+- [x] **P8.12** (M3) Run trace (`getRunTrace`) for the drill-down view.
+- [x] **P8.13** (M3) Tests: each metric from fixture event arrays.
+- [x] **P8.14** (M3) Tests: below min n → `sufficient=false`. Eval events excluded.
 
 ### 8B. Alert rules (`lib/monitoring/alerts.ts`)
-- [ ] **P8.15** (M3, →T16) Rule `M3_validator_rejection`: any in 24 h → critical.
-- [ ] **P8.16** (M3) Rule `M6_gemini_failure_rate`: > 10% of the last 20 extraction events → critical.
-- [ ] **P8.17** (M3) Rule `M1_correction_rate`: > 20% over the last 30 AI products → warning.
+- [x] **P8.15** (M3, →T16) Rule `M3_validator_rejection`: any in 24 h → critical.
+- [x] **P8.16** (M3) Rule `M6_gemini_failure_rate`: > 10% of the last 20 extraction events → critical.
+- [x] **P8.17** (M3) Rule `M1_correction_rate`: > 20% over the last 30 AI products → warning.
 - [ ] **P8.18** (M3) Rule `M5_latency_p95`: uncached > 8 s or cached > 2 s over the last 20 runs → warning. **Re-tune the thresholds with the real numbers from P6.35** and record them in `docs/decisions.md`.
-- [ ] **P8.19** (M3) Rule `M4_no_box_rate`: > 15% of the last 20 runs → warning.
-- [ ] **P8.20** (M3) Rule `M2_unknown_share`: > 30% unknown units in 24 h → info.
-- [ ] **P8.21** (M3) Min-sample guard per rule.
-- [ ] **P8.22** (M3) Dedup: one open alert per rule.
-- [ ] **P8.23** (M3) Auto-resolve when the rule evaluates clean.
+- [x] **P8.19** (M3) Rule `M4_no_box_rate`: > 15% of the last 20 runs → warning.
+- [x] **P8.20** (M3) Rule `M2_unknown_share`: > 30% unknown units in 24 h → info.
+- [x] **P8.21** (M3) Min-sample guard per rule.
+- [x] **P8.22** (M3) Dedup: one open alert per rule.
+- [x] **P8.23** (M3) Auto-resolve when the rule evaluates clean.
 - [ ] **P8.24** (M3) Evaluated after each order run (P6.15) and on dashboard load.
-- [ ] **P8.25** (M3) Optional webhook POST on open (if `ALERT_WEBHOOK_URL` is set). Skipped for simulated-outage-driven alerts.
-- [ ] **P8.26** (M3) Tests: fires at threshold + 1, not at threshold. Dedup. Resolve. Min sample.
+- [x] **P8.25** (M3) Optional webhook POST on open (if `ALERT_WEBHOOK_URL` is set). Skipped for simulated-outage-driven alerts.
+- [x] **P8.26** (M3) Tests: fires at threshold + 1, not at threshold. Dedup. Resolve. Min sample.
 
 ### 8C. Dashboard page (`/monitoring`)
 - [ ] **P8.27** (M3) Window selector + visible sample sizes.
