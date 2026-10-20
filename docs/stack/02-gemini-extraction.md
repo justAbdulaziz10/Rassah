@@ -66,7 +66,7 @@ Key rules to include (write the prompt in English. Product text stays in its ori
 6. `fragile = true` for glass, crystal, ceramic, porcelain, mirrors, screens, or when unsure whether the container is glass. *(Missing a fragile item is worse than over-padding.)*
 7. `liquid = true` for any liquid, gel or cream in a container that can leak.
 8. `evidence`: quote the shortest phrase you used, or say what you inferred from.
-9. Order dimensions as length ≥ width ≥ height. Orientation is decided later by the engine.
+9. Return dimensions in the product's **natural upright orientation**: `heightCm` is the vertical side when the product stands as sold (a perfume box 6 × 6 × 15 has `heightCm = 15`). The engine sorts the other sides itself, but it needs the true height so liquids stay upright.
 
 ## Response schema
 

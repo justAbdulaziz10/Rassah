@@ -25,7 +25,7 @@ lib/engine/
 ## 2. From facts to items (`prepare.ts`)
 
 1. Expand quantities: product `p-07` × 2 → units `p-07#1`, `p-07#2`.
-2. Base dims = AI/manual facts sorted `L ≥ W ≥ H`.
+2. Base dims = AI/manual facts sorted `L ≥ W ≥ H`. The fact's `heightCm` (natural upright side) is kept separately as `uprightHeight` for liquids.
 3. **Safety margin** for estimated values: if `dimsSource = "inferred"`, multiply each dimension by `1 + MARGIN_INFERRED` (default **0.15**, justified by the extraction eval error; see Stack 07).
 4. **Protective padding**: if `fragile` or `sensitive`, add `PADDING_CM` (default **1.5 cm**) on every side, so +3 cm per dimension.
 5. Allowed rotations:
@@ -74,7 +74,7 @@ pick candidate with lowest estimated total cost (tie → smallest carton volume)
 1. volume, descending
 2. base area (`L × W`), descending
 3. weight, descending (heavy at the bottom)
-4. height, descending
+4. longest side, descending
 
 `greedyPlace`:
 
@@ -108,7 +108,7 @@ return placed
 - Input: requested units (with effective dims, flags, weights), carton, placements.
 - Output: `{ valid: boolean, violations: Violation[] }` with codes:
   `out_of_bounds`, `overlap`, `overweight`, `floating`, `on_fragile`, `liquid_tipped`, `dim_mismatch` (placed size isn't a rotation of the item), `missing_item`, `duplicate_item`.
-- The API **only shows a layout if `valid = true`**. Any violation on our own engine's output means an engine bug. It is logged (metric M3) and raises a **critical** alert. That carton is then treated as failed.
+- The API **only shows a layout if `valid = true`**. Any violation on our own engine's output means an engine bug. It is counted (`validatorRejections`, metric M3) with its violations, and it raises a **critical** alert. The packer then tries the next strategy for that carton. If none passes, the carton's outcome is `validator_rejected`.
 - The validator also runs on the **naive baseline** during evaluation. That is where it is expected to catch `floating` and `on_fragile` layouts, and it shows why the rules matter.
 
 ## 6. Naive baseline (`baseline.ts`, evaluation only)

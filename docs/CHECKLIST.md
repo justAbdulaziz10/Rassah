@@ -18,10 +18,10 @@
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 28 | 🟨 In progress |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 29 | 🟨 In progress |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 0 | ⬜ Not started |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 0 | ⬜ Not started |
-| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 0 | ⬜ Not started |
+| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 0 | ⬜ Not started |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 0 | ⬜ Not started |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 0 | ⬜ Not started |
@@ -30,7 +30,7 @@
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 0 | ⬜ Not started |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 0 | ⬜ Not started |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **30** | |
+| **Total** | | | | **517** | **83** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -204,7 +204,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 1F. CI
 - [x] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test.
-- [ ] **P1.30** (M3) Open a test PR. CI runs and passes.
+- [x] **P1.30** (M3) Open a test PR. CI runs and passes.
 
 ### 1G. Vercel
 - [ ] **P1.31** (M3) Import the repo into Vercel. Framework detected as Next.js. Node version matches `.nvmrc`.
@@ -323,73 +323,73 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M2 · **Reviewer:** M1 · **Target:** Wed morning · **Gate:** G4 · **Spec:** [stack/03](stack/03-packing-engine.md)
 
 ### 4A. Types and geometry
-- [ ] **P4.1** (M2, →T7) `types.ts`: `ProductFacts`, `Unit`, `Carton`, `Placement`, `Layout`, `PackResult` (statuses: `box_found`, `no_box`, `needs_measurement`), `Violation` (9 codes), `SkipReason`.
-- [ ] **P4.2** (M2) `config.ts`: `MARGIN_INFERRED=0.15`, `PADDING_CM=1.5`, `MIN_SUPPORT=0.70`, `MAX_SEARCH_MS=1500`, `VOLUMETRIC_DIVISOR=5000`, `WALL_CM=0.5`, `EPS=1e-6`, `MAX_UNITS=12`, `ENGINE_VERSION`.
-- [ ] **P4.3** (M2) `geometry.ts`: `rotations(dims, liquid)` deduplicated (6 normal / 2 liquid).
-- [ ] **P4.4** (M2) `geometry.ts`: interval overlap with EPS, box overlap, footprint contact area.
+- [x] **P4.1** (M2, →T7) `types.ts`: `ProductFacts`, `Unit`, `Carton`, `Placement`, `Layout`, `PackResult` (statuses: `box_found`, `no_box`, `needs_measurement`), `Violation` (9 codes), `SkipReason`.
+- [x] **P4.2** (M2) `config.ts`: `MARGIN_INFERRED=0.15`, `PADDING_CM=1.5`, `MIN_SUPPORT=0.70`, `MAX_SEARCH_MS=1500`, `VOLUMETRIC_DIVISOR=5000`, `WALL_CM=0.5`, `EPS=1e-6`, `MAX_UNITS=12`, `ENGINE_VERSION`.
+- [x] **P4.3** (M2) `geometry.ts`: `rotations(dims, liquid)` deduplicated (6 normal / 2 liquid).
+- [x] **P4.4** (M2) `geometry.ts`: interval overlap with EPS, box overlap, footprint contact area.
 
 ### 4B. Validator (build and test FIRST)
-- [ ] **P4.5** (M2) `validator.ts` has **no imports** from `packer.ts` (add a test or lint rule that enforces it).
-- [ ] **P4.6** (M2) Check `out_of_bounds`.
-- [ ] **P4.7** (M2) Check `overlap` (pairwise, separated on at least one axis).
-- [ ] **P4.8** (M2) Check `overweight` (units + carton tare vs max).
-- [ ] **P4.9** (M2) Check `floating` (z = 0 or support ratio ≥ `MIN_SUPPORT`).
-- [ ] **P4.10** (M2) Check `on_fragile` (nothing rests on a fragile item's top face).
-- [ ] **P4.11** (M2) Check `liquid_tipped` (vertical size equals the original height).
-- [ ] **P4.12** (M2) Check `dim_mismatch` (placed size is a permutation of the effective dims, within EPS).
-- [ ] **P4.13** (M2) Check `missing_item` and `duplicate_item`.
-- [ ] **P4.14** (M2) Returns **all** violations (not just the first), each with code + unitId.
-- [ ] **P4.15** (M2) Tests: one failing layout per violation code (9 tests).
-- [ ] **P4.16** (M2) Tests: exact wall contact and item-to-item contact are allowed.
-- [ ] **P4.17** (M2) Tests: 50% support → `floating`. 80% support → valid. Support split across two items below is summed.
+- [x] **P4.5** (M2) `validator.ts` has **no imports** from `packer.ts` (add a test or lint rule that enforces it).
+- [x] **P4.6** (M2) Check `out_of_bounds`.
+- [x] **P4.7** (M2) Check `overlap` (pairwise, separated on at least one axis).
+- [x] **P4.8** (M2) Check `overweight` (units + carton tare vs max).
+- [x] **P4.9** (M2) Check `floating` (z = 0 or support ratio ≥ `MIN_SUPPORT`).
+- [x] **P4.10** (M2) Check `on_fragile` (nothing rests on a fragile item's top face).
+- [x] **P4.11** (M2) Check `liquid_tipped` (vertical size equals the original height).
+- [x] **P4.12** (M2) Check `dim_mismatch` (placed size is a permutation of the effective dims, within EPS).
+- [x] **P4.13** (M2) Check `missing_item` and `duplicate_item`.
+- [x] **P4.14** (M2) Returns **all** violations (not just the first), each with code + unitId.
+- [x] **P4.15** (M2) Tests: one failing layout per violation code (9 tests).
+- [x] **P4.16** (M2) Tests: exact wall contact and item-to-item contact are allowed.
+- [x] **P4.17** (M2) Tests: 50% support → `floating`. 80% support → valid. Support split across two items below is summed.
 
 ### 4C. Preparation
-- [ ] **P4.18** (M2) `prepare.ts`: expand quantities into units (`p-07#1`, `p-07#2`).
-- [ ] **P4.19** (M2) Sort base dims L ≥ W ≥ H.
-- [ ] **P4.20** (M2) Apply `MARGIN_INFERRED` **only** when `dimsSource = "inferred"`.
-- [ ] **P4.21** (M2) Apply padding **only** when fragile or sensitive.
-- [ ] **P4.22** (M2) Any unknown dimension/weight → `needs_measurement` with product ids. The engine is not run.
-- [ ] **P4.23** (M2) More than `MAX_UNITS` → input error (clear message).
-- [ ] **P4.24** (M2) Tests for P4.18–P4.23.
+- [x] **P4.18** (M2) `prepare.ts`: expand quantities into units (`p-07#1`, `p-07#2`).
+- [x] **P4.19** (M2) Sort base dims L ≥ W ≥ H.
+- [x] **P4.20** (M2) Apply `MARGIN_INFERRED` **only** when `dimsSource = "inferred"`.
+- [x] **P4.21** (M2) Apply padding **only** when fragile or sensitive.
+- [x] **P4.22** (M2) Any unknown dimension/weight → `needs_measurement` with product ids. The engine is not run.
+- [x] **P4.23** (M2) More than `MAX_UNITS` → input error (clear message).
+- [x] **P4.24** (M2) Tests for P4.18–P4.23.
 
 ### 4D. Packer
-- [ ] **P4.25** (M2, →T8) Pre-checks per carton: single unit too large in all rotations → skip `oversize`. Total weight → skip `overweight`.
-- [ ] **P4.26** (M2) `greedyPlace` over extreme points with the score (z, y, x).
-- [ ] **P4.27** (M2) Enforces in bounds, no overlap, support, nothing on fragile, liquid rotations.
-- [ ] **P4.28** (M2) Extreme-point generation + dedupe + drop out-of-carton points.
-- [ ] **P4.29** (M2) 4 orderings (volume, base area, weight, height desc), with fragile units always last.
-- [ ] **P4.30** (M2) Cartons tried in cost order. Candidate chosen by lowest estimated total cost, tie → smaller volume.
-- [ ] **P4.31** (M2) Search budget `MAX_SEARCH_MS` enforced. Records `candidatesChecked` and per-carton skip reasons.
-- [ ] **P4.32** (M2) Every candidate layout is passed through the validator. A rejected candidate is counted (`validatorRejections`) with its violations, and that carton is treated as failed.
-- [ ] **P4.33** (M2) `no_box` result carries the reasons per carton and the message "No valid carton found within the search budget".
-- [ ] **P4.34** (M2) Deterministic (no `Math.random`, no time-dependent ordering).
-- [ ] **P4.35** (M2) Tests: smallest valid carton chosen for a simple order.
-- [ ] **P4.36** (M2) Tests: oversize → `no_box` (oversize). Overweight → `no_box` (overweight).
-- [ ] **P4.37** (M2) Tests: fragile item has nothing on top. Liquid stays upright.
-- [ ] **P4.38** (M2) Tests: determinism (same input → deep-equal output).
-- [ ] **P4.39** (M2) **Property test:** 200 seeded random orders → every returned layout passes the validator, and `validatorRejections` is 0.
-- [ ] **P4.40** (M2) Performance test: a 12-unit order completes under `MAX_SEARCH_MS` locally.
+- [x] **P4.25** (M2, →T8) Pre-checks per carton: single unit too large in all rotations → skip `oversize`. Total weight → skip `overweight`.
+- [x] **P4.26** (M2) `greedyPlace` over extreme points with the score (z, y, x).
+- [x] **P4.27** (M2) Enforces in bounds, no overlap, support, nothing on fragile, liquid rotations.
+- [x] **P4.28** (M2) Extreme-point generation + dedupe + drop out-of-carton points.
+- [x] **P4.29** (M2) 4 orderings (volume, base area, weight, longest side; all desc), with fragile units always last.
+- [x] **P4.30** (M2) Cartons tried in cost order. Candidate chosen by lowest estimated total cost, tie → smaller volume.
+- [x] **P4.31** (M2) Search budget `MAX_SEARCH_MS` enforced. Records `candidatesChecked` and per-carton skip reasons.
+- [x] **P4.32** (M2) Every candidate layout is passed through the validator. A rejected candidate is counted (`validatorRejections`) with its violations, the next strategy is tried, and the carton's outcome becomes `validator_rejected` if none passes.
+- [x] **P4.33** (M2) `no_box` result carries the reasons per carton and the message "No valid carton found within the search budget".
+- [x] **P4.34** (M2) Deterministic (no `Math.random`, no time-dependent ordering).
+- [x] **P4.35** (M2) Tests: smallest valid carton chosen for a simple order.
+- [x] **P4.36** (M2) Tests: oversize → `no_box` (oversize). Overweight → `no_box` (overweight).
+- [x] **P4.37** (M2) Tests: fragile item has nothing on top. Liquid stays upright.
+- [x] **P4.38** (M2) Tests: determinism (same input → deep-equal output).
+- [x] **P4.39** (M2) **Property test:** 200 seeded random orders → every returned layout passes the validator, and `validatorRejections` is 0.
+- [x] **P4.40** (M2) Performance test: a 12-unit order completes under `MAX_SEARCH_MS` locally.
 
 ### 4E. Naive baseline (evaluation only)
-- [ ] **P4.41** (M2) `baseline.ts`: volume-desc first-fit over extreme points, 6 rotations, **no** support / fragile / liquid rules, smallest-volume carton first.
-- [ ] **P4.42** (M2) Not imported by any app route (evaluation scripts only).
-- [ ] **P4.43** (M2) Test: on a fixture with a fragile item, the baseline can produce a layout the validator rejects (demonstrates the purpose).
+- [x] **P4.41** (M2) `baseline.ts`: volume-desc first-fit over extreme points, 6 rotations, **no** support / fragile / liquid rules, smallest-volume carton first.
+- [x] **P4.42** (M2) Not imported by any app route (evaluation scripts only).
+- [x] **P4.43** (M2) Test: on a fixture with a fragile item, the baseline can produce a layout the validator rejects (demonstrates the purpose).
 
 ### 4F. Cost model
-- [ ] **P4.44** (M2) `cost.ts`: outer dims, volumetric kg, actual kg (with tare), chargeable kg, shipping, total. All flagged `estimated: true`.
-- [ ] **P4.45** (M2) Tests: volumetric vs actual switch-over. `ceil` rounding at exact kg boundaries.
+- [x] **P4.44** (M2) `cost.ts`: outer dims, volumetric kg, actual kg (with tare), chargeable kg, shipping, total. All flagged `estimated: true`.
+- [x] **P4.45** (M2) Tests: volumetric vs actual switch-over. `ceil` rounding at exact kg boundaries.
 
 ### 4G. Instructions
-- [ ] **P4.46** (M2) `instructions.ar.ts`: Arabic templates (carton line, per-item placement, fragile, liquid, sensitive, estimated warning, void fill).
-- [ ] **P4.47** (M2) `instructions.ts`: steps generated bottom-to-top from the validated layout.
-- [ ] **P4.48** (M2) Tests: the fragile wrap step appears for fragile items. "This side up" appears for liquids. The estimated warning appears only for inferred items.
+- [x] **P4.46** (M2) `instructions.ar.ts`: Arabic templates (carton line, per-item placement, fragile, liquid, sensitive, estimated warning, void fill).
+- [x] **P4.47** (M2) `instructions.ts`: steps generated bottom-to-top from the validated layout.
+- [x] **P4.48** (M2) Tests: the fragile wrap step appears for fragile items. "This side up" appears for liquids. The estimated warning appears only for inferred items.
 
 ### 4H. Public interface and review
-- [ ] **P4.49** (M2) `lib/engine/index.ts` exports a single `packOrder(units, cartons, config) → PackResult` plus `validateLayout`.
-- [ ] **P4.50** (M2) Engine has no imports from `lib/db`, `lib/ai`, Next.js, or any network module.
-- [ ] **P4.51** (M2) Code comments explain the *why* of each rule (for the Q&A walkthrough).
+- [x] **P4.49** (M2) `lib/engine/index.ts` exports a single `packOrder(lines, facts, cartons, rates, config) → result + instructions` plus `validateLayout`.
+- [x] **P4.50** (M2) Engine has no imports from `lib/db`, `lib/ai`, Next.js, or any network module.
+- [x] **P4.51** (M2) Code comments explain the *why* of each rule (for the Q&A walkthrough).
 - [ ] **P4.52** (M1) Review PR: M1 can explain the overlap check, the support ratio and the strategies in their own words.
-- [ ] **P4.53** (M2) Record `MIN_SUPPORT` and `PADDING_CM` assumptions in `docs/decisions.md`.
+- [x] **P4.53** (M2) Record `MIN_SUPPORT` and `PADDING_CM` assumptions in `docs/decisions.md`.
 - [ ] **P4.54** (M2) Update the dashboard. **Gate G4 check.**
 
 ---
