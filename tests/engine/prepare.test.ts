@@ -56,4 +56,16 @@ describe("prepareUnits", () => {
     expect(r.ok).toBe(false);
     expect(!r.ok && r.kind).toBe("invalid_input");
   });
+
+  it("numbers units per product, so two lines of the same product never share an id", () => {
+    const r = prepareUnits(
+      [
+        { productId: "p", name: "p", qty: 2 },
+        { productId: "p", name: "p", qty: 1 },
+      ],
+      new Map([["p", facts("p")]]),
+      CFG,
+    );
+    expect(r.ok && r.units.map((u) => u.unitId)).toEqual(["p#1", "p#2", "p#3"]);
+  });
 });

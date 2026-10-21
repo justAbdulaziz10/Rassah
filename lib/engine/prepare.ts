@@ -40,6 +40,8 @@ export function prepareUnits(
   if (needs.size > 0) return { ok: false, kind: "needs_measurement", productIds: [...needs] };
 
   const units: Unit[] = [];
+  // Numbered per product, not per line, so two lines of the same product never share a unit id.
+  const counts = new Map<string, number>();
   for (const line of lines) {
     const f = facts.get(line.productId)!;
     const estimated = f.dimsSource === "inferred";
@@ -53,7 +55,9 @@ export function prepareUnits(
     const dims = sortDesc([grow(f.lengthCm!), grow(f.widthCm!), upright]);
     const baseDims = sortDesc([f.lengthCm!, f.widthCm!, f.heightCm!]);
 
-    for (let i = 1; i <= line.qty; i++) {
+    for (let k = 0; k < line.qty; k++) {
+      const i = (counts.get(line.productId) ?? 0) + 1;
+      counts.set(line.productId, i);
       units.push({
         unitId: `${line.productId}#${i}`,
         productId: line.productId,

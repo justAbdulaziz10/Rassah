@@ -28,7 +28,7 @@ The packer types an order number. Rassah:
 3. Gates every layout through an **independent validator**, then picks the cheapest valid carton by estimated carton + shipping cost.
 4. Shows the carton, **numbered Arabic packing instructions**, a 3D step-by-step view, estimated cost, and per-product source badges. The packer **confirms or corrects**. Corrections are stored and measured.
 
-If a value has no basis, the order stops with "needs measurement" (the packer measures once). If no carton fits within the search budget, it says so. It never invents a layout.
+If a value has no basis, the order stops with "needs measurement" (the packer measures once). If no single carton fits, it says so and suggests a split into several cartons, each one checked like a normal order. It never invents a layout.
 
 ![Orders list](screens/01-orders.png)
 
@@ -73,7 +73,7 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 152 tests) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 195 tests) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (525 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
 *Figure 2. Development flow as planned (branch → PR → preview → review → merge). The process actually used is the paragraph above and `docs/decisions.md`; the figure was not redrawn.*
@@ -112,6 +112,17 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 | Runtime p50 / p95 | 0.3 / 12.9 ms |
 
 **Evaluation-driven iteration:** recall 3/20 (extreme points) → 9/20 (corner grid + seeded restarts; more restarts gave no gain) → 15/20 ("tight" placement scores, found by diagnosing fixture `feasible-05`) → **20/20** (engine-0.2: backtracking anchor search for the exact fills the greedy passes missed). The 0 SAR saving is by construction (both pick the cheapest fitting carton), not a bug.
+
+**Head-to-head benchmark** (`npm run bench`, protocol in `docs/benchmark.md`, results in `eval/results/bench-2026-10-21.md`, engine-0.3). 278 cases: the 60 fixtures, 18 demo orders with true sizes and 200 seeded random orders. Every engine gets the same units, cartons and prices, and one validator and one cost model judge all of them. The harness also has adapters for two commercial packing APIs (Paccurate, 3DBinPacking); they run as soon as the team adds trial keys, so no vendor numbers are claimed here yet.
+
+| On 258 feasible cases | Rassah | Naive packer |
+|---|---|---|
+| Layouts passing every rule | **100%** (98.8% one box, 1.2% split) | 32.6% |
+| Cost per order where both are valid (n = 84) | **31.35 SAR** | 34.19 SAR (Rassah 8.3% cheaper, never costlier) |
+| One-box-impossible fixtures (20) | 0 false claims, 7 valid splits | 6 invalid one-box layouts |
+| Runtime p50 / p95 | 0.5 / 81 ms | <1 ms |
+
+**Multi-carton split (engine-0.3):** when no single carton fits, Rassah splits the order (first-fit-decreasing by volume and by weight, then tries to empty the last box), and every box goes through the same search, validator and cost model. Demo order 1020 (≈20.5 kg) now gets a 4-carton plan with steps per carton instead of only "no carton fits".
 
 **Extraction** (`eval/results/extraction-2026-10-21-v1.json`, `gemini-3.5-flash-lite`, prompt v1, 30 synthetic products, 30/30 calls ok). Table = run 2 (latest). Two runs were made (same model and prompt): estimated-dim MAPE 14.3% -> 12.9%, holdout 18.2% -> 16.1%, and one fragile false positive in run 2. This is LLM run-to-run variation; the committed file and the /evaluation page show run 2 (latest), run 1 is "previous".
 
@@ -154,11 +165,11 @@ Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI fe
 
 ## 11. Limitations
 
-Synthetic data. Rigid box-shaped products only (no clothing). One carton per order. Illustrative costs. No live Salla/Zid integration. Time-bounded heuristic (not globally optimal, although all 20/20 exact-fill fixtures are found). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
+Synthetic data. Rigid box-shaped products only (no clothing). Multi-carton splits are heuristic (not the cheapest possible split). Illustrative costs. No live Salla/Zid integration. Time-bounded heuristic (not globally optimal, although all 20/20 exact-fill fixtures are found). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
 
 ## 12. Next steps
 
-Pilot with one merchant (100 real orders, packer vs Rassah: carton spend, courier invoices, damage, packing time). Salla/Zid integration. Multi-carton orders. Manufacturer-spec lookup. Scale-weight feedback to catch bad facts. Separate preview/production databases.
+Run the head-to-head benchmark against the commercial APIs with trial keys. Test on real orders (packer vs Rassah: carton spend, courier invoices, damage, packing time). Salla/Zid integration. A smarter multi-carton split. Manufacturer-spec lookup. Scale-weight feedback to catch bad facts. Separate preview/production databases.
 
 ## 13. References
 

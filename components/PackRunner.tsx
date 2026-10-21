@@ -242,7 +242,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
       {d.status === "no_box" && !split && (
         <section className="rounded-lg border border-critical bg-critical-soft/40 p-4">
           <h2 className="font-bold text-critical">لا يوجد كرتون مناسب لهذا الطلب</h2>
-          <p className="mt-1 text-sm">جرّبت رصّة كل الكراتين المتاحة، وهذا سبب استبعاد كل كرتون. ولا ينفع تقسيمه أيضاً: إحدى القطع لا تتّسع وحدها في أي كرتون.</p>
+          <p className="mt-1 text-sm">جرّبت رصّة كل الكراتين المتاحة، وهذا سبب استبعاد كل كرتون. ولم تجد رصّة تقسيماً مناسباً على أكثر من كرتون. تأكد من مقاسات المنتجات وأوزانها، أو قسّم الطلب يدوياً.</p>
           <ul className="mt-2 grid gap-1 text-sm">
             {d.attempts.map((a) => (
               <li key={a.cartonId}>
