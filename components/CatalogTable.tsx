@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import type { DataSource } from "@/lib/engine/types";
 import { fmtApiError, fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_HINT, SOURCE_LABEL } from "@/lib/ui/format";
 import { FlagChips, SourceBadge } from "./Badges";
-import FactsForm from "./FactsForm";
+import FactsForm, { toFormValues } from "./FactsForm";
 import { EmptyState, Notice } from "./PageHeader";
 
 export interface CatalogRow {
@@ -119,15 +119,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
                       <FactsForm
                         mode={r.facts && r.facts.dimsSource !== "unknown" ? "edit" : "measure"}
                         submitLabel="حفظ"
-                        initial={{
-                          lengthCm: r.facts?.lengthCm ?? null,
-                          widthCm: r.facts?.widthCm ?? null,
-                          heightCm: r.facts?.heightCm ?? null,
-                          weightG: r.facts?.weightG ?? null,
-                          fragile: r.facts?.fragile ?? false,
-                          liquid: r.facts?.liquid ?? false,
-                          sensitive: r.facts?.sensitive ?? false,
-                        }}
+                        initial={toFormValues(r.facts)}
                         onSubmit={async (changes) => {
                           const err = await call(r.productId, `/api/products/${r.productId}/facts`, "PATCH", { changes });
                           if (!err) setEditing(null);

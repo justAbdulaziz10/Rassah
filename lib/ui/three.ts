@@ -9,6 +9,18 @@ export interface BoxPlacement {
   dz: number;
 }
 
+/** One placed unit as the carton views draw it (3D view, 2D top view, landing hero). */
+export interface ViewItem {
+  unitId: string;
+  name?: string;
+  fragile: boolean;
+  liquid: boolean;
+  sensitive: boolean;
+  /** Size is a guess: drawn see-through. */
+  estimated: boolean;
+  placement: BoxPlacement;
+}
+
 /** Engine (x, y, z) with z up → three.js (x, y, z) with y up, centred on the carton floor. */
 export function toThreePosition(p: BoxPlacement, inner: readonly [number, number, number]): [number, number, number] {
   const [L, W] = inner;

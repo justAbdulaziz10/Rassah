@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AR } from "@/lib/engine/instructions.ar";
-import { fmtAiSar, fmtApiError, fmtCartons, fmtClock, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime } from "@/lib/ui/format";
+import { fmtAiSar, fmtApiError, fmtCartons, fmtClock, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime, pluralForm } from "@/lib/ui/format";
 
 const LRI = "⁦";
 const PDI = "⁩";
@@ -14,6 +14,21 @@ describe("Arabic count agreement", () => {
     expect(fmtPieces(11)).toBe(`${LRI}11${PDI} قطعة`);
     expect(fmtPieces(0)).toBe(`${LRI}0${PDI} قطع`);
     expect(fmtCount(25, { one: "منتج", two: "منتجان", few: "منتجات", many: "منتجاً" })).toBe(`${LRI}25${PDI} منتجاً`);
+  });
+
+  it("pluralForm picks the same word fmtCount always used, and the orders page's waiting label", () => {
+    const forms = { one: "طلب ينتظر", two: "طلبان ينتظران", few: "طلبات تنتظر", many: "طلباً ينتظر" };
+    // The form choice fmtCount made before pluralForm existed.
+    const before = (n: number) => {
+      const abs = Math.abs(n);
+      if (abs === 1) return forms.one;
+      if (abs === 2) return forms.two;
+      if (abs >= 3 && abs <= 10) return `${LRI}${n}${PDI} ${forms.few}`;
+      if (abs >= 11) return `${LRI}${n}${PDI} ${forms.many}`;
+      return `${LRI}${n}${PDI} ${forms.few}`;
+    };
+    for (const n of [0, 1, 2, 3, 7, 10, 10.5, 11, 12, 99, 100, 101, 1000, 2.5, -1, -2, -5, -11]) expect(fmtCount(n, forms)).toBe(before(n));
+    expect([0, 1, 2, 3, 10, 11, 25].map((n) => pluralForm(n, forms))).toEqual([forms.few, forms.one, forms.two, forms.few, forms.few, forms.many, forms.many]);
   });
 });
 

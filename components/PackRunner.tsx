@@ -8,7 +8,7 @@ import { fmtApiError, fmtCartons, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight
 import { useQueue } from "@/lib/ui/queue-store";
 import { FlagChips, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
-import FactsForm, { type FactsFormValues } from "./FactsForm";
+import FactsForm, { toFormValues, type FactsFormValues } from "./FactsForm";
 import Safe3D from "./Safe3D";
 import TopView2D from "./TopView2D";
 
@@ -19,7 +19,6 @@ const PackingView3D = dynamic(() => import("./PackingView3D"), {
 });
 
 type State = { kind: "loading" } | { kind: "done"; data: PackResponse } | { kind: "failed"; message: string };
-
 
 async function postJson(url: string, body: unknown, method = "POST") {
   const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -83,6 +82,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
   const viewItems = toViewItems(d.items);
   const itemsByProduct = new Map<string, PackItemView>();
   for (const it of d.items) if (!itemsByProduct.has(it.productId)) itemsByProduct.set(it.productId, it);
+  const editItem = editing ? itemsByProduct.get(editing) : undefined;
 
   async function saveFacts(productId: string, changes: Partial<FactsFormValues>, viaRun: boolean) {
     const res = viaRun
@@ -125,7 +125,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
             {split ? (
               <span className="whitespace-nowrap rounded bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn">على أكثر من كرتون</span>
             ) : (
-              <StatusPill status={d.status} label={STATUS_LABEL[d.status] ?? d.status} />
+              <StatusPill status={d.status} />
             )}
           </div>
           {customerName && <p className="mt-0.5 text-sm text-muted">العميل: {customerName}</p>}
@@ -138,14 +138,14 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
             </>
           )}
           {d.carton && (
-            <p className="mt-2 text-3xl font-bold text-brand">
-              كرتون {d.carton.name} <span className="text-lg font-normal text-muted">{fmtDims(d.carton.innerCm)}</span>
-            </p>
-          )}
-          {d.carton && (
-            <p className="mt-1 text-sm text-muted">
-              {fmtPieces(d.items.length)} · الكرتون الأوفر الذي يتّسع للطلب بأمان
-            </p>
+            <>
+              <p className="mt-2 text-3xl font-bold text-brand">
+                كرتون {d.carton.name} <span className="text-lg font-normal text-muted">{fmtDims(d.carton.innerCm)}</span>
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {fmtPieces(d.items.length)} · الكرتون الأوفر الذي يتّسع للطلب بأمان
+              </p>
+            </>
           )}
           {packedBefore && !confirmed && (
             <p className="mt-2 text-sm text-ok">✓ غُلّف هذا الطلب {packedBefore.at ? fmtTime(packedBefore.at) : "من قبل"}. الخطوات أدناه للمراجعة فقط.</p>
@@ -345,24 +345,16 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
               </tbody>
             </table>
           </div>
-          {editing && itemsByProduct.get(editing) && (
+          {editing && editItem && (
             <div className="mt-3">
               <p className="mb-2 text-sm font-medium">
-                تصحيح «{itemsByProduct.get(editing)!.name}»: يُحفظ تصحيحك ويُستخدم في كل الطلبات القادمة.
+                تصحيح «{editItem.name}»: يُحفظ تصحيحك ويُستخدم في كل الطلبات القادمة.
               </p>
               <FactsForm
                 key={editing}
                 mode="edit"
                 submitLabel="احفظ التصحيح وأعد الحساب"
-                initial={{
-                  lengthCm: itemsByProduct.get(editing)!.facts.lengthCm,
-                  widthCm: itemsByProduct.get(editing)!.facts.widthCm,
-                  heightCm: itemsByProduct.get(editing)!.facts.heightCm,
-                  weightG: itemsByProduct.get(editing)!.facts.weightG,
-                  fragile: itemsByProduct.get(editing)!.facts.fragile,
-                  liquid: itemsByProduct.get(editing)!.facts.liquid,
-                  sensitive: itemsByProduct.get(editing)!.facts.sensitive,
-                }}
+                initial={toFormValues(editItem.facts)}
                 onSubmit={(c) => saveFacts(editing, c, true)}
                 onCancel={() => setEditing(null)}
               />

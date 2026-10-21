@@ -23,22 +23,37 @@ export function fmtDims(d: ReadonlyArray<number | null> | null | undefined): str
   return `${ltr(d.map((x) => fmtNum(x)).join(" × "))} سم`;
 }
 
+export interface PluralForms {
+  one: string;
+  two: string;
+  few: string;
+  many: string;
+}
+
 /**
  * Arabic count agreement: 1 and 2 use the singular and dual forms,
  * 3-10 the plural, 11+ the singular accusative (11 قطعة), 0 the plural form ("0 قطع").
  */
-export function fmtCount(n: number, forms: { one: string; two: string; few: string; many: string }): string {
+export function pluralForm(n: number, forms: PluralForms): string {
   const abs = Math.abs(n);
   if (abs === 1) return forms.one;
   if (abs === 2) return forms.two;
-  if (abs >= 3 && abs <= 10) return `${ltr(String(n))} ${forms.few}`;
-  if (abs >= 11) return `${ltr(String(n))} ${forms.many}`;
-  return `${ltr(String(n))} ${forms.few}`;
+  if (abs >= 11) return forms.many;
+  return forms.few;
 }
+
+/** The count with its agreeing word; 1 and 2 are said by the word alone ("قطعة واحدة", "قطعتان"). */
+export function fmtCount(n: number, forms: PluralForms): string {
+  const abs = Math.abs(n);
+  const word = pluralForm(n, forms);
+  return abs === 1 || abs === 2 ? word : `${ltr(String(n))} ${word}`;
+}
+
+const PIECES: PluralForms = { one: "قطعة واحدة", two: "قطعتان", few: "قطع", many: "قطعة" };
 
 /** 1 قطعة، 2 قطعتان، 3-10 قطع، 11+ قطعة. */
 export function fmtPieces(n: number): string {
-  return fmtCount(n, { one: "قطعة واحدة", two: "قطعتان", few: "قطع", many: "قطعة" });
+  return fmtCount(n, PIECES);
 }
 
 /** For "قسّمته على …": 2 كرتونين، 3-10 كراتين، 11+ كرتوناً. */

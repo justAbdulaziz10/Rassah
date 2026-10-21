@@ -4,16 +4,9 @@ import { ContactShadows, Edges, OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Mesh } from "three";
-import { cartonThreeSize, itemKind, KIND_COLOR, toThreePosition, toThreeSize, type BoxPlacement } from "@/lib/ui/three";
+import { cartonThreeSize, itemKind, KIND_COLOR, toThreePosition, toThreeSize, type ViewItem } from "@/lib/ui/three";
 
-export interface HeroItem {
-  unitId: string;
-  fragile: boolean;
-  liquid: boolean;
-  sensitive: boolean;
-  estimated: boolean;
-  placement: BoxPlacement;
-}
+export type HeroItem = ViewItem;
 
 interface Props {
   inner: [number, number, number];

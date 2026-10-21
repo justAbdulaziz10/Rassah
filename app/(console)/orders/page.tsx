@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { FlagChip, FLAGS } from "@/components/Badges";
 import { AlertIcon, ArrowForwardIcon, CheckIcon, PackageCheckIcon } from "@/components/Icons";
 import OrderLookup from "@/components/OrderLookup";
 import { EmptyState, Notice, PageHeader, QueueSkeleton } from "@/components/PageHeader";
@@ -9,7 +10,7 @@ import { repoOrError } from "@/lib/http";
 import { FILTERS, parseFilter, REASON_LABEL, STATE_LABEL, STATE_STYLE, type FilterKey } from "@/lib/orders/labels";
 import { loadQueue, type QueueSnapshot } from "@/lib/orders/load";
 import type { QueueEntry } from "@/lib/orders/queue";
-import { fmtCount, fmtPieces, fmtTime } from "@/lib/ui/format";
+import { fmtCount, fmtPieces, fmtTime, pluralForm, type PluralForms } from "@/lib/ui/format";
 
 export const metadata: Metadata = { title: "الطلبات" };
 
@@ -79,7 +80,7 @@ async function Queue({ searchParams }: Pick<PageProps<"/orders">, "searchParams"
             <p className="flex items-baseline gap-2.5 text-lg">
               <span className="ltr-nums font-display text-5xl font-bold leading-none text-brand">{counts.remaining}</span>
               <span>
-                {waitingLabel(counts.remaining)} التغليف
+                {pluralForm(counts.remaining, WAITING)} التغليف
                 <span className="block text-sm text-muted">من أصل {fmtCount(counts.total, { one: "طلب واحد", two: "طلبين", few: "طلبات", many: "طلباً" })}</span>
               </span>
             </p>
@@ -162,9 +163,6 @@ function OrderCard({ entry, snap }: { entry: QueueEntry; snap: QueueSnapshot }) 
   const { order, state, reason } = entry;
   const names = order.productIds.map((id) => snap.products.get(id)?.name ?? id);
   const flags = order.productIds.map((id) => snap.flags.get(id));
-  const fragile = flags.some((f) => f?.fragile);
-  const liquid = flags.some((f) => f?.liquid);
-  const sensitive = flags.some((f) => f?.sensitive);
   const attention = state === "attention";
   const done = state === "done";
 
@@ -204,9 +202,9 @@ function OrderCard({ entry, snap }: { entry: QueueEntry; snap: QueueSnapshot }) 
 
       <div className="mt-auto flex flex-wrap items-center gap-1.5 border-t border-border/70 pt-3 text-xs text-muted">
         <span>{fmtPieces(order.unitCount)}</span>
-        {fragile && <span className="rounded bg-fragile-soft px-1.5 py-0.5 font-medium text-fragile">قابل للكسر</span>}
-        {liquid && <span className="rounded bg-liquid-soft px-1.5 py-0.5 font-medium text-liquid">سائل</span>}
-        {sensitive && <span className="rounded bg-sensitive-soft px-1.5 py-0.5 font-medium text-sensitive">حساس</span>}
+        {FLAGS.filter((f) => flags.some((x) => x?.[f])).map((f) => (
+          <FlagChip key={f} flag={f} inRow />
+        ))}
         {done && entry.confirmedAt && <span className="ms-auto">غُلّف {fmtTime(entry.confirmedAt)}</span>}
         {!done && (
           <span className="ms-auto inline-flex items-center gap-1 text-sm font-bold text-brand">
@@ -220,10 +218,4 @@ function OrderCard({ entry, snap }: { entry: QueueEntry; snap: QueueSnapshot }) 
 }
 
 /** Label after the big number: 1 طلب ينتظر، 2 طلبان ينتظران، 3-10 طلبات تنتظر، 11+ طلباً ينتظر. */
-function waitingLabel(n: number): string {
-  if (n === 0) return "طلبات تنتظر";
-  if (n === 1) return "طلب ينتظر";
-  if (n === 2) return "طلبان ينتظران";
-  if (n >= 3 && n <= 10) return "طلبات تنتظر";
-  return "طلباً ينتظر";
-}
+const WAITING: PluralForms = { one: "طلب ينتظر", two: "طلبان ينتظران", few: "طلبات تنتظر", many: "طلباً ينتظر" };

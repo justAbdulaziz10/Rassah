@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FLAG_LABEL, FLAGS } from "./Badges";
 
 export interface FactsFormValues {
   lengthCm: number | null;
@@ -10,6 +11,19 @@ export interface FactsFormValues {
   fragile: boolean;
   liquid: boolean;
   sensitive: boolean;
+}
+
+/** Form values from stored facts; a product with no facts yet starts empty. */
+export function toFormValues(facts: Partial<FactsFormValues> | null | undefined): FactsFormValues {
+  return {
+    lengthCm: facts?.lengthCm ?? null,
+    widthCm: facts?.widthCm ?? null,
+    heightCm: facts?.heightCm ?? null,
+    weightG: facts?.weightG ?? null,
+    fragile: facts?.fragile ?? false,
+    liquid: facts?.liquid ?? false,
+    sensitive: facts?.sensitive ?? false,
+  };
 }
 
 interface Props {
@@ -50,7 +64,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
     if (mode === "edit" && (["lengthCm", "widthCm", "heightCm"] as const).some((k) => k in changes)) {
       for (const k of ["lengthCm", "widthCm", "heightCm"] as const) if (values[k] !== null) changes[k] = values[k];
     }
-    for (const k of ["fragile", "liquid", "sensitive"] as const) {
+    for (const k of FLAGS) {
       if (values[k] !== initial[k]) changes[k] = values[k];
     }
     if (Object.keys(changes).length === 0) {
@@ -89,16 +103,10 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
         ))}
       </div>
       <div className="flex flex-wrap gap-x-5 gap-y-2">
-        {(
-          [
-            ["fragile", "قابل للكسر"],
-            ["liquid", "سائل"],
-            ["sensitive", "حساس"],
-          ] as const
-        ).map(([k, label]) => (
+        {FLAGS.map((k) => (
           <label key={k} className="flex items-center gap-2 py-1">
             <input type="checkbox" className="size-4 accent-[var(--brand)]" checked={values[k]} onChange={(e) => setValues({ ...values, [k]: e.target.checked })} />
-            {label}
+            {FLAG_LABEL[k]}
           </label>
         ))}
       </div>

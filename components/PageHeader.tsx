@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertIcon, CheckIcon, InfoIcon } from "./Icons";
+import { AlertIcon, CheckIcon } from "./Icons";
 
 /** Page title with a one-line explanation of what the page is for. Shared by the console pages. `actions` sits beside the title (wraps below it on phones). */
 export function PageHeader({ title, children, actions }: { title: string; children?: ReactNode; actions?: ReactNode }) {
@@ -29,17 +29,18 @@ export function EmptyState({ title, children, tone = "neutral" }: { title: strin
   );
 }
 
-/** A notice that explains a problem and what to do about it. Colour is never the only signal: each tone has its icon. */
-export function Notice({ tone, children }: { tone: "warn" | "critical" | "info"; children: ReactNode }) {
-  const style = {
-    warn: "border-warn bg-warn-soft",
-    critical: "border-critical bg-critical-soft",
-    info: "border-info bg-info-soft",
-  }[tone];
-  const Icon = tone === "info" ? InfoIcon : AlertIcon;
+/** Border and background per tone, shared by notices and the monitoring page's alerts. */
+export const TONE_STYLE = {
+  warn: "border-warn bg-warn-soft",
+  critical: "border-critical bg-critical-soft",
+  info: "border-info bg-info-soft",
+} as const;
+
+/** A notice that explains a problem and what to do about it. Colour is never the only signal: the icon says it too. */
+export function Notice({ tone, children }: { tone: "warn" | "critical"; children: ReactNode }) {
   return (
-    <div role={tone === "info" ? "note" : "alert"} className={`flex items-start gap-3 rounded-xl border p-4 text-sm leading-6 ${style}`}>
-      <Icon className="mt-0.5 size-5 shrink-0" />
+    <div role="alert" className={`flex items-start gap-3 rounded-xl border p-4 text-sm leading-6 ${TONE_STYLE[tone]}`}>
+      <AlertIcon className="mt-0.5 size-5 shrink-0" />
       <div>{children}</div>
     </div>
   );

@@ -13,32 +13,32 @@ import {
   fmtCount,
   fmtMs,
   fmtPct,
+  fmtPieces,
   fmtTime,
   ltr,
   ORIGIN_LABEL,
   OUTCOME_LABEL,
+  type PluralForms,
   SOURCE_HINT,
   SOURCE_LABEL,
   STATUS_LABEL,
 } from "@/lib/ui/format";
-import { StatusPill } from "./Badges";
+import { FLAG_LABEL, StatusPill } from "./Badges";
 import { AlertIcon, CheckIcon, InfoIcon } from "./Icons";
-import { DashboardSkeleton, EmptyState, Notice } from "./PageHeader";
+import { DashboardSkeleton, EmptyState, Notice, TONE_STYLE } from "./PageHeader";
 
 const FIELD_LABEL: Record<string, string> = {
   length_cm: "الطول",
   width_cm: "العرض",
   height_cm: "الارتفاع",
   weight_g: "الوزن",
-  fragile: "قابل للكسر",
-  liquid: "سائل",
-  sensitive: "حساس",
+  ...FLAG_LABEL,
 };
 const EMPLOYEE_ACTION: Record<string, string> = { pending: "لم يراجع بعد", confirmed: "أكّد التغليف", edited: "صحّح البيانات" };
-const ORDERS = { one: "طلب واحد", two: "طلبان", few: "طلبات", many: "طلباً" };
-const READS = { one: "قراءة واحدة", two: "قراءتان", few: "قراءات", many: "قراءة" };
-const PRODUCTS = { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجاً" };
-const PIECES = { one: "قطعة واحدة", two: "قطعتان", few: "قطع", many: "قطعة" };
+const ORDERS: PluralForms = { one: "طلب واحد", two: "طلبان", few: "طلبات", many: "طلباً" };
+const READS: PluralForms = { one: "قراءة واحدة", two: "قراءتان", few: "قراءات", many: "قراءة" };
+const PRODUCTS: PluralForms = { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجاً" };
+const SIGNALS: PluralForms = { one: "مؤشر واحد", two: "مؤشران", few: "مؤشرات", many: "مؤشراً" };
 const REFRESH_SECONDS = 15;
 
 type Win = DashboardData["window"];
@@ -57,7 +57,8 @@ interface Trace {
   run: OrderRun;
   extractions: ExtractionEvent[];
   corrections: Correction[];
-  names?: Record<string, string>;
+  /** Product names by id; the trace route always sends them. */
+  names: Record<string, string>;
 }
 
 export default function MonitoringDashboard({ initialRun }: { initialRun: string | null }) {
@@ -125,6 +126,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
   // Only the selected run's trace is shown; undefined while it is still loading.
   const shownTrace = trace && trace.id === traceId ? trace.data : undefined;
   const toggleRun = (id: string) => setTraceId((cur) => (cur === id ? null : id));
+  const checks = checkLimits(data);
 
   return (
     <div className={`space-y-6 transition-opacity ${refreshing ? "opacity-70" : ""}`}>
@@ -171,15 +173,15 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
       {error && <Notice tone="warn">تعذّر تحديث الأرقام ({fmtApiError(error)}). المعروض هو آخر تحديث ناجح.</Notice>}
 
-      <Health data={data} />
-      <Numbers data={data} />
+      <Health data={data} checks={checks} />
+      <Numbers data={data} checks={checks} />
 
       <section className="grid gap-4 lg:grid-cols-2">
         <LatencyCard data={data} />
         <CorrectionsCard data={data} />
-        <SourcesCard data={data} />
-        <FailuresCard data={data} />
-        <OutcomesCard data={data} />
+        <SourcesCard data={data} checks={checks} />
+        <FailuresCard data={data} checks={checks} />
+        <OutcomesCard data={data} checks={checks} />
         <div className="grid content-start gap-4">
           <ValidatorCard data={data} />
           <CacheCard data={data} />
@@ -214,19 +216,40 @@ interface Signal {
   action?: { href: string; label: string };
 }
 
-function signals(d: DashboardData): Signal[] {
+/**
+ * Every "over the limit" check, judged once for the health list, the tiles and the cards.
+ * A metric with too few cases is never over its limit.
+ */
+function checkLimits(d: DashboardData) {
+  const m = d.metrics;
+  const t = d.targets;
+  const above = (sufficient: boolean, value: number | null, limit: number) => sufficient && (value ?? 0) > limit;
+  const { cached, uncached } = m.m5Latency;
+  const reads = m.m6GeminiFailureRate;
+  return {
+    reads: above(reads.sufficient, reads.value, t.failureRate),
+    accuracy: above(m.m1CorrectionRate.sufficient, m.m1CorrectionRate.value, t.correctionRate),
+    slowCached: above(cached.sufficient, cached.value.p95, t.cachedP95Ms),
+    slowNew: above(uncached.sufficient, uncached.value.p95, t.uncachedP95Ms),
+    cartons: above(m.m4NoBoxRate.sufficient, m.m4NoBoxRate.value, t.noBoxRate),
+    measures: above(m.m2SourceMix.sufficient, m.m2SourceMix.unknownShare, t.unknownShare),
+    /** Product page reads that did not succeed (M6). */
+    failedReads: reads.n - (reads.byStatus.ok ?? 0),
+  };
+}
+
+type Checks = ReturnType<typeof checkLimits>;
+
+function signals(d: DashboardData, c: Checks): Signal[] {
   const m = d.metrics;
   const t = d.targets;
   const few = (n: number, minN: number, what: string) => `تكفي ${ltr(String(minN))} ${what} للحكم، والمتوفر ${ltr(String(n))}`;
   const judge = (sufficient: boolean, over: boolean): Verdict => (!sufficient ? "few" : over ? "over" : "ok");
 
   const reads = m.m6GeminiFailureRate;
-  const failed = reads.n - (reads.byStatus.ok ?? 0);
   const m1 = m.m1CorrectionRate;
   const cached = m.m5Latency.cached;
   const uncached = m.m5Latency.uncached;
-  const slowCached = cached.sufficient && (cached.value.p95 ?? 0) > t.cachedP95Ms;
-  const slowNew = uncached.sufficient && (uncached.value.p95 ?? 0) > t.uncachedP95Ms;
   const m4 = m.m4NoBoxRate;
   const m3 = m.m3ValidatorRejections;
   const m2 = m.m2SourceMix;
@@ -235,11 +258,11 @@ function signals(d: DashboardData): Signal[] {
     {
       key: "reads",
       title: "قراءة صفحات المنتجات الجديدة",
-      verdict: judge(reads.sufficient, (reads.value ?? 0) > t.failureRate),
+      verdict: judge(reads.sufficient, c.reads),
       result:
         reads.n === 0
           ? "لم تحتج رصّة إلى قراءة أي صفحة جديدة في هذه الفترة."
-          : `القراءات الفاشلة: ${ltr(String(failed))} من أصل ${fmtCount(reads.n, READS)} (${fmtPct(reads.value)}).`,
+          : `القراءات الفاشلة: ${ltr(String(c.failedReads))} من أصل ${fmtCount(reads.n, READS)} (${fmtPct(reads.value)}).`,
       limit: `الحدّ ${fmtPct(t.failureRate)}`,
       few: few(reads.n, reads.minN, "قراءات"),
       action: { href: "/catalog", label: "افتح المنتجات" },
@@ -247,7 +270,7 @@ function signals(d: DashboardData): Signal[] {
     {
       key: "accuracy",
       title: "دقة القراءة",
-      verdict: judge(m1.sufficient, (m1.value ?? 0) > t.correctionRate),
+      verdict: judge(m1.sufficient, c.accuracy),
       result:
         m1.reviewed === 0
           ? "لم يؤكّد الموظف بعد أي طلب فيه منتج قرأته رصّة."
@@ -259,7 +282,7 @@ function signals(d: DashboardData): Signal[] {
     {
       key: "speed",
       title: "سرعة التجهيز",
-      verdict: judge(cached.sufficient || uncached.sufficient, slowCached || slowNew),
+      verdict: judge(cached.sufficient || uncached.sufficient, c.slowCached || c.slowNew),
       result:
         cached.n + uncached.n === 0
           ? "لم يُجهَّز أي طلب في هذه الفترة."
@@ -275,7 +298,7 @@ function signals(d: DashboardData): Signal[] {
     {
       key: "cartons",
       title: "إيجاد كرتون واحد للطلب",
-      verdict: judge(m4.sufficient, (m4.value ?? 0) > t.noBoxRate),
+      verdict: judge(m4.sufficient, c.cartons),
       result:
         m4.n === 0
           ? "لم يصل أي طلب إلى اختيار الكرتون في هذه الفترة."
@@ -297,11 +320,11 @@ function signals(d: DashboardData): Signal[] {
     {
       key: "measures",
       title: "مقاسات المنتجات",
-      verdict: judge(m2.sufficient, (m2.unknownShare ?? 0) > t.unknownShare),
+      verdict: judge(m2.sufficient, c.measures),
       result:
         m2.n === 0
           ? "لا توجد قطع في هذه الفترة."
-          : `${ltr(String(m2.value.unknown))} من ${fmtCount(m2.n, PIECES)} بلا مقاس معروف (${fmtPct(m2.unknownShare)}) وتحتاج قياساً.`,
+          : `${ltr(String(m2.value.unknown))} من ${fmtPieces(m2.n)} بلا مقاس معروف (${fmtPct(m2.unknownShare)}) وتحتاج قياساً.`,
       limit: `الحدّ ${fmtPct(t.unknownShare)}`,
       few: few(m2.n, m2.minN, "قطع"),
       action: { href: "/catalog", label: "افتح المنتجات" },
@@ -315,8 +338,8 @@ const VERDICT = {
   few: { label: "بيانات قليلة", cls: "bg-border/50 text-muted", Icon: InfoIcon },
 } as const;
 
-function Health({ data }: { data: DashboardData }) {
-  const rows = signals(data);
+function Health({ data, checks }: { data: DashboardData; checks: Checks }) {
+  const rows = signals(data, checks);
   const over = rows.filter((r) => r.verdict === "over").length;
   const alerts = data.alerts.length;
   const few = rows.filter((r) => r.verdict === "few").length;
@@ -329,8 +352,8 @@ function Health({ data }: { data: DashboardData }) {
           {good
             ? few === 0
               ? "كل شيء يعمل كما يجب"
-              : `لا شيء فوق الحدّ · ${fmtCount(few, { one: "مؤشر واحد", two: "مؤشران", few: "مؤشرات", many: "مؤشراً" })} بلا بيانات كافية بعد`
-            : [alerts ? `${fmtCount(alerts, { one: "تنبيه مفتوح", two: "تنبيهان مفتوحان", few: "تنبيهات مفتوحة", many: "تنبيهاً مفتوحاً" })}` : null, over ? `${fmtCount(over, { one: "مؤشر واحد", two: "مؤشران", few: "مؤشرات", many: "مؤشراً" })} فوق الحدّ` : null]
+              : `لا شيء فوق الحدّ · ${fmtCount(few, SIGNALS)} بلا بيانات كافية بعد`
+            : [alerts ? `${fmtCount(alerts, { one: "تنبيه مفتوح", two: "تنبيهان مفتوحان", few: "تنبيهات مفتوحة", many: "تنبيهاً مفتوحاً" })}` : null, over ? `${fmtCount(over, SIGNALS)} فوق الحدّ` : null]
                 .filter(Boolean)
                 .join(" · ")}
         </h2>
@@ -376,18 +399,22 @@ function Health({ data }: { data: DashboardData }) {
   );
 }
 
+const SEVERITY = {
+  critical: { label: "تنبيه حرج", style: TONE_STYLE.critical },
+  warning: { label: "تحذير", style: TONE_STYLE.warn },
+  info: { label: "للعلم", style: TONE_STYLE.info },
+} as const;
+
 function Alerts({ alerts }: { alerts: DashboardData["alerts"] }) {
-  const style = { critical: "border-critical bg-critical-soft", warning: "border-warn bg-warn-soft", info: "border-info bg-info-soft" };
-  const label = { critical: "تنبيه حرج", warning: "تحذير", info: "للعلم" };
   return (
     <div className="space-y-2 border-b border-border px-4 py-3 sm:px-5" role="alert">
       {alerts.map((a) => {
         const Icon = a.severity === "info" ? InfoIcon : AlertIcon;
         return (
-          <div key={a.id ?? a.rule} className={`rounded-xl border p-3 text-sm ${style[a.severity]}`}>
+          <div key={a.id ?? a.rule} className={`rounded-xl border p-3 text-sm ${SEVERITY[a.severity].style}`}>
             <p className="flex items-center gap-2 font-bold">
               <Icon className="size-4" />
-              {label[a.severity]}
+              {SEVERITY[a.severity].label}
               {a.simulated && <span className="text-xs font-normal text-muted">(محاكاة عطل، لا يُرسل إشعار)</span>}
             </p>
             <p className="mt-1 leading-6">{a.message}</p>
@@ -410,7 +437,7 @@ function alertNumber(rule: string, v: number): string {
 
 /* --------------------------------------------------------------- numbers */
 
-function Numbers({ data }: { data: DashboardData }) {
+function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
   const m = data.metrics;
   const t = data.targets;
   const m1 = m.m1CorrectionRate;
@@ -418,7 +445,6 @@ function Numbers({ data }: { data: DashboardData }) {
   const cached = m.m5Latency.cached;
   const uncached = m.m5Latency.uncached;
   const cost = m.m7Cost;
-  const failed = m6.n - (m6.byStatus.ok ?? 0);
   return (
     <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="الأرقام الرئيسية">
       <Tile
@@ -428,7 +454,7 @@ function Numbers({ data }: { data: DashboardData }) {
         n={m1.n}
         minN={m1.minN}
         sufficient={m1.sufficient}
-        over={m1.sufficient && (m1.value ?? 0) > t.correctionRate}
+        over={checks.accuracy}
         limit={`الحدّ المسموح ${fmtPct(t.correctionRate)}`}
         detail={m1.reviewed > 0 ? `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, PRODUCTS)} راجعها` : "لم يراجع الموظف أي منتج قرأته رصّة بعد"}
         hint="من المنتجات التي قرأتها رصّة وراجعها الموظف، كم منها احتاج إلى تصحيح؟ كلما قلّت النسبة كانت القراءة أدق."
@@ -440,9 +466,9 @@ function Numbers({ data }: { data: DashboardData }) {
         n={m6.n}
         minN={m6.minN}
         sufficient={m6.sufficient}
-        over={m6.sufficient && (m6.value ?? 0) > t.failureRate}
+        over={checks.reads}
         limit={`الحدّ المسموح ${fmtPct(t.failureRate)}`}
-        detail={m6.n > 0 ? `فشلت ${ltr(String(failed))} من ${fmtCount(m6.n, READS)}` : "لم تحتج رصّة إلى قراءة أي منتج جديد"}
+        detail={m6.n > 0 ? `فشلت ${ltr(String(checks.failedReads))} من ${fmtCount(m6.n, READS)}` : "لم تحتج رصّة إلى قراءة أي منتج جديد"}
         hint="إذا ارتفعت النسبة فقد تتعطل قراءة المنتجات الجديدة، وسيلزم قياسها يدوياً. الأسباب في بطاقة «أسباب فشل قراءة المنتجات»."
       />
       <Tile
@@ -450,8 +476,8 @@ function Numbers({ data }: { data: DashboardData }) {
         title="سرعة تجهيز الطلب"
         value={
           <span className="grid grid-cols-2 gap-3">
-            <SpeedValue label="منتجاته معروفة" ms={cached.value.p95} n={cached.n} over={cached.sufficient && (cached.value.p95 ?? 0) > t.cachedP95Ms} />
-            <SpeedValue label="فيه منتج جديد" ms={uncached.value.p95} n={uncached.n} over={uncached.sufficient && (uncached.value.p95 ?? 0) > t.uncachedP95Ms} />
+            <SpeedValue label="منتجاته معروفة" ms={cached.value.p95} n={cached.n} over={checks.slowCached} />
+            <SpeedValue label="فيه منتج جديد" ms={uncached.value.p95} n={uncached.n} over={checks.slowNew} />
           </span>
         }
         n={cached.n + uncached.n}
@@ -640,17 +666,11 @@ function LatencyCard({ data }: { data: DashboardData }) {
         <>
           <p className="mb-1 text-xs text-muted">المدة {unit}</p>
           <div className="h-60">
-            <LatencyChart points={points} top={top} limit={limit} showLimit={showLimit} tip={<LatencyTip />} />
+            <LatencyChart points={points} top={top} limit={limit} showLimit={showLimit} tip={<ChartTip body={latencyTip} />} />
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm bg-[var(--series-1)]" aria-hidden />
-              منتجاته معروفة مسبقاً
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm bg-[var(--series-2)]" aria-hidden />
-              فيه منتجات جديدة
-            </span>
+            <Swatch series={1}>منتجاته معروفة مسبقاً</Swatch>
+            <Swatch series={2}>فيه منتجات جديدة</Swatch>
             {showLimit && (
               <span className="flex items-center gap-1.5">
                 <span className="w-4 border-t-2 border-dashed border-critical" aria-hidden />
@@ -669,7 +689,18 @@ function LatencyCard({ data }: { data: DashboardData }) {
   );
 }
 
-function LatencyTip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { ms: number; cached: boolean; order: string; at: string } }> }) {
+/** Chart legend entry: the series colour, then its meaning. */
+function Swatch({ series, children }: { series: 1 | 2; children: React.ReactNode }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className={`size-2.5 rounded-sm ${series === 1 ? "bg-[var(--series-1)]" : "bg-[var(--series-2)]"}`} aria-hidden />
+      {children}
+    </span>
+  );
+}
+
+/** Tooltip of both bar charts: the order, what its bar shows (`body`), then the time. recharts passes `active` and `payload`. */
+function ChartTip<P>({ active, payload, body }: { active?: boolean; payload?: Array<{ payload: P & { order: string; at: string } }>; body: (p: P) => React.ReactNode }) {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
@@ -677,11 +708,17 @@ function LatencyTip({ active, payload }: { active?: boolean; payload?: Array<{ p
       <p className="font-bold">
         الطلب <span className="ltr-nums">#{p.order}</span>
       </p>
-      <p>
-        {fmtMs(p.ms)} · {p.cached ? "منتجاته معروفة مسبقاً" : "فيه منتجات جديدة"}
-      </p>
+      {body(p)}
       <p className="text-muted">الساعة {fmtClock(p.at)}</p>
     </div>
+  );
+}
+
+function latencyTip(p: { ms: number; cached: boolean }) {
+  return (
+    <p>
+      {fmtMs(p.ms)} · {p.cached ? "منتجاته معروفة مسبقاً" : "فيه منتجات جديدة"}
+    </p>
   );
 }
 
@@ -702,17 +739,11 @@ function CorrectionsCard({ data }: { data: DashboardData }) {
         <>
           <p className="mb-1 text-xs text-muted">عدد المنتجات في الطلب</p>
           <div className="h-60">
-            <CorrectionsChart points={points} tip={<CorrectionTip />} />
+            <CorrectionsChart points={points} tip={<ChartTip body={correctionTip} />} />
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm bg-[var(--series-1)]" aria-hidden />
-              قرأتها رصّة صحيحة
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2.5 rounded-sm bg-[var(--series-2)]" aria-hidden />
-              صحّحها الموظف
-            </span>
+            <Swatch series={1}>قرأتها رصّة صحيحة</Swatch>
+            <Swatch series={2}>صحّحها الموظف</Swatch>
             <span className="ms-auto">
               النسبة {fmtPct(m1.value)} · الحدّ {fmtPct(data.targets.correctionRate)}
             </span>
@@ -732,26 +763,20 @@ function CorrectionsCard({ data }: { data: DashboardData }) {
   );
 }
 
-function CorrectionTip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { ok: number; fixed: number; order: string; at: string; fields: string[] } }> }) {
-  if (!active || !payload?.length) return null;
-  const p = payload[0].payload;
+function correctionTip(p: { ok: number; fixed: number; fields: string[] }) {
   return (
-    <div dir="rtl" className="rounded-lg border border-border bg-surface px-3 py-2 text-xs shadow-sm">
-      <p className="font-bold">
-        الطلب <span className="ltr-nums">#{p.order}</span>
-      </p>
+    <>
       <p>
         {p.fixed === 0 ? `${fmtCount(p.ok + p.fixed, PRODUCTS)}، لم يُصحَّح شيء` : `صحّح الموظف ${ltr(String(p.fixed))} من ${fmtCount(p.ok + p.fixed, PRODUCTS)}`}
       </p>
       {p.fields.length > 0 && <p>{p.fields.map((f) => FIELD_LABEL[f] ?? f).join("، ")}</p>}
-      <p className="text-muted">الساعة {fmtClock(p.at)}</p>
-    </div>
+    </>
   );
 }
 
-function SourcesCard({ data }: { data: DashboardData }) {
+function SourcesCard({ data, checks }: { data: DashboardData; checks: Checks }) {
   const mix = data.metrics.m2SourceMix;
-  const over = mix.sufficient && (mix.unknownShare ?? 0) > data.targets.unknownShare;
+  const over = checks.measures;
   const rows = (["page", "inferred", "manual", "unknown"] as const).map((k) => ({ key: k, label: SOURCE_LABEL[k], value: mix.value[k], note: SOURCE_HINT[k] }));
   return (
     <Card
@@ -786,10 +811,10 @@ const FAILURE_NOTE: Record<string, string> = {
   empty: "ردّت الخدمة بلا محتوى",
 };
 
-function FailuresCard({ data }: { data: DashboardData }) {
+function FailuresCard({ data, checks }: { data: DashboardData; checks: Checks }) {
   const m6 = data.metrics.m6GeminiFailureRate;
   const ok = m6.byStatus.ok ?? 0;
-  const failed = m6.n - ok;
+  const failed = checks.failedReads;
   const rows = Object.entries(m6.byStatus)
     .filter(([s]) => s !== "ok")
     .sort((a, b) => b[1] - a[1])
@@ -852,13 +877,13 @@ const SKIP_NOTE: Record<string, string> = {
   validator_rejected: "وُجد ترتيب لكن المدقّق رفضه",
 };
 
-function OutcomesCard({ data }: { data: DashboardData }) {
+function OutcomesCard({ data, checks }: { data: DashboardData; checks: Checks }) {
   const m4 = data.metrics.m4NoBoxRate;
   const o = data.outcomes;
-  const over = m4.sufficient && (m4.value ?? 0) > data.targets.noBoxRate;
+  const over = checks.cartons;
   const rows = (["box_found", "no_box", "needs_measurement", "error"] as const).map((s) => ({ key: s, label: OUTCOME_SHORT[s], value: o[s], note: OUTCOME_NOTE[s] }));
+  // Only no-box runs are counted, and those never skip a carton as "not_needed" (that needs a cheaper carton that fits).
   const skips = Object.entries(m4.skipReasons)
-    .filter(([k]) => k !== "not_needed")
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({ key: k, label: OUTCOME_LABEL[k] ?? k, value: v, note: SKIP_NOTE[k] }));
   return (
@@ -995,7 +1020,7 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                   <Link href={`/orders/${r.orderId}`} className="ltr-nums font-bold hover:text-brand">
                     #{r.orderId}
                   </Link>
-                  <StatusPill status={r.status} label={STATUS_LABEL[r.status] ?? r.status} />
+                  <StatusPill status={r.status} />
                   <span className="ms-auto text-xs text-muted" title={fmtTime(r.createdAt)}>
                     {fmtClock(r.createdAt)}
                   </span>
@@ -1049,7 +1074,7 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                       </Link>
                     </td>
                     <td>
-                      <StatusPill status={r.status} label={STATUS_LABEL[r.status] ?? r.status} />
+                      <StatusPill status={r.status} />
                     </td>
                     <td>{r.cartonId ?? "—"}</td>
                     <td className="whitespace-nowrap">{fmtMs(r.totalMs)}</td>
@@ -1111,7 +1136,7 @@ function TraceSlot({ trace }: { trace: Trace | null | undefined }) {
 
 function TraceView({ trace }: { trace: Trace }) {
   const r = trace.run;
-  const name = (id: string) => trace.names?.[id] ?? id;
+  const name = (id: string) => trace.names[id] ?? id;
   return (
     <div className="space-y-4 text-sm">
       <h3 className="font-bold">

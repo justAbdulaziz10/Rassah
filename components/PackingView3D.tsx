@@ -3,22 +3,13 @@
 import { Edges, Html, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useId, useMemo, useState } from "react";
+import { FLAG_LABEL, FLAGS } from "@/components/Badges";
 import { ArrowBackIcon, ArrowForwardIcon } from "@/components/Icons";
-import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, type BoxPlacement } from "@/lib/ui/three";
-
-interface View3DItem {
-  unitId: string;
-  name: string;
-  fragile: boolean;
-  liquid: boolean;
-  sensitive: boolean;
-  estimated: boolean;
-  placement: BoxPlacement;
-}
+import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, type ViewItem } from "@/lib/ui/three";
 
 interface Props {
   inner: [number, number, number];
-  items: View3DItem[];
+  items: Array<ViewItem & { name: string }>;
 }
 
 export default function PackingView3D({ inner, items }: Props) {
@@ -119,9 +110,9 @@ export default function PackingView3D({ inner, items }: Props) {
         </span>
         {current && <span className="basis-full text-muted sm:basis-auto">القطعة الحالية: {current.name}</span>}
         <span className="ms-auto flex flex-wrap gap-3 text-xs text-muted">
-          <Legend color={KIND_COLOR.fragile} label="قابل للكسر" />
-          <Legend color={KIND_COLOR.liquid} label="سائل" />
-          <Legend color={KIND_COLOR.sensitive} label="حساس" />
+          {FLAGS.map((f) => (
+            <Legend key={f} color={KIND_COLOR[f]} label={FLAG_LABEL[f]} />
+          ))}
           <Legend color={KIND_COLOR.plain} label="عادي" />
           <span>الشفاف: مقاس تقديري</span>
         </span>

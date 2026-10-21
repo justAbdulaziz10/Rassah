@@ -1,17 +1,9 @@
-import { itemKind, KIND_COLOR, topViewRects, type BoxPlacement } from "@/lib/ui/three";
+import { itemKind, KIND_COLOR, topViewRects, type ViewItem } from "@/lib/ui/three";
 
 interface Props {
   /** Carton inner L, W, H in cm (engine order). */
   inner: [number, number, number];
-  items: Array<{
-    unitId: string;
-    name?: string;
-    fragile: boolean;
-    liquid: boolean;
-    sensitive: boolean;
-    estimated: boolean;
-    placement: BoxPlacement;
-  }>;
+  items: ViewItem[];
   /** "deep" sits on the landing page's dark teal; "light" on the console surface. */
   tone?: "light" | "deep";
 }
