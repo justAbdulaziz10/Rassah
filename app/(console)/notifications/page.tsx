@@ -134,9 +134,9 @@ function Row({ entry, snap, tone, detail, action }: { entry: QueueEntry; snap: Q
         }`}
       >
         <span className="ltr-nums font-bold">#{entry.order.id}</span>
-        <span className="min-w-0 flex-1 truncate text-sm">{names.join("، ")}</span>
+        <span className="order-last w-full min-w-0 truncate text-sm sm:order-none sm:w-auto sm:flex-1">{names.join("، ")}</span>
         <span className={`text-sm ${critical ? "font-bold text-critical" : "text-muted"}`}>{detail}</span>
-        <span className="text-sm font-bold text-brand">{action} ←</span>
+        <span className="ms-auto text-sm font-bold text-brand sm:ms-0">{action} ←</span>
       </Link>
     </li>
   );
