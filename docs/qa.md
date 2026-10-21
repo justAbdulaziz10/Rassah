@@ -33,7 +33,7 @@ See `docs/report/TOOLS.md`. Claude generated most code drafts and the synthetic 
 Cached products keep working. Uncached ones fail visibly ("needs measurement", marked "extraction failed"), the event is logged with its status, and M6 crosses 10% → critical alert (+ webhook for real outages). The packer can measure manually.
 
 **11. Why Supabase, Vercel, TypeScript?**
-Vercel was a team decision (previews per PR). TypeScript gives one language for UI, API and engine on Vercel. Supabase because serverless functions have no persistent disk, and we need durable events for monitoring. Trade-off: the team is stronger in Python, which we mitigated with cross-reviews and code walkthroughs.
+Vercel was a team decision (native Next.js hosting; per-PR previews were planned but we ended up deploying production from `main`, with only one preview check). TypeScript gives one language for UI, API and engine on Vercel. Supabase because serverless functions have no persistent disk, and we need durable events for monitoring. Trade-off: the team is stronger in Python, which we mitigated with cross-reviews and code walkthroughs.
 
 **12. What's next after the camp?**
 Pilot with one merchant (real catalog, 100 orders, packer vs Rassah), Salla/Zid integration, multi-carton orders, manufacturer-spec lookup for branded products, scale-weight feedback to catch bad facts.

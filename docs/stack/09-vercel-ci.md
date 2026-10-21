@@ -7,8 +7,8 @@
 | Environment | Trigger | URL | Database | Purpose |
 |---|---|---|---|---|
 | Local | `npm run dev` | localhost:3000 | Supabase (same project, or a second dev project if time allows) | Development |
-| **Preview** | Every push to a PR branch | unique `*.vercel.app` per PR | Supabase | Review on a live URL before merge |
-| **Production** | Merge to `main` | project domain | Supabase | Demo URL |
+| **Preview** | Every push to a PR branch (planned; not used in the workflow as built: only PR #1, a PR template, got a preview, used once for a check on 2026-10-21) | unique `*.vercel.app` per PR | Supabase | Review on a live URL before merge (plan) |
+| **Production** | Push to `main` (as built: straight from the local CI gate) | project domain | Supabase | Demo URL |
 
 > With one Supabase project, preview and production share data. Tag traffic so it can be filtered: set `VERCEL_ENV` (provided by Vercel) into each event as `env` if time allows, or reseed and clear events before the demo (`scripts/reset-events.ts`). Simplest safe choice for 2 days: one project, plus clearing events the morning of the demo.
 
@@ -52,7 +52,7 @@ jobs:
 
 - CI needs **no secrets**. Tests never call Gemini or Supabase (Stack 08).
 - Add `.nvmrc` with the Node LTS version so local, CI and Vercel match.
-- Branch protection on `main` (GitHub → Settings → Branches): require the `CI / check` status and 1 approving review. Turn it on right after Phase 0 so the scaffold commit isn't blocked.
+- Branch protection on `main` (GitHub → Settings → Branches): require the `CI / check` status and 1 approving review. **Plan only: this was not enabled.** As built, the gate was local (`agent-ship ci`) before pushing straight to `main`, with GitHub Actions CI re-running after the push (`docs/decisions.md`, 2026-10-21).
 
 ## Release and demo checklist
 

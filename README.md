@@ -6,6 +6,8 @@ A packer types an order number. Rassah reads each product's page with an LLM (Ge
 
 **Live:** https://rassah.vercel.app
 
+**Pages:** `/` is now a landing page (its hero replays a real engine result for order 1016); the working screens are `/orders`, `/catalog`, `/monitoring` and `/evaluation`.
+
 > Status: **MVP live**. Repository: https://github.com/justAbdulaziz10/Rassah. The implementation follows [`docs/PLAN.md`](docs/PLAN.md).
 > Built for *Project 1: AI Product Development and Monitoring* (Tuwaiq Academy × Startupbootcamp × Meta). Demo day: **Thursday 22 October 2026**.
 
@@ -92,7 +94,7 @@ Copy `.env.example` to `.env.local`. Never commit real values; server-only varia
 | [docs/stack/06-monitoring.md](docs/stack/06-monitoring.md) | Events, the seven metrics, alert rules, dashboard, fault injection |
 | [docs/stack/07-evaluation.md](docs/stack/07-evaluation.md) | Offline evaluation: datasets, metrics, scripts, how results reach the report |
 | [docs/stack/08-testing-quality.md](docs/stack/08-testing-quality.md) | Vitest, ESLint, TypeScript strict mode, the test list |
-| [docs/stack/09-vercel-ci.md](docs/stack/09-vercel-ci.md) | Vercel deployment, environment variables, GitHub Actions CI, branch workflow |
+| [docs/stack/09-vercel-ci.md](docs/stack/09-vercel-ci.md) | Vercel deployment, environment variables, GitHub Actions CI, planned vs. as-built workflow |
 
 ## Tech stack at a glance
 

@@ -17,7 +17,7 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 | Next.js 16 (App Router, Cache Components) + TypeScript strict | UI + API in one deployable project | Vercel-native, one language. Streamlit cannot run on Vercel. |
 | Tailwind CSS 4 | RTL-friendly styling with logical utilities | Fast, consistent tokens for light/dark |
 | Supabase (Postgres) | Mock store, AI catalog cache, monitoring events, eval results | Serverless functions have no durable disk, so SQLite would lose data |
-| Vercel | Hosting, preview deployment per PR | Team decision. Previews strengthen the review workflow. |
+| Vercel | Hosting, production deploy from `main` | Team decision. Per-PR previews were planned but not used (one preview check on 2026-10-21); see `docs/decisions.md`. |
 | GitHub + GitHub Actions | Version control, CI (lint, typecheck, data validation, tests) | Required handoff. Free CI for public repos. |
 | Vitest | Unit, property and pipeline tests | Fast, native TS/ESM |
 | Zod 4 | Validating env vars, API input, data files, model output | One schema library for every trust boundary |

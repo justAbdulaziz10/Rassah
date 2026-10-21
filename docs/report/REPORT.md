@@ -21,6 +21,8 @@ Merchants who ship multi-item orders choose cartons by eye. Three things go wron
 
 ## 2. Solution and user flow
 
+`/` is now a landing page (its hero replays a real engine result for order 1016); the working screens are `/orders`, `/catalog`, `/monitoring` and `/evaluation`.
+
 The packer types an order number. Rassah:
 
 1. Loads the order's products. For each product not already cached, **Gemini reads the product page** and returns outer-package dimensions, weight, fragile / liquid / sensitive flags, where each value came from (*page*, *inferred*, *unknown*), confidence, and an evidence quote.
@@ -73,10 +75,10 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 152 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 152 tests) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
-*Figure 2. Development flow: branch → CI + Vercel preview → review → main → production → monitoring → issue.*
+*Figure 2. Development flow as planned (branch → PR → preview → review → merge). The process actually used is the paragraph above and `docs/decisions.md`; the figure was not redrawn.*
 
 ## 7. Selected metrics (monitoring)
 

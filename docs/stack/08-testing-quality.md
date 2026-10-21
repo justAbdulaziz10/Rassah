@@ -48,7 +48,7 @@
 | `lib/monitoring/*` | Metric and alert functions on fixture event arrays | No |
 | Route handlers | Pipeline test with fake extractor + in-memory fake DB adapter (`lib/db` behind a small interface) | No |
 | Real Gemini | **Only** via `npm run eval:extraction` (costs tokens, not in CI) | Yes |
-| UI | Manual check on the Vercel preview for 3 fixture orders before merging UI PRs | — |
+| UI | Manual check of 3 fixture orders on the running app before pushing UI changes (plan: on the Vercel preview; in practice only one preview check was done, see `docs/decisions.md` 2026-10-21) | — |
 
 **Test list (minimum).** Each must exist before the demo:
 
@@ -79,8 +79,9 @@ Monitoring (M3):
 
 - Branch names: `feat/<lane>-<short>`, `fix/<short>`, `docs/<short>`, `eval/<short>`.
 - Commit messages: imperative, scoped, e.g. `engine: enforce support ratio in validator`.
-- PR description: what changed, how it was tested, screenshots for UI, and eval before/after numbers for prompt or engine changes.
-- **No PR merges with a red CI check.** No direct pushes to `main` after Phase 0.
+- Commit/PR description: what changed, how it was tested, screenshots for UI, and eval before/after numbers for prompt or engine changes.
+- **Plan:** no PR merges with a red CI check, no direct pushes to `main` after Phase 0.
+- **As built (2026-10-21, `docs/decisions.md`):** agents worked in git worktrees, work was merged locally, and the local CI gate (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) had to pass before pushing straight to `main`. GitHub Actions CI then re-ran, and a red CI was the stop signal. There was no per-PR review and no branch protection.
 - Code comments explain *why* (e.g. why fragile items go last), not *what*.
 - Keep engine functions small and named after the rule they enforce (`checkSupport`, `checkNothingOnFragile`). This makes the Q&A walkthrough easy.
 
