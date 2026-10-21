@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AR } from "@/lib/engine/instructions.ar";
-import { fmtApiError, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime } from "@/lib/ui/format";
+import { fmtApiError, fmtCartons, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime } from "@/lib/ui/format";
 
 const LRI = "⁦";
 const PDI = "⁩";
@@ -49,5 +49,13 @@ describe("dates and errors", () => {
     expect(fmtApiError("Could not reach the store's orders API: store API answered HTTP 502")).toContain("المتجر");
     expect(fmtApiError("Products not in Rassah's catalog yet: p-99")).toContain("غير مضافة");
     expect(fmtApiError("Run not found")).toBe("عملية التجهيز غير موجودة.");
+  });
+});
+
+describe("fmtCartons", () => {
+  it("uses the Arabic dual and plural", () => {
+    expect(fmtCartons(1)).toBe("كرتون واحد");
+    expect(fmtCartons(2)).toBe("كرتونين");
+    expect(fmtCartons(3)).toBe("⁦3⁩ كراتين");
   });
 });

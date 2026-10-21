@@ -20,6 +20,7 @@ export const STATE_STYLE: Record<QueueState, string> = {
 export const REASON_LABEL: Record<AttentionReason, string> = {
   needs_measurement: "أحد منتجاته يحتاج قياساً قبل التغليف",
   no_box: "لا يوجد كرتون مناسب لهذا الطلب",
+  split: "لا يتّسع في كرتون واحد، افتحه لترى تقسيمه على أكثر من كرتون",
   error: "تعذّر تجهيز الطلب، افتحه وأعد المحاولة",
 };
 

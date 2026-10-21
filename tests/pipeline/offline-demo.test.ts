@@ -78,8 +78,15 @@ describe("offline demo pack (memory backend, no Gemini key)", () => {
     expect(r1002.items.find((i) => i.productId === "p-16")).toMatchObject({ marginApplied: true, facts: { origin: "seeded", dimsSource: "inferred" } });
     expect(r1002.lines.every((l) => l.origin === "seeded")).toBe(true);
 
+    // Too heavy for any one carton: still no_box, with a split suggestion that covers every unit once.
     const r1020 = await pack(repo, "1020");
     expect(r1020.status).toBe("no_box");
+    expect(r1020.split).not.toBeNull();
+    const units = r1020.split!.boxes.flatMap((b) => b.items.map((i) => i.unitId));
+    expect(new Set(units).size).toBe(units.length);
+    expect(units.length).toBe(r1020.lines.reduce((s, l) => s + l.qty, 0));
+    expect(r1020.split!.boxes.every((b) => b.instructions.length > 0 && b.cost.totalSar > 0)).toBe(true);
+    expect(repo.orderRuns.at(-1)!.strategy).toBe(`split_${r1020.split!.boxes.length}`);
 
     // Nothing was attributed to the AI and Gemini was never called.
     expect(repo.orderRuns.every((run) => run.aiProducts.length === 0 && run.tokensTotal === 0)).toBe(true);

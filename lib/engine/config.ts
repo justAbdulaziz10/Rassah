@@ -4,8 +4,9 @@
  * Default engine version stamped into order events and eval runs (env ENGINE_VERSION overrides).
  * Bump it whenever packing behavior changes, so results stay comparable across versions.
  * engine-0.2: backtracking anchor search after the greedy passes (docs/stack/03 §4).
+ * engine-0.3: when no single carton fits, a validated split into several cartons (split.ts).
  */
-export const ENGINE_VERSION = "engine-0.2";
+export const ENGINE_VERSION = "engine-0.3";
 
 export const ENGINE_CONFIG = {
   /** Safety margin on inferred dimensions. Set from the extraction eval error (docs/stack/07). */

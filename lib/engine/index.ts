@@ -4,6 +4,7 @@ import { ENGINE_CONFIG, type EngineConfig } from "./config";
 import { buildInstructions, type InstructionStep } from "./instructions";
 import { packUnits } from "./packer";
 import { prepareUnits } from "./prepare";
+import { splitPack, type SplitPlan } from "./split";
 import type { Carton, OrderLine, PackResult, ProductFacts, ShippingRates } from "./types";
 
 export { ENGINE_CONFIG, ENGINE_VERSION } from "./config";
@@ -14,10 +15,12 @@ export { buildInstructions } from "./instructions";
 export type { InstructionStep } from "./instructions";
 export { prepareUnits } from "./prepare";
 export { packUnits } from "./packer";
+export { splitPack } from "./split";
+export type { SplitBox, SplitPlan } from "./split";
 export * from "./types";
 
 export type PackOrderResult =
-  | (PackResult & { instructions?: InstructionStep[] })
+  | (PackResult & { instructions?: InstructionStep[]; split?: SplitPlan | null })
   | { status: "invalid_input"; message: string };
 
 /** Facts + order lines + cartons → validated carton choice, layout and instructions. */
@@ -36,7 +39,8 @@ export function packOrder(
       : { status: "invalid_input", message: prepared.message };
   }
   const result = packUnits(prepared.units, cartons, { config, rates, now });
-  if (result.status !== "box_found") return result;
+  // No single carton fits: suggest the cheapest split into several cartons, each one validated.
+  if (result.status !== "box_found") return { ...result, split: splitPack(prepared.units, cartons, { config, rates, now }) };
   return {
     ...result,
     instructions: buildInstructions(result.carton, result.placements, result.units, config.paddingCm),

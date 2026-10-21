@@ -7,6 +7,7 @@
 | | Paccurate | 3DBinPacking | Rassah |
 |---|---|---|---|
 | Mixed carton catalog with prices | yes | yes | yes |
+| Split into several boxes when one is not enough | yes | yes | yes (each box checked by the validator) |
 | Dimensional-weight shipping in the choice | yes (we pass it in the carton price) | yes (same) | yes |
 | Liquids stay upright | yes (`lock-orientation`) | partly (`vr` = no turning) | yes |
 | Nothing on top of fragile items | yes (`fragile` + `onTopOnly`) | no rule available | yes |
@@ -45,10 +46,12 @@ Sources: Paccurate API types (npm `paccurate` 2.4.2, docs.paccurate.io), 3DBinPa
 
 ## Results so far (no vendor keys yet: Rassah vs a naive packer)
 
-From `eval/results/bench-2026-10-21.md`, 258 feasible cases:
+From `eval/results/bench-2026-10-21.md` (engine-0.3), 258 feasible cases:
 
-- **Valid layouts:** Rassah 98.4%, naive packer 32.6%. The naive packer breaks the rules on most orders (liquid tipped 117, item on a fragile one 79, item without support 20).
+- **Valid layouts:** Rassah 100% (98.8% in one box, 1.2% split into several boxes), naive packer 32.6%. The naive packer breaks the rules on most orders (liquid tipped 117, item on a fragile one 79, item without support 20).
 - **Cost** where both are valid (84 orders): Rassah 31.35 SAR vs 34.19 SAR per order, 8.3% less, and never more expensive.
-- **Impossible orders:** Rassah never claimed a fit (20/20 said no); the naive packer returned 6 invalid one-box layouts.
-- **Speed:** Rassah p50 0.5 ms, p95 68 ms per order on a laptop.
+- **Impossible for one box (20 fixtures):** Rassah never claimed a one-box fit; it split 7 of them into valid boxes and said no to the 13 where one item fits no carton or the time ran out. The naive packer returned 6 invalid one-box layouts.
+- **Speed:** Rassah p50 0.5 ms, p95 81 ms per order on a laptop.
 - **Missing sizes:** with no sizes entered by the store, the vendor APIs can pack 0/20 demo orders; Rassah packs 18/20 with no data entry, and the other 2 after one measurement per product.
+
+What to watch tomorrow: both vendors also split orders, so the deciding numbers are the valid-layout rate (all rules, judged by the same validator) and the cost on orders both pack validly.

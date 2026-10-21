@@ -78,6 +78,7 @@ describe("runPack", () => {
     expect(r.status).toBe("no_box");
     expect(r.reason).toMatch(/search budget/);
     expect(r.attempts.length).toBe(2);
+    expect(r.split).toBeNull(); // the single item fits no carton, so no split either
   });
 
   it("unknown order → not_found, still logged as an error run", async () => {

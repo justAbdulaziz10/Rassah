@@ -6,7 +6,7 @@ import type { ExtractDeps } from "@/lib/ai/extractor";
 import type { Repo } from "@/lib/db/repo";
 import type { OrderRun, StoredFacts } from "@/lib/db/types";
 import { ENGINE_CONFIG, packOrder, type EngineConfig, type InstructionStep } from "@/lib/engine";
-import type { CartonAttempt, CostEstimate, DataSource, ProductFacts } from "@/lib/engine/types";
+import type { CartonAttempt, CostEstimate, DataSource, Placement, ProductFacts, Unit } from "@/lib/engine/types";
 import { evaluateRules, syncAlerts } from "@/lib/monitoring/alerts";
 
 export interface PackItemView {
@@ -52,6 +52,21 @@ export interface PackResponse {
   errorMessage: string | null;
   /** Where the order came from: "rassah" (own database) or the external platform's name. */
   orderSource: string;
+  /**
+   * Only with status no_box: the order split into several cartons, each box searched and validated
+   * like a normal answer. null when no split works either (e.g. one item fits no carton).
+   */
+  split: PackSplitView | null;
+}
+
+export interface PackSplitView {
+  boxes: Array<{
+    carton: { id: string; name: string; innerCm: [number, number, number] };
+    items: PackItemView[];
+    instructions: InstructionStep[];
+    cost: CostEstimate;
+  }>;
+  totalSar: number;
 }
 
 export interface PackRequest {
@@ -104,6 +119,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
     monitoring: { saved: true },
     errorMessage: null,
     orderSource: "rassah",
+    split: null,
   };
   const run: OrderRun = {
     id: req.runId,
@@ -203,6 +219,37 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
       run.estimatedUnits = run.unitSources.inferred;
       run.aiProducts = [...catalog.facts.values()].filter((f) => f.origin === "ai").map((f) => f.productId);
 
+      const itemViews = (placements: Placement[], units: Unit[]): PackItemView[] => {
+        const unitById = new Map(units.map((u) => [u.unitId, u]));
+        return placements.map((p) => {
+          const u = unitById.get(p.unitId)!;
+          const f = catalog.facts.get(u.productId)!;
+          return {
+            unitId: u.unitId,
+            productId: u.productId,
+            name: u.name,
+            facts: {
+              lengthCm: f.lengthCm,
+              widthCm: f.widthCm,
+              heightCm: f.heightCm,
+              weightG: f.weightG,
+              dimsSource: f.dimsSource,
+              weightSource: f.weightSource,
+              fragile: f.fragile,
+              liquid: f.liquid,
+              sensitive: f.sensitive,
+              confidence: f.confidence,
+              evidence: f.evidence,
+              origin: f.origin,
+            },
+            effectiveCm: u.dims,
+            marginApplied: u.estimated,
+            paddingApplied: u.fragile || u.sensitive,
+            placement: { x: p.x, y: p.y, z: p.z, dx: p.dx, dy: p.dy, dz: p.dz },
+          };
+        });
+      };
+
       const tPack = now();
       const result = packOrder(lines, catalog.facts as Map<string, ProductFacts>, cartons, rates, config);
       run.packMs = now() - tPack;
@@ -226,6 +273,20 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
         if (result.status === "no_box") {
           response.status = run.status = "no_box";
           response.reason = result.reason;
+          if (result.split) {
+            // Kept as no_box (no single carton fits); the strategy records the split for the order queue.
+            run.strategy = `split_${result.split.boxes.length}`;
+            run.totalSar = result.split.totalSar;
+            response.split = {
+              boxes: result.split.boxes.map((b) => ({
+                carton: { id: b.carton.id, name: b.carton.name, innerCm: b.carton.inner },
+                items: itemViews(b.placements, b.units),
+                instructions: b.instructions,
+                cost: b.cost,
+              })),
+              totalSar: result.split.totalSar,
+            };
+          }
         } else {
           response.status = run.status = "box_found";
           run.cartonId = result.carton.id;
@@ -236,34 +297,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
           response.carton = { id: result.carton.id, name: result.carton.name, innerCm: result.carton.inner };
           response.cost = result.cost;
           response.instructions = result.instructions ?? [];
-          const unitById = new Map(result.units.map((u) => [u.unitId, u]));
-          response.items = result.placements.map((p) => {
-            const u = unitById.get(p.unitId)!;
-            const f = catalog.facts.get(u.productId)!;
-            return {
-              unitId: u.unitId,
-              productId: u.productId,
-              name: u.name,
-              facts: {
-                lengthCm: f.lengthCm,
-                widthCm: f.widthCm,
-                heightCm: f.heightCm,
-                weightG: f.weightG,
-                dimsSource: f.dimsSource,
-                weightSource: f.weightSource,
-                fragile: f.fragile,
-                liquid: f.liquid,
-                sensitive: f.sensitive,
-                confidence: f.confidence,
-                evidence: f.evidence,
-                origin: f.origin,
-              },
-              effectiveCm: u.dims,
-              marginApplied: u.estimated,
-              paddingApplied: u.fragile || u.sensitive,
-              placement: { x: p.x, y: p.y, z: p.z, dx: p.dx, dy: p.dy, dz: p.dz },
-            };
-          });
+          response.items = itemViews(result.placements, result.units);
         }
       }
     }

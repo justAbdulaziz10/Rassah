@@ -96,6 +96,11 @@ describe("order queue", () => {
     expect(buildQueue([order("1001")], fixedLast, noFacts)[0].state).toBe("ready");
   });
 
+  it("an order Rassah split into several cartons needs attention with its own reason", () => {
+    const runs = [run("1020", "2026-10-21T10:00:00Z", { status: "no_box", strategy: "split_2" })];
+    expect(buildQueue([order("1020")], runs, noFacts)[0]).toMatchObject({ state: "attention", reason: "split" });
+  });
+
   it("ignores evaluation runs and runs of other orders", () => {
     const runs = [run("1001", "2026-10-21T10:00:00Z", { trigger: "eval", employeeAction: "confirmed" }), run("1002", "2026-10-21T10:00:00Z")];
     expect(buildQueue([order("1001")], runs, noFacts)[0].state).toBe("new");

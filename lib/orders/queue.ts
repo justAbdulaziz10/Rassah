@@ -13,7 +13,7 @@ import type { OrderRun, OrderSummary, RunStatus, StoredFacts } from "@/lib/db/ty
  */
 export type QueueState = "new" | "ready" | "attention" | "done";
 
-export type AttentionReason = "needs_measurement" | "no_box" | "error";
+export type AttentionReason = "needs_measurement" | "no_box" | "split" | "error";
 
 export interface QueueEntry {
   order: OrderSummary;
@@ -66,7 +66,9 @@ export function buildQueue(orders: OrderSummary[], runs: OrderRun[], facts: Map<
     if (confirmedRun) {
       return { ...base, state: "done", reason: null, confirmedAt: confirmedRun.actionAt ?? confirmedRun.createdAt ?? null };
     }
-    const runReason = latest ? (ATTENTION[latest.status] ?? null) : null;
+    // No single carton fits, but Rassah found a split into several cartons (pack pipeline sets strategy split_N).
+    const split = latest?.status === "no_box" && latest.strategy?.startsWith("split_");
+    const runReason = latest ? (split ? "split" : (ATTENTION[latest.status] ?? null)) : null;
     // Facts saved after the last attempt can settle it either way, so a fresh "needs measuring" wins over an old success.
     const reason = runReason ?? (unmeasured.length > 0 ? "needs_measurement" : null);
     if (reason) return { ...base, state: "attention", reason };

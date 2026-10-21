@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
-import { fmtApiError, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
+import { fmtApiError, fmtCartons, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
 import { FlagChips, SeededBadge, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
 import FactsForm, { type FactsFormValues } from "./FactsForm";
@@ -100,15 +100,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
   }
 
   const d = state.data;
-  const viewItems = d.items.map((it) => ({
-    unitId: it.unitId,
-    name: it.name,
-    fragile: it.facts.fragile,
-    liquid: it.facts.liquid,
-    sensitive: it.facts.sensitive,
-    estimated: it.marginApplied,
-    placement: it.placement,
-  }));
+  const viewItems = toViewItems(d.items);
   const itemsByProduct = new Map<string, PackItemView>();
   for (const it of d.items) if (!itemsByProduct.has(it.productId)) itemsByProduct.set(it.productId, it);
 
@@ -138,6 +130,8 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
     setQueue(await fetchQueue());
   }
 
+  const split = d.status === "no_box" ? d.split : null;
+  const packable = d.status === "box_found" || split !== null;
   const packedBefore = queue?.done.find((x) => x.id === d.orderId) ?? null;
   const isDone = confirmed || packedBefore !== null;
   const nextId = queue?.remainingOrderIds.find((id) => id !== d.orderId) ?? null;
@@ -149,8 +143,20 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold">الطلب #{d.orderId}</h1>
-            <StatusPill status={d.status} label={STATUS_LABEL[d.status] ?? d.status} />
+            {split ? (
+              <span className="whitespace-nowrap rounded bg-warn-soft px-2 py-0.5 text-xs font-medium text-warn">على أكثر من كرتون</span>
+            ) : (
+              <StatusPill status={d.status} label={STATUS_LABEL[d.status] ?? d.status} />
+            )}
           </div>
+          {split && (
+            <>
+              <p className="mt-2 text-3xl font-bold text-brand">يُغلَّف في {fmtCartons(split.boxes.length)}</p>
+              <p className="mt-1 text-sm text-muted">
+                {fmtPieces(split.boxes.reduce((s, b) => s + b.items.length, 0))} · لا يتّسع كرتون واحد للطلب بأمان، فقسّمته رصّة بأقل تكلفة
+              </p>
+            </>
+          )}
           {d.carton && (
             <p className="mt-2 text-3xl font-bold text-brand">
               كرتون {d.carton.name} <span className="text-lg font-normal text-muted">{fmtDims(d.carton.innerCm)}</span>
@@ -170,7 +176,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
           {!d.monitoring.saved && <p className="mt-1 text-xs text-warn">لم يُحفظ سجل هذا الطلب في صفحة الأداء. التغليف غير متأثر.</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2 print:hidden">
-          {d.status === "box_found" && (
+          {packable && (
             <button onClick={() => window.print()} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-border/40">
               اطبع الخطوات
             </button>
@@ -178,7 +184,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
           <button onClick={pack} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-border/40" title="يعيد اختيار الكرتون بالمقاسات المحفوظة الآن">
             أعد الحساب
           </button>
-          {d.status === "box_found" &&
+          {packable &&
             (isDone ? (
               <span className="rounded-lg bg-ok-soft px-3 py-2 text-sm font-bold text-ok">✓ تم التغليف</span>
             ) : (
@@ -231,10 +237,12 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
         </section>
       )}
 
-      {d.status === "no_box" && (
+      {split && <SplitBoxes split={split} />}
+
+      {d.status === "no_box" && !split && (
         <section className="rounded-lg border border-critical bg-critical-soft/40 p-4">
           <h2 className="font-bold text-critical">لا يوجد كرتون مناسب لهذا الطلب</h2>
-          <p className="mt-1 text-sm">جرّبت رصّة كل الكراتين المتاحة، وهذا سبب استبعاد كل كرتون. يمكنك تقسيم الطلب على أكثر من كرتون.</p>
+          <p className="mt-1 text-sm">جرّبت رصّة كل الكراتين المتاحة، وهذا سبب استبعاد كل كرتون. ولا ينفع تقسيمه أيضاً: إحدى القطع لا تتّسع وحدها في أي كرتون.</p>
           <ul className="mt-2 grid gap-1 text-sm">
             {d.attempts.map((a) => (
               <li key={a.cartonId}>
@@ -257,42 +265,11 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
           <section className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
             <div className="space-y-3">
               <h2 className="font-bold">خطوات التغليف</h2>
-              <ol className="space-y-2">
-                {d.instructions.map((s) => (
-                  <li key={s.step} className="rounded-md border border-border bg-surface p-3">
-                    <div className="flex gap-2">
-                      <span className="ltr-nums flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs text-brand-contrast">
-                        {s.step}
-                      </span>
-                      <span>{s.text}</span>
-                    </div>
-                    {s.notes.length > 0 && (
-                      <ul className="mt-1 ms-8 list-disc space-y-0.5 text-sm text-muted">
-                        {s.notes.map((n) => (
-                          <li key={n}>{n}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ol>
+              <Steps steps={d.instructions} />
             </div>
             <div className="space-y-3 print:hidden">
               <h2 className="font-bold">شكل الترتيب داخل الكرتون</h2>
-              <Safe3D
-                fallback={
-                  <div className="rounded-lg border border-border bg-surface">
-                    <div className="h-80 w-full p-4 sm:h-96">
-                      <TopView2D inner={d.carton.innerCm} items={viewItems} />
-                    </div>
-                    <p className="border-t border-border px-4 py-3 text-sm text-muted">
-                      متصفحك لا يدعم العرض المجسّم، فهذا منظر علوي للكرتون. خطوات التغليف المكتوبة كاملة.
-                    </p>
-                  </div>
-                }
-              >
-                <PackingView3D inner={d.carton.innerCm} items={viewItems} />
-              </Safe3D>
+              <Layout inner={d.carton.innerCm} items={viewItems} />
             </div>
           </section>
 
@@ -314,7 +291,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
       )}
 
       {/* Before a carton is chosen there are no placed sizes to show: list what each product is waiting for. */}
-      {d.status !== "box_found" && d.lines.length > 0 && (
+      {d.status !== "box_found" && !split && d.lines.length > 0 && (
         <section className="rounded-lg border border-border bg-surface p-4">
           <h2 className="font-bold">منتجات الطلب</h2>
           <ul className="mt-2 divide-y divide-border text-sm">
@@ -432,5 +409,111 @@ function Stat({ label, value, strong, hint }: { label: string; value: string; st
       <dt className={`text-xs text-muted ${hint ? "underline decoration-dotted underline-offset-4" : ""}`}>{label}</dt>
       <dd className={strong ? "text-lg font-bold" : ""}>{value}</dd>
     </div>
+  );
+}
+
+function toViewItems(items: PackItemView[]) {
+  return items.map((it) => ({
+    unitId: it.unitId,
+    name: it.name,
+    fragile: it.facts.fragile,
+    liquid: it.facts.liquid,
+    sensitive: it.facts.sensitive,
+    estimated: it.marginApplied,
+    placement: it.placement,
+  }));
+}
+
+function Steps({ steps }: { steps: PackResponse["instructions"] }) {
+  return (
+    <ol className="space-y-2">
+      {steps.map((s) => (
+        <li key={s.step} className="rounded-md border border-border bg-surface p-3">
+          <div className="flex gap-2">
+            <span className="ltr-nums flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs text-brand-contrast">
+              {s.step}
+            </span>
+            <span>{s.text}</span>
+          </div>
+          {s.notes.length > 0 && (
+            <ul className="mt-1 ms-8 list-disc space-y-0.5 text-sm text-muted">
+              {s.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Layout({ inner, items }: { inner: [number, number, number]; items: ReturnType<typeof toViewItems> }) {
+  return (
+    <Safe3D
+      fallback={
+        <div className="rounded-lg border border-border bg-surface">
+          <div className="h-80 w-full p-4 sm:h-96">
+            <TopView2D inner={inner} items={items} />
+          </div>
+          <p className="border-t border-border px-4 py-3 text-sm text-muted">
+            متصفحك لا يدعم العرض المجسّم، فهذا منظر علوي للكرتون. خطوات التغليف المكتوبة كاملة.
+          </p>
+        </div>
+      }
+    >
+      <PackingView3D inner={inner} items={items} />
+    </Safe3D>
+  );
+}
+
+/** One section per carton when the order is split: what goes in it, the steps, the picture and the cost. */
+function SplitBoxes({ split }: { split: NonNullable<PackResponse["split"]> }) {
+  const n = split.boxes.length;
+  return (
+    <>
+      <section className="rounded-lg border border-warn bg-warn-soft/40 p-4">
+        <h2 className="font-bold text-warn">الطلب أكبر أو أثقل من أي كرتون واحد</h2>
+        <p className="mt-1 text-sm">
+          قسّمته رصّة على {fmtCartons(n)}، وكل كرتون مرتّب ومفحوص مثل أي طلب عادي. اكتب على كل كرتون رقمه ورقم الطلب
+          (مثلاً «<span className="ltr-nums">1/{n}</span>») حتى تُشحن معاً. التكلفة المتوقعة للكل:{" "}
+          <span className="font-bold">{fmtSar(split.totalSar)}</span>
+        </p>
+      </section>
+      {split.boxes.map((b, i) => {
+        const items = toViewItems(b.items);
+        const names = new Map<string, number>();
+        for (const it of b.items) names.set(it.name, (names.get(it.name) ?? 0) + 1);
+        return (
+          <section key={i} className="space-y-4 rounded-lg border border-border bg-surface p-4 print:break-before-page">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-xl font-bold">
+                الكرتون <span className="ltr-nums">{i + 1}</span> من <span className="ltr-nums">{n}</span>: {b.carton.name}
+              </h2>
+              <span className="text-sm text-muted">{fmtDims(b.carton.innerCm)}</span>
+              <span className="ms-auto text-sm">
+                التكلفة المتوقعة <span className="font-bold">{fmtSar(b.cost.totalSar)}</span>
+              </span>
+            </div>
+            <p className="text-sm text-muted">
+              يحتوي:{" "}
+              {[...names].map(([name, qty], k) => (
+                <span key={name}>
+                  {k > 0 && "، "}
+                  {name}
+                  {qty > 1 && ` (${fmtPieces(qty)})`}
+                </span>
+              ))}
+            </p>
+            <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+              <Steps steps={b.instructions} />
+              <div className="print:hidden">
+                <Layout inner={b.carton.innerCm} items={items} />
+              </div>
+            </div>
+          </section>
+        );
+      })}
+    </>
   );
 }

@@ -26,11 +26,11 @@
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 38 | 38 | ✅ Done (gate passed) |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 54 | 54 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 39 | 38 | 🟨 In progress (gate passed) |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **524** | **456** | |
+| **Total** | | | | **525** | **457** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -713,6 +713,7 @@ CI needs **no** secrets because tests never call external services.
 ### 9G. Competitor benchmark (Paccurate, 3DBinPacking)
 - [x] **P9.37** (M2) Head-to-head harness: same units, cartons and prices for every engine; one validator and one cost model judge all of them; vendor responses cached. — `npm run bench`, `scripts/bench.ts`, `lib/bench/competitors.ts`, 6 adapter tests, protocol in `docs/benchmark.md`
 - [x] **P9.38** (M2) First run without vendor keys (Rassah vs a naive packer, 258 feasible cases). — valid layouts 98.4% vs 32.6%, 8.3% cheaper where both are valid, 0 false claims on 20 impossible cases; `eval/results/bench-2026-10-21.md`
+- [x] **P9.40** (M2) Split into several cartons when no single carton fits (engine-0.3, `lib/engine/split.ts`): each box is a normal validated answer with its own steps, 3D view and cost; order 1020 shows the split. — feasible cases now 100% valid (was 98.4%), 7/20 impossible fixtures get a valid split; tests in `tests/engine/split.test.ts`
 - [ ] **P9.39** (ALL) Run against the vendors: get a Paccurate key and a 3DBinPacking trial key, put them in `.env.local`, run `npm run bench -- --write`. — needs the team to create the vendor accounts; steps in `docs/benchmark.md`
 
 ---

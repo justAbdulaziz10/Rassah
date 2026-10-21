@@ -17,7 +17,7 @@
 | 1 | `/orders` → type **1001** → "جهّز الطلب" | "The packer types an order number." Single book → smallest suitable carton (FLAT). |
 | 2 | Back → **1002** | Perfume 50 ml has **no dimensions on its page**. Gemini inferred them ("تقديري" badge, evidence quote). The engine added a 15% safety margin and padding, kept it upright, and put it on top. Show the numbered instructions and the 3D step slider. |
 | 3 | On 1002 → "تعديل" on the perfume → change height → save | "If the packer corrects the AI, it is recorded. That correction rate is our main AI-quality metric (M1)." |
-| 4 | **1020** | "≈20.5 kg: every carton is too small or too weak. Rassah says so and never invents a layout." |
+| 4 | **1020** | "≈20.5 kg: no single carton can hold it, and Rassah says so instead of inventing a layout. Then it splits the order into several cartons, each one packed and checked like a normal order, numbered 1/4 … 4/4." |
 | 5 | `/monitoring` | Walk 3 tiles: M1 correction rate, M6 Gemini failures, M5 p95 cached vs uncached. Click a run → trace (Gemini call, tokens, timings). |
 
 ## Outage story (≈ 30 s, during Q&A if asked)
@@ -50,7 +50,7 @@ All 30 products pre-extracted on production (`trigger='admin'`): 15 page, 12 inf
 |---|---|
 | 1001–1005, 1007–1016, 1018, 1019 (17) | `box_found` (1001 → FLAT, 1018 → M, 1003/1013/1019 → XL, rest → L) |
 | 1006, 1017 | `needs_measurement` (contain a group-C product with no measurements on the page; the AI does not guess) |
-| 1020 | `no_box` (S/FLAT/M/L too small, XL overweight) |
+| 1020 | `no_box` (S/FLAT/M/L too small, XL overweight) + a split suggestion into several cartons |
 
 Timings (server `totalMs`): cached orders 119–234 ms after moving functions to fra1 (were 358–1896 ms in iad1). Uncached order 1001 (facts cleared for p-02): 1589 ms total, of which Gemini extraction 1205 ms.
 

@@ -41,6 +41,11 @@ export function fmtPieces(n: number): string {
   return fmtCount(n, { one: "قطعة واحدة", two: "قطعتان", few: "قطع", many: "قطعة" });
 }
 
+/** For "قسّمته على …": 2 كرتونين، 3-10 كراتين، 11+ كرتوناً. */
+export function fmtCartons(n: number): string {
+  return fmtCount(n, { one: "كرتون واحد", two: "كرتونين", few: "كراتين", many: "كرتوناً" });
+}
+
 export function fmtWeight(g: number | null | undefined): string {
   if (g === null || g === undefined) return "—";
   return g >= 1000 ? `${ltr(fmtNum(g / 1000, 2))} كجم` : `${ltr(fmtNum(g, 0))} جم`;

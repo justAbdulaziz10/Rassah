@@ -23,6 +23,7 @@ import { estimateCost } from "../lib/engine/cost";
 import { volume } from "../lib/engine/geometry";
 import { packUnits } from "../lib/engine/packer";
 import { prepareUnits } from "../lib/engine/prepare";
+import { splitPack } from "../lib/engine/split";
 import type { Carton, OrderLine, ProductFacts, Unit, ViolationCode } from "../lib/engine/types";
 import { validateLayout } from "../lib/engine/validator";
 
@@ -148,11 +149,14 @@ const rassah: Engine = {
   label: `Rassah (${ENGINE_VERSION})`,
   unsupported: [],
   async run(c) {
-    const r = packUnits(c.units, c.cartons, { config: ENGINE_CONFIG, rates: RATES });
-    const all = c.units.map((u) => u.unitId);
-    return r.status === "box_found"
-      ? { boxes: [{ carton: r.carton, placements: r.placements }], unpacked: [], engineMs: null }
-      : { boxes: [], unpacked: all, engineMs: null };
+    const opts = { config: ENGINE_CONFIG, rates: RATES };
+    const r = packUnits(c.units, c.cartons, opts);
+    if (r.status === "box_found") return { boxes: [{ carton: r.carton, placements: r.placements }], unpacked: [], engineMs: null };
+    // Same as the app: when no single carton fits, suggest a split into several validated boxes.
+    const split = splitPack(c.units, c.cartons, opts);
+    return split
+      ? { boxes: split.boxes.map((b) => ({ carton: b.carton, placements: b.placements })), unpacked: [], engineMs: null }
+      : { boxes: [], unpacked: c.units.map((u) => u.unitId), engineMs: null };
   },
 };
 
@@ -364,7 +368,7 @@ async function main() {
   out();
   for (const e of engines) {
     const s = imp.map((c) => results.get(e.key)!.get(c.id)!);
-    out(`- ${e.label}: false "fits in one box" claims that pass the validator ${s.filter((x) => x.outcome === "one_box" && x.valid).length}, invalid one-box claims ${s.filter((x) => x.outcome === "one_box" && !x.valid).length}, split ${s.filter((x) => x.outcome === "multi_box").length}, said no ${s.filter((x) => x.outcome === "not_packed").length}.`);
+    out(`- ${e.label}: false "fits in one box" claims that pass the validator ${s.filter((x) => x.outcome === "one_box" && x.valid).length}, invalid one-box claims ${s.filter((x) => x.outcome === "one_box" && !x.valid).length}, valid split into several boxes ${s.filter((x) => x.outcome === "multi_box" && x.valid).length}, invalid split ${s.filter((x) => x.outcome === "multi_box" && !x.valid).length}, said no ${s.filter((x) => x.outcome === "not_packed").length}.`);
   }
   out();
 
