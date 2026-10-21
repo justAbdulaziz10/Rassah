@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cartonThreeSize, itemKind, placementOrder, toThreePosition, toThreeSize } from "@/lib/ui/three";
+import { cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize } from "@/lib/ui/three";
 
 const inner: [number, number, number] = [30, 20, 15];
 
@@ -34,5 +34,35 @@ describe("3D helpers", () => {
       { id: "floor-front", placement: { x: 0, y: 4, z: 0, dx: 1, dy: 1, dz: 1 } },
     ];
     expect(placementOrder(items).map((i) => i.id)).toEqual(["floor-back", "floor-front", "top"]);
+  });
+
+  it("top view paints lower tops first so stacked items stay visible", () => {
+    const items = [
+      { id: "tall", placement: { x: 0, y: 0, z: 0, dx: 4, dy: 4, dz: 10 } },
+      { id: "stacked", placement: { x: 5, y: 0, z: 3, dx: 2, dy: 2, dz: 2 } },
+      { id: "flat", placement: { x: 5, y: 0, z: 0, dx: 6, dy: 6, dz: 3 } },
+    ];
+    expect(topViewRects(items).map((i) => i.id)).toEqual(["flat", "stacked", "tall"]);
+  });
+
+  it("top view breaks equal tops by base height, then y, then x", () => {
+    const items = [
+      { id: "high-base", placement: { x: 0, y: 0, z: 2, dx: 1, dy: 1, dz: 2 } },
+      { id: "front", placement: { x: 0, y: 3, z: 0, dx: 1, dy: 1, dz: 4 } },
+      { id: "back-right", placement: { x: 2, y: 0, z: 0, dx: 1, dy: 1, dz: 4 } },
+      { id: "back-left", placement: { x: 0, y: 0, z: 0, dx: 1, dy: 1, dz: 4 } },
+    ];
+    expect(topViewRects(items).map((i) => i.id)).toEqual(["back-left", "back-right", "front", "high-base"]);
+  });
+
+  it("top view maps x/y to the rect and leaves the input untouched", () => {
+    const items = [
+      { id: "b", placement: { x: 3, y: 2, z: 1, dx: 5, dy: 4, dz: 1 } },
+      { id: "a", placement: { x: 0, y: 0, z: 0, dx: 1, dy: 1, dz: 1 } },
+    ];
+    const before = structuredClone(items);
+    const rects = topViewRects(items);
+    expect(items).toEqual(before);
+    expect(rects[1]).toMatchObject({ id: "b", rx: 3, ry: 2, rw: 5, rh: 4 });
   });
 });

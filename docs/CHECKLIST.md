@@ -17,20 +17,22 @@
 
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
-| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 11 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 33 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 29 | 🟨 In progress |
+| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 13 | 🟨 In progress |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 35 | 🟨 In progress |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 30 | ✅ Done (gate passed) |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
-| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
-| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 44 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 34 | 🟨 In progress |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 42 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 47 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 29 | 🟨 In progress |
+| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
+| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 37 | ✅ Done (gate passed) |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 48 | 48 | ✅ Done (gate passed) |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 36 | ✅ Done (gate passed) |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
-| 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 1 | ⬜ Not started |
-| **Total** | | | | **517** | **425** | |
+| 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
+| **Total** | | | | **518** | **447** | |
+
+_Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -72,7 +74,7 @@ In parallel and also blocking: `P2 schema` → `P2 seed`, and `P4 validator` →
 
 | # | Service / credential | Purpose | Created by | Stored in | Shared with | Done |
 |---|---|---|---|---|---|---|
-| C1 | GitHub repo `justAbdulaziz10/Rassah`: write access | Code, PRs, CI | Repo owner | GitHub | M1, M2, M3 | ⬜ |
+| C1 | GitHub repo `justAbdulaziz10/Rassah`: write access | Code, PRs, CI | Repo owner | GitHub | M1, M2, M3 | ✅ (2 collaborators with push, verified 2026-10-21) |
 | C2 | Google account / project for AI Studio | Owns the Gemini key | M3 | Team password manager | ALL | ✅ |
 | C3 | `GEMINI_API_KEY` | Gemini API auth | M3 | Vercel env (Preview + Prod) + each `.env.local` | ALL | ✅ |
 | C4 | Gemini model id (`GEMINI_MODEL`) | Which Flash-tier model (now `gemini-3.5-flash-lite`, 2026-10-21) | M1 | Vercel env + `.env.example` (name only) | ALL | ✅ |
@@ -113,21 +115,21 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P0.1** (M3, →T1) Message the instructor: "Our product uses an LLM (Gemini) to extract product dimensions and handling flags from product-page text, and a search-based engine to pack items into the cheapest safe carton. Does this satisfy *AI-powered product*?" Done when: written reply received and pasted into `docs/decisions.md`. ✅ 20 Oct: **APIs are allowed. No fine-tuning needed.** Recorded in [decisions.md](decisions.md).
 - [x] **P0.2** (ALL) If P0.1 is negative, hold an emergency call within 1 hour and record the decision. ✅ Not needed (P0.1 positive).
 - [x] **P0.3** (ALL) Re-confirm the stack decision: TypeScript on Vercel (team is stronger in Python). Record it in `docs/decisions.md`. — TypeScript on Vercel recorded in decisions.md
-- [ ] **P0.4** (ALL) Confirm lane ownership (M1/M2/M3) and review pairs from PLAN §10.
-- [ ] **P0.5** (ALL) Agree on sync times: Tue 23:00, Wed 09:00, Wed 13:00 ⛳, Wed 18:00, Wed 23:00, Thu 08:00.
-- [ ] **P0.6** (ALL) Create a team chat channel for blockers. Link it in the Blockers section below.
+- [ ] **P0.4** (ALL) Confirm lane ownership (M1/M2/M3) and review pairs from PLAN §10. — not verifiable by agent; needs team confirmation
+- [ ] **P0.5** (ALL) Agree on sync times: Tue 23:00, Wed 09:00, Wed 13:00 ⛳, Wed 18:00, Wed 23:00, Thu 08:00. — not verifiable by agent; needs team confirmation
+- [ ] **P0.6** (ALL) Create a team chat channel for blockers. Link it in the Blockers section below. — not verifiable by agent; needs team confirmation (no channel link recorded in Blockers)
 
 ### 0B. Customer discovery (problem validation)
-- [ ] **P0.7** (M1, →T0) Pick 3 Salla/Zid stores that sell rigid products (perfume, cosmetics, electronics, books). Note them in `docs/discovery.md`.
-- [ ] **P0.8** (M1) Send each a short message: how do they choose cartons, do they see breakage or oversized boxes, and how many carton sizes do they keep.
-- [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies.
+- [ ] **P0.7** (M1, →T0) Pick 3 Salla/Zid stores that sell rigid products (perfume, cosmetics, electronics, books). Note them in `docs/discovery.md`. — not done: the log in `docs/discovery.md` is empty (no stores named)
+- [ ] **P0.8** (M1) Send each a short message: how do they choose cartons, do they see breakage or oversized boxes, and how many carton sizes do they keep. — not done: no outreach recorded; message drafts are ready in `docs/discovery.md`
+- [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies. — not done: no replies and no "no reply" rows logged; the report says so honestly
 
 ### 0C. Gemini (Google AI Studio)
 - [x] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.** — done 2026-10-21 (key created by the owner)
 - [x] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4). — gemini-3.5-flash-lite (3.8-flash and 3.6-flash free tier = 20 requests/day; switched 2026-10-21)
 - [x] **P0.12** (M1) Record the free-tier rate limits (requests/min, requests/day) shown for that model in `docs/decisions.md`. They decide concurrency (P5.27). — free tier = 20 requests/day/model; recorded in decisions.md
 - [x] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5). — $0.30 in / $2.50 out per 1M (2026-10-21); recorded in decisions.md
-- [ ] **P0.14** (M1) Quick sanity call: send one product description in AI Studio's UI and confirm it returns JSON. Screenshot it for the tools log.
+- [ ] **P0.14** (M1) Quick sanity call: send one product description in AI Studio's UI and confirm it returns JSON. Screenshot it for the tools log. — not verifiable by agent: the AI Studio screenshot is not in the repo (the API itself is proven by the 30/30 extraction)
 
 ### 0D. Supabase
 - [x] **P0.15** (M3, →T2) Create the Supabase organization + project (region close to Saudi Arabia, e.g. EU/Middle East if offered) (C6). — project `rassah` (etxxhydkvtixajxkwgmn), org newmillion, eu-central-1 Frankfurt, free plan
@@ -142,21 +144,21 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P0.22** (M3) Note the plan's function max-duration limit in `docs/decisions.md` (used in P6.1). — Hobby 300 s max; routes use maxDuration 60 (decisions.md)
 
 ### 0F. GitHub
-- [ ] **P0.23** (Repo owner) Give M1, M2, M3 write access to the repo (C1).
-- [ ] **P0.24** (ALL) Each member clones the repo and can push a test branch.
+- [x] **P0.23** (Repo owner) Give M1, M2, M3 write access to the repo (C1). — verified 2026-10-21: `gh api` collaborators = justAbdulaziz10 (admin) + Bayan369 + enghanamansour, both with push; mapping of the two logins to M1/M2 not checked by an agent
+- [ ] **P0.24** (ALL) Each member clones the repo and can push a test branch. — not verifiable by agent: origin has only `main` and `chore/pr-template` (PR #1); needs per-member confirmation
 - [x] **P0.25** (M3) Create GitHub labels: `lane:ai`, `lane:engine`, `lane:platform`, `blocker`, `cut-list`. — all 5 labels exist on GitHub
 
 ### 0G. Local machines (each member)
-- [ ] **P0.26** (M1) Node.js LTS + npm installed (`node -v` recorded), Git configured, editor ready.
-- [ ] **P0.27** (M2) Node.js LTS + npm installed, Git configured, editor ready.
-- [ ] **P0.28** (M3) Node.js LTS + npm installed, Git configured, editor ready.
-- [ ] **P0.29** (ALL) All three use the **same** Node major version (written to `.nvmrc` in P1.6).
+- [ ] **P0.26** (M1) Node.js LTS + npm installed (`node -v` recorded), Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
+- [ ] **P0.27** (M2) Node.js LTS + npm installed, Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
+- [ ] **P0.28** (M3) Node.js LTS + npm installed, Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
+- [ ] **P0.29** (ALL) All three use the **same** Node major version (written to `.nvmrc` in P1.6). — repo side done (`.nvmrc` = 24, `engines` set); needs all 3 members to confirm their local Node major
 
 ### 0H. Shared secrets handling
 - [ ] **P0.30** (M3) Set up the team password manager or a secure shared note (C13).
 - [ ] **P0.31** (M3) Move all credentials C2–C12 into it. Delete them from chat messages.
 - [ ] **P0.32** (ALL) Each member confirms they can read the shared secrets.
-- [ ] **P0.33** (M3) Fill in the "Done" column of the credentials register above. **Gate G0 check.**
+- [ ] **P0.33** (M3) Fill in the "Done" column of the credentials register above. **Gate G0 check.** — register updated 2026-10-21; gate G0 still fails (C7, C12, C13 open)
 
 ---
 
@@ -214,10 +216,10 @@ CI needs **no** secrets because tests never call external services.
 
 ### 1H. Branch protection and onboarding
 - [ ] **P1.35** (M3) Enable branch protection on `main`: require `CI / check` + 1 approving review, no direct pushes. — superseded: team pushes straight to main with the local CI gate + GitHub Actions (decisions.md); leave unticked
-- [ ] **P1.36** (M1) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
-- [ ] **P1.37** (M2) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
+- [ ] **P1.36** (M1) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — not verifiable by agent; needs M1 confirmation
+- [ ] **P1.37** (M2) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — not verifiable by agent; needs M2 confirmation
 - [x] **P1.38** (M3) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — fresh clone 2026-10-21: npm ci → check 152/152 → dev /orders 200
-- [ ] **P1.39** (M3) Update the progress dashboard. **Gate G1 check.**
+- [ ] **P1.39** (M3) Update the progress dashboard. **Gate G1 check.** — gate G1 needs M1 and M2 fresh-clone confirmation (P1.36, P1.37); CI is green on `main`, production live
 
 ---
 
@@ -263,7 +265,7 @@ CI needs **no** secrets because tests never call external services.
 ### 2E. Verification
 - [x] **P2.28** (M3) `/api/health` reports `supabase: "ok"` locally and on the Vercel preview. — production health reports database ok
 - [x] **P2.29** (M3) Verify the anon key **cannot** read any table (quick REST call with the anon key returns nothing or 401). — anon REST read of products returned [] (RLS blocks anon)
-- [ ] **P2.30** (M3) Update the dashboard. **Gate G2 check.**
+- [x] **P2.30** (M3) Update the dashboard. **Gate G2 check.** — G2 passed (verified): migration applied, seed counts 30/5/20/51, RLS on all tables, anon read blocked (P2.5–P2.29)
 
 ---
 
@@ -287,11 +289,11 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P3.11** (M1) A header note in the file states: synthetic, written by the team, modeled on Saudi store pages.
 
 ### 3C. Ground truth (`data/ground_truth.json`)
-- [ ] **P3.12** (M2) Written by **M2** (not the author of the descriptions) for all 30 products.
+- [ ] **P3.12** (M2) Written by **M2** (not the author of the descriptions) for all 30 products. — open: ground truth was AI-drafted; independent re-check table is ready in `docs/team/ground-truth-review.md` (reviewer column empty)
 - [x] **P3.13** (M2) Fields: `lengthCm, widthCm, heightCm` (natural upright orientation, `heightCm` = vertical side; the eval sorts before comparing), `weightG`, `fragile`, `liquid`, `sensitive`, `expectedDimsSource`.
 - [x] **P3.14** (M2) Group B ground-truth sizes are realistic for the product type (sanity-checked against similar real items).
 - [x] **P3.15** (M1) Pick 10 products as the **holdout** set (mixed groups). Mark them in ground truth (`holdout: true`).
-- [ ] **P3.16** (M1+M2) Disagreements between author and labeler resolved and noted.
+- [ ] **P3.16** (M1+M2) Disagreements between author and labeler resolved and noted. — open: depends on P3.12; no disagreements recorded yet
 
 ### 3D. Cartons (`data/cartons.json`)
 - [x] **P3.17** (M2) 5 cartons per stack/07 (S, FLAT, M, L, XL): inner dims, max weight, tare weight, synthetic cost.
@@ -314,7 +316,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 3G. Verification
 - [x] **P3.30** (M1) `scripts/validate-data.ts` passes. The seed (P2.25) succeeds with the final data. — validate-data passes; seed succeeds
-- [ ] **P3.31** (M1) Update the dashboard. **Gate G3 check.**
+- [ ] **P3.31** (M1) Update the dashboard. **Gate G3 check.** — gate G3 not met until P3.12 is done by a member who did not write the descriptions
 
 ---
 
@@ -388,9 +390,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P4.49** (M2) `lib/engine/index.ts` exports a single `packOrder(lines, facts, cartons, rates, config) → result + instructions` plus `validateLayout`.
 - [x] **P4.50** (M2) Engine has no imports from `lib/db`, `lib/ai`, Next.js, or any network module.
 - [x] **P4.51** (M2) Code comments explain the *why* of each rule (for the Q&A walkthrough).
-- [ ] **P4.52** (M1) Review PR: M1 can explain the overlap check, the support ratio and the strategies in their own words.
+- [ ] **P4.52** (M1) Review PR: M1 can explain the overlap check, the support ratio and the strategies in their own words. — not verifiable by agent; walkthrough in `docs/team/walkthroughs.md`, needs M1 confirmation
 - [x] **P4.53** (M2) Record `MIN_SUPPORT` and `PADDING_CM` assumptions in `docs/decisions.md`.
-- [ ] **P4.54** (M2) Update the dashboard. **Gate G4 check.**
+- [x] **P4.54** (M2) Update the dashboard. **Gate G4 check.** — G4 passed (verified 2026-10-21): `vitest run` 19 files / 157 tests green incl. the 200-order property test; P4.52 (M1 review) stays open
 
 ---
 
@@ -457,8 +459,8 @@ CI needs **no** secrets because tests never call external services.
 
 ### 5H. Real-model check and review
 - [x] **P5.44** (M1) One-off local run over all 30 products (`trigger='admin'`): zero crashes, every attempt has an event. — done on production via admin extract: 30/30 ok, every attempt has an event
-- [ ] **P5.45** (M3) Review PR: M3 can explain the fallback chain, the sanity checks and why we validate with Zod.
-- [ ] **P5.46** (M1) Update the dashboard. **Gate G5 check.**
+- [ ] **P5.45** (M3) Review PR: M3 can explain the fallback chain, the sanity checks and why we validate with Zod. — not verifiable by agent; walkthrough in `docs/team/walkthroughs.md`, needs M3 confirmation
+- [x] **P5.46** (M1) Update the dashboard. **Gate G5 check.** — G5 passed (verified): 30/30 extractions on production, every attempt has an event (P5.44); P5.45 (M3 review) stays open
 
 ---
 
@@ -514,8 +516,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P6.33** (M1) Call the pack API for **all 20 orders** on the preview. Statuses match expectations (incl. `needs_measurement` and `no_box`). — done on production instead of a preview (2026-10-21)
 - [x] **P6.34** (M3) Rows appear in `order_runs` and `extraction_events` with correct `run_id` links. — verified: every extraction_event with run_id links to an order_run, 0 orphans
 - [x] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds). — uncached 1589 ms, cached 119–234 ms
-- [ ] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers.
-- [ ] **P6.37** (M3) Update the dashboard. **Gate G6 check.**
+- [x] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers. — n/a: the gate passed (all 20 orders matched on production, P6.33), so no cut-list item was applied
+- [x] **P6.37** (M3) Update the dashboard. **Gate G6 check.** — G6 passed (verified, on production rather than a preview)
 
 ---
 
@@ -582,7 +584,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.44** (M3) Review PR on the preview: full flow for the 3 demo orders. — full flow for the 3 demo orders on the PR #1 preview (PR #1 comment)
 - [x] **P7.45** (M1) Try the edit flow: an edit changes the correction rate data (checked in Supabase). — p-21 edited 5→6 cm on production: M1 null → 0.333 (1/3), corrections 0 → 1 row
 - [x] **P7.46** (M2) Test on phone width and desktop. — 390 px and 1440 px checked 2026-10-21
-- [ ] **P7.47** (M2) Update the dashboard. **Gate G7 check.**
+- [x] **P7.47** (M2) Update the dashboard. **Gate G7 check.** — G7 passed (verified): full flow on PR #1 preview and production; 390 px and 1440 px checked (P7.44–P7.46)
+- [x] **P7.48** (M2) 3D views degrade to a 2D top view when WebGL is unavailable instead of crashing the page. Done when: with WebGL disabled, `/` and `/orders/[id]` render the 2D view and no error page; tested and on `main`. — verified 2026-10-21: reproduced the crash in Brave with WebGL off on production; after the fix (`components/Safe3D.tsx` WebGL check + error boundary, `components/TopView2D.tsx`) a local production build renders the 2D top view on both pages with no error page, and the 3D canvas still renders with WebGL on
 
 ---
 
@@ -647,9 +650,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.46** (M1+M3) Write it up in `docs/report/results.md` with real numbers. If none happened, write "none observed" and use the outage demo instead. — written up in results.md with before/after numbers
 
 ### 8F. Verification
-- [ ] **P8.47** (M1) Review PR: M1 can explain every tile and what to do when it turns red.
+- [ ] **P8.47** (M1) Review PR: M1 can explain every tile and what to do when it turns red. — not verifiable by agent; needs M1 confirmation
 - [x] **P8.48** (M3) The dashboard shows real Supabase data on the preview. — production dashboard shows real Supabase data (screens/04-monitoring.png)
-- [ ] **P8.49** (M3) Update the dashboard. **Gate G8 check.**
+- [x] **P8.49** (M3) Update the dashboard. **Gate G8 check.** — G8 passed (verified): seven metrics from real events; simulated outage fires and resolves the M6 alert on production (P8.43); P8.47 (M1 explains every tile) stays open
 
 ---
 
@@ -672,7 +675,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.12** (M1) Holdout metrics reported separately.
 - [x] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
 - [x] **P9.14** (M1) Prints a summary table to the console.
-- [x] **P9.15** (M1) Run v1 on all 30 products. Results committed. — `eval/results/extraction-2026-10-21-v1.json`, gemini-3.5-flash-lite, 30/30 ok; run twice, committed file = run 2 (7df0b26c), run 1 (195cf93f) is "previous" on /evaluation (results file is in the working tree, commit pending)
+- [x] **P9.15** (M1) Run v1 on all 30 products. Results committed. — `eval/results/extraction-2026-10-21-v1.json`, gemini-3.5-flash-lite, 30/30 ok; run twice, committed file = run 2 (7df0b26c), run 1 (195cf93f) is "previous" on /evaluation (results file committed on `main`)
 
 ### 9B. Prompt iteration (→T20)
 - [x] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — none: tuning metrics all 100% except inferred MAPE (11.3% dim, run 2), no failures to fix
@@ -703,7 +706,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 9F. Verification
 - [x] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`. — `/evaluation` reads the JSON (DB first, file fallback via `lib/monitoring/evaluation.ts`); results.md and REPORT.md checked against the JSON. Re-check on the deployed page if `eval_runs` holds an older run
-- [ ] **P9.36** (M1) Update the dashboard. **Gate G9 check.**
+- [x] **P9.36** (M1) Update the dashboard. **Gate G9 check.** — G9 passed (verified): extraction and packing runs stored, numbers in results.md, margin decision recorded
 
 ---
 
@@ -714,7 +717,7 @@ CI needs **no** secrets because tests never call external services.
 ### 10A. Security checklist
 - [x] **P10.1** (M3) No secret in git history: search the repo for key prefixes and `SERVICE_ROLE`. Nothing found.
 - [x] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
-- [x] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
+- [x] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`. — verified 2026-10-21: every file in the three folders has it (`lib/db/seed-facts.ts` was missing it, added)
 - [x] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses. — checked 2026-10-21 on production: client only contacts rassah.vercel.app; no JWT/Gemini key/Supabase URL in HTML or /api responses
 - [x] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production). — RLS enabled on all 12 tables (0001_init.sql); anon REST read of products returned [] on the production project (2026-10-21)
 - [x] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
@@ -733,7 +736,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.15** (M3) Production env vars double-checked against the matrix. — checked 2026-10-21 against the matrix: Supabase, Gemini (model/prices/key), DEMO_MODE, ENGINE_VERSION, PROMPT_VERSION set for production + preview
 - [x] **P10.16** (M3) `/api/health` all green on production. — done 2026-10-21: status ok, database ok, gemini key present, engine-0.2
 - [x] **P10.17** (M3) Supabase project not paused. Note the inactivity rule. — project active; free projects pause after 1 week of inactivity (open it on demo morning, P12.6)
-- [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs.
+- [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs. — not run on purpose: it deletes events/alerts. Run once after the last rehearsal, before the demo (Thursday morning)
 - [x] **P10.19** (M1, →T21) Pre-warm: extract all 30 products on production (`trigger='admin'`). Facts present for groups A and B. — done 2026-10-21: 30/30 extracted (15 page, 12 inferred, 3 unknown)
 - [x] **P10.20** (M3, →T22) Smoke test **all 20 orders** on the production URL. Statuses as expected. Record results in `docs/demo-script.md`. — done 2026-10-21: 17 box_found, 2 needs_measurement, 1 no_box; see demo-script.md
 - [x] **P10.21** (M3) Check Vercel function logs for errors during the smoke test. — Vercel runtime errors (24 h): none
@@ -754,7 +757,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.30** (M3) README complete: description, live URL, screenshots, getting started, scripts, env vars, architecture link, limitations, team. — README complete (2026-10-21)
 - [x] **P10.31** (M3) All docs links work (no 404s in the GitHub UI). — all relative links/anchors checked, none broken
 - [x] **P10.32** (M3) No stray TODOs in critical paths (engine, validator, extractor, pack route).
-- [ ] **P10.33** (M3) Update the dashboard. **Gate G10 check.**
+- [x] **P10.33** (M3) Update the dashboard. **Gate G10 check.** — G10 passed (verified 2026-10-21): CI green on main, production health ok, security items P10.1–P10.17 ticked, 20/20 smoke test; P10.18 (reset-events before the demo) stays open
 
 ---
 
@@ -767,7 +770,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.2** (M3) Monitoring flow diagram matches the actual tables, events and alert rules.
 - [x] **P11.3** (M3) Architecture diagram matches the actual modules. _Added `lib/pipeline` and the eval scripts / `lib/eval`._
 - [x] **P11.4** (M3) All three exported as PNG (mermaid.live) into `docs/report/`. _Rendered with mermaid-cli: `diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`._
-- [ ] **P11.5** (M1+M2) Both teammates review that the diagrams match the code.
+- [ ] **P11.5** (M1+M2) Both teammates review that the diagrams match the code. — not verifiable by agent; checklist in `docs/team/diagram-check.md`, needs M1 and M2 sign-off
 
 ### 11B. Tools & AI-usage log (`docs/report/TOOLS.md`)
 - [x] **P11.6** (ALL) Row per tool: Claude/Claude Code, Gemini API, Google AI Studio, Next.js, Supabase, Vercel, GitHub Actions, Vitest, react-three-fiber, Recharts, Mermaid, any other AI assistant used.
@@ -811,22 +814,22 @@ CI needs **no** secrets because tests never call external services.
 ### 11E. Supporting documents
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [x] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons). — decisions.md complete (2026-10-21)
-- [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest).
+- [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest). — file is honest but the outreach log is still empty (P0.7–P0.9); finalize after outreach or leave as is and say so in the pitch
 - [x] **P11.42** (ALL) `docs/report/results.md` final. — marked FINAL 2026-10-21
 - [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
 
 ### 11F. Code walkthrough prep (team-participation requirement)
-- [ ] **P11.44** (M1) Can walk through `validator.ts` (written by M2).
-- [ ] **P11.45** (M2) Can walk through `extractor.ts` + prompt (written by M1).
-- [ ] **P11.46** (M3) Can walk through `packer.ts` + `prepare.ts` (written by M2).
-- [ ] **P11.47** (M1) Can walk through `metrics.ts` + `alerts.ts` (written by M3).
-- [ ] **P11.48** (M2) Can walk through the pack route + event writing (written by M3).
-- [ ] **P11.49** (M3) Can walk through the extraction eval (written by M1).
+- [ ] **P11.44** (M1) Can walk through `validator.ts` (written by M2). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M1 confirmation
+- [ ] **P11.45** (M2) Can walk through `extractor.ts` + prompt (written by M1). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M2 confirmation
+- [ ] **P11.46** (M3) Can walk through `packer.ts` + `prepare.ts` (written by M2). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M3 confirmation
+- [ ] **P11.47** (M1) Can walk through `metrics.ts` + `alerts.ts` (written by M3). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M1 confirmation
+- [ ] **P11.48** (M2) Can walk through the pack route + event writing (written by M3). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M2 confirmation
+- [ ] **P11.49** (M3) Can walk through the extraction eval (written by M1). — not verifiable by agent; prep in `docs/team/walkthroughs.md`, needs M3 confirmation
 
 ### 11G. Review and submission
-- [ ] **P11.50** (ALL) All 3 members read the full report and the deck. Comments resolved.
-- [ ] **P11.51** (ALL) Confirm submission format and channel with the instructor (repo link, PDF, deck).
-- [ ] **P11.52** (ALL) Update the dashboard. **Gate G11 check.**
+- [ ] **P11.50** (ALL) All 3 members read the full report and the deck. Comments resolved. — not verifiable by agent; needs all 3 members
+- [ ] **P11.51** (ALL) Confirm submission format and channel with the instructor (repo link, PDF, deck). — not verifiable by agent; draft message in `docs/team/submission.md` (not sent)
+- [ ] **P11.52** (ALL) Update the dashboard. **Gate G11 check.** — gate G11 not met: P11.5, P11.14, P11.41, P11.44–P11.51 open
 
 ---
 
@@ -835,15 +838,15 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** ALL · **Gate:** G12
 
 ### 12A. Rehearsal (Wed night)
-- [ ] **P12.1** (ALL, →T26) Rehearsal 1, timed. Note what overran.
-- [ ] **P12.2** (ALL) Rehearsal 2, under 3:00.
-- [ ] **P12.3** (ALL) Q&A drill: each member answers 6 random questions from `docs/qa.md` about **another** member's lane.
-- [ ] **P12.4** (ALL) Practice the outage demo (≤ 30 s).
-- [ ] **P12.5** (ALL) Practice the fallback: switch to the backup video within 10 s if the live demo fails.
+- [ ] **P12.1** (ALL, →T26) Rehearsal 1, timed. Note what overran. — not done; timing sheets in `docs/team/rehearsal.md`
+- [ ] **P12.2** (ALL) Rehearsal 2, under 3:00. — not done; timing sheets in `docs/team/rehearsal.md`
+- [ ] **P12.3** (ALL) Q&A drill: each member answers 6 random questions from `docs/qa.md` about **another** member's lane. — not done; question cards in `docs/team/qa-cards.md`
+- [ ] **P12.4** (ALL) Practice the outage demo (≤ 30 s). — not done; routine in `docs/team/rehearsal.md`
+- [ ] **P12.5** (ALL) Practice the fallback: switch to the backup video within 10 s if the live demo fails. — not done; routine in `docs/team/rehearsal.md`
 
 ### 12B. Morning checks (Thu)
 - [ ] **P12.6** (M3) Open the Supabase dashboard (wake the project if paused).
-- [ ] **P12.7** (M3) `/api/health` all green on production.
+- [ ] **P12.7** (M3) `/api/health` all green on production. — Thursday-morning check; `/api/health` was green on production at 2026-10-21 (status ok, database ok, Gemini key present, demoMode true)
 - [ ] **P12.8** (M3) Gemini key valid (one admin re-extract on a group-A product succeeds).
 - [ ] **P12.9** (M3) Run 3–5 live orders so the dashboard window has fresh data.
 - [ ] **P12.10** (M3) Dashboard shows no unexpected open alerts. Resolve leftovers from the rehearsal.
@@ -860,9 +863,9 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P12.19** (M2) HDMI/USB-C adapter if presenting from your own laptop.
 
 ### 12D. Submission
-- [ ] **P12.20** (ALL) Repo is public (or shared with the judges) and `main` is the final version.
-- [ ] **P12.21** (ALL) Report PDF submitted / linked.
-- [ ] **P12.22** (ALL) Deck submitted / linked.
+- [ ] **P12.20** (ALL) Repo is public (or shared with the judges) and `main` is the final version. — repo is PUBLIC (verified with `gh repo view` 2026-10-21); tick on Thursday once `main` is final
+- [ ] **P12.21** (ALL) Report PDF submitted / linked. — not done; links drafted in `docs/team/submission.md` (not sent)
+- [ ] **P12.22** (ALL) Deck submitted / linked. — not done; links drafted in `docs/team/submission.md` (not sent)
 - [x] **P12.23** (ALL) Live URL + repo URL on the last slide and in the README. — live URL + repo URL on the last slide and in README
 
 ### 12E. During the presentation
@@ -900,6 +903,7 @@ Never cut: **validator, event logging, tests, honesty about data.**
 |---|---|---|---|---|---|---|
 | 2026-10-21 | B1 | Gemini free tier allows only 20 requests/day/model (429 QuotaFailure); extraction eval runs were mostly rate_limited and discarded | Owner | P9.15-P9.19 (extraction eval, margin decision) cannot complete | Owner enabling billing (Paid Tier), then re-run the eval | Yes (2026-10-21): switched to gemini-3.5-flash-lite (free tier 15 RPM / 500 RPD); eval completed, P9.15-P9.19 done |
 | 2026-10-21 | B2 | Supabase DB password not recorded (C7); Supabase and Vercel team invites for M1/M2 not done (P0.16, P0.18, P0.20) | M3 | No direct DB/CLI access; teammates lack dashboard access | Reset/record password in the password manager; send invites | No |
+| 2026-10-21 | B3 | Production crash when WebGL is unavailable: landing page `/` and `/orders/[id]` 3D views fall to the error page | M2 | Demo risk on a laptop or projector without WebGL (P7.48) | Fixed: `Safe3D` falls back to the 2D top view (P7.48) | Yes |
 
 ## Sync log
 

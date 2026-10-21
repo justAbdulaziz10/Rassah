@@ -7,6 +7,8 @@ import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
 import { fmtDims, fmtMs, fmtNum, fmtSar, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
 import { FlagChips, SeededBadge, SourceBadge, StatusPill } from "./Badges";
 import FactsForm, { type FactsFormValues } from "./FactsForm";
+import Safe3D from "./Safe3D";
+import TopView2D from "./TopView2D";
 
 // WebGL needs the browser; show the written instructions while it loads.
 const PackingView3D = dynamic(() => import("./PackingView3D"), {
@@ -69,6 +71,15 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
   }
 
   const d = state.data;
+  const viewItems = d.items.map((it) => ({
+    unitId: it.unitId,
+    name: it.name,
+    fragile: it.facts.fragile,
+    liquid: it.facts.liquid,
+    sensitive: it.facts.sensitive,
+    estimated: it.marginApplied,
+    placement: it.placement,
+  }));
   const itemsByProduct = new Map<string, PackItemView>();
   for (const it of d.items) if (!itemsByProduct.has(it.productId)) itemsByProduct.set(it.productId, it);
 
@@ -197,18 +208,20 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
             </div>
             <div className="space-y-3">
               <h2 className="font-bold">العرض ثلاثي الأبعاد</h2>
-              <PackingView3D
-                inner={d.carton.innerCm}
-                items={d.items.map((it) => ({
-                  unitId: it.unitId,
-                  name: it.name,
-                  fragile: it.facts.fragile,
-                  liquid: it.facts.liquid,
-                  sensitive: it.facts.sensitive,
-                  estimated: it.marginApplied,
-                  placement: it.placement,
-                }))}
-              />
+              <Safe3D
+                fallback={
+                  <div className="rounded-lg border border-border bg-surface">
+                    <div className="h-80 w-full p-4 sm:h-96">
+                      <TopView2D inner={d.carton.innerCm} items={viewItems} />
+                    </div>
+                    <p className="border-t border-border px-4 py-3 text-sm text-muted">
+                      العرض ثلاثي الأبعاد غير متاح في هذا المتصفح، فهذا منظر علوي للكرتون. التعليمات المكتوبة كاملة.
+                    </p>
+                  </div>
+                }
+              >
+                <PackingView3D inner={d.carton.innerCm} items={viewItems} />
+              </Safe3D>
             </div>
           </section>
 

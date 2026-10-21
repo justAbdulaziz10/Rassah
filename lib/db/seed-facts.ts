@@ -4,6 +4,7 @@
 // no confidence, not counted as AI products or AI corrections). Products whose ground truth has no
 // dimensions (group C) are left out and still go to "needs measurement".
 // Real (Supabase) mode never calls this; the Gemini path never reads ground truth.
+import "server-only";
 
 import type { GroundTruthItem } from "@/lib/data/schemas";
 import type { Product, StoredFacts } from "@/lib/db/types";

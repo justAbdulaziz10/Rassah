@@ -46,3 +46,14 @@ export const KIND_COLOR: Record<ItemKind, string> = {
 export function placementOrder<T extends { placement: BoxPlacement }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.placement.z - b.placement.z || a.placement.y - b.placement.y || a.placement.x - b.placement.x);
 }
+
+/** Rects for the 2D top-down fallback (x along the length, y along the width). Lower tops paint first so stacked items show on top. */
+export function topViewRects<T extends { placement: BoxPlacement }>(items: T[]): Array<T & { rx: number; ry: number; rw: number; rh: number }> {
+  return [...items]
+    .sort((a, b) => {
+      const pa = a.placement;
+      const pb = b.placement;
+      return pa.z + pa.dz - (pb.z + pb.dz) || pa.z - pb.z || pa.y - pb.y || pa.x - pb.x;
+    })
+    .map((it) => ({ ...it, rx: it.placement.x, ry: it.placement.y, rw: it.placement.dx, rh: it.placement.dy }));
+}

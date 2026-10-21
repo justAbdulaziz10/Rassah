@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import Safe3D from "../Safe3D";
+import TopView2D from "../TopView2D";
 import type { HeroItem } from "./HeroCanvas";
 
 const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
@@ -55,7 +57,9 @@ export default function HeroPacking({ orderId, cartonName, inner, items, steps }
   return (
     <figure className="relative">
       <div className="aspect-[5/4] w-full">
-        <HeroCanvas key={run} inner={inner} items={items} placed={placed} reducedMotion={reducedMotion} />
+        <Safe3D fallback={<TopView2D inner={inner} items={items.slice(0, placed)} tone="deep" />}>
+          <HeroCanvas key={run} inner={inner} items={items} placed={placed} reducedMotion={reducedMotion} />
+        </Safe3D>
       </div>
 
       <figcaption className="mt-2 rounded-xl border border-white/15 bg-[var(--deep-2)]/80 p-4 text-sm text-[var(--on-deep)] backdrop-blur-sm">
