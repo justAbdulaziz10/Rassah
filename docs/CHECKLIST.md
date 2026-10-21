@@ -190,7 +190,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 1D. Scripts and quality tooling
 - [x] **P1.19** (M3) `package.json` scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `check`, `seed`, `eval:extraction`, `eval:packing`.
-- [x] **P1.20** (M3) `vitest.config.ts` with the `@/*` alias and `environment: "node"`.
+- [x] **P1.20** (M3) `vitest.config.mts` with the `@/*` alias and `environment: "node"`.
 - [x] **P1.21** (M3) One trivial passing test (`tests/smoke.test.ts`) so CI has something to run.
 - [x] **P1.22** (M3) Lint command works (`next lint` or `eslint .`, whichever the scaffold supports). Recorded in stack/08.
 - [x] **P1.23** (M3) `npm run check` passes locally.
@@ -213,7 +213,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P1.34** (M3) The test PR from P1.30 gets a Vercel **preview URL** comment. — PR #1 got the Vercel preview comment (rassah-git-chore-pr-template-….vercel.app)
 
 ### 1H. Branch protection and onboarding
-- [ ] **P1.35** (M3) Enable branch protection on `main`: require `CI / check` + 1 approving review, no direct pushes.
+- [ ] **P1.35** (M3) Enable branch protection on `main`: require `CI / check` + 1 approving review, no direct pushes. — superseded: team pushes straight to main with the local CI gate + GitHub Actions (decisions.md); leave unticked
 - [ ] **P1.36** (M1) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
 - [ ] **P1.37** (M2) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
 - [x] **P1.38** (M3) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — fresh clone 2026-10-21: npm ci → check 152/152 → dev /orders 200
@@ -236,7 +236,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06. — no schema mismatches; stale docs fixed (stack/01, stack/04)
 
 ### 2B. Access layer
-- [x] **P2.9** (M3) `lib/db/server.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
+- [x] **P2.9** (M3) `lib/db/supabase.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
 - [x] **P2.10** (M3) Define a small `Db` interface (the queries the app needs) so tests can use an in-memory fake.
 - [x] **P2.11** (M3) Typed row types for each table in `lib/db/types.ts` (hand-written or generated with `supabase gen types`).
 - [x] **P2.12** (M3) Queries: `getOrderWithItems(orderId)`.
@@ -246,7 +246,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P2.16** (M3) Queries: `insertAlert`, `getOpenAlerts`, `resolveAlert`.
 - [x] **P2.17** (M3) Queries: `insertEvalRun`, `insertEvalResults`, `getLatestEvalRuns(kind)`.
 - [x] **P2.18** (M3) Queries: `getRunTrace(runId)` returns the order run + extraction events + corrections.
-- [x] **P2.19** (M3) In-memory fake implementing the `Db` interface (`tests/fakes/db.ts`).
+- [x] **P2.19** (M3) In-memory fake implementing the `Db` interface (`tests/fakes/memory-repo.ts`).
 
 ### 2C. Seed and reset
 - [x] **P2.20** (M3, →T5) `scripts/seed.ts`: upsert products (computing `source_hash`), cartons, orders, order_items from `data/*.json`.
@@ -400,7 +400,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 5A. SDK and client
 - [x] **P5.1** (M1) Read the `@google/genai` README (googleapis/js-genai). Confirm the exact names for structured output and usage metadata. Note them in stack/02.
-- [x] **P5.2** (M1) `lib/ai/client.ts`: `import "server-only"`, a `GoogleGenAI` client from `GEMINI_API_KEY`, model from `GEMINI_MODEL`.
+- [x] **P5.2** (M1) `lib/ai/gemini.ts`: `import "server-only"`, a `GoogleGenAI` client from `GEMINI_API_KEY`, model from `GEMINI_MODEL`.
 - [x] **P5.3** (M1) Missing key → typed `config_error` (no crash at import time).
 
 ### 5B. Schema
@@ -558,12 +558,12 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.26** (M2) Engine (z-up) → three.js (y-up) mapping helper + unit test.
 - [x] **P7.27** (M2) Box center = origin + size/2 helper + unit test.
 - [x] **P7.28** (M2) Carton drawn as a wireframe. Items as solid boxes with edges.
-- [x] **P7.29** (M2) Colors by flag. Estimated items get a dashed outline + label suffix.
+- [x] **P7.29** (M2) Colors by flag. Estimated items get a dashed outline + label suffix. — changed: in 3D, estimated items are translucent (no dashed edges in drei); dashed outline stays on 2D badges (decisions.md 2026-10-21)
 - [x] **P7.30** (M2) Hover/tap label with the item name.
 - [x] **P7.31** (M2) OrbitControls. The camera fits the carton on load.
 - [x] **P7.32** (M2) Step slider: reveals items in placement order, matching the instruction numbers.
-- [ ] **P7.33** (M2) Works on a phone browser (touch rotate/zoom).
-- [ ] **P7.34** (M2) Visual check with 3 fixture orders on the preview (screenshots in the PR).
+- [x] **P7.33** (M2) Works on a phone browser (touch rotate/zoom). — 390×844 touch drag rotates the 3D view on production (docs/report/checks/)
+- [x] **P7.34** (M2) Visual check with 3 fixture orders on the preview (screenshots in the PR). — orders 1001, 1002, 1020 on the PR #1 preview, screenshots in PR #1 comment
 
 ### 7E. Catalog page (`/catalog`)
 - [x] **P7.35** (M2) Table of `product_facts`: name, dims, weight, flags, sources, confidence, origin, extracted_at.
@@ -579,8 +579,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.43** (M2) No console errors in the browser on the main flow.
 
 ### 7G. Verification
-- [ ] **P7.44** (M3) Review PR on the preview: full flow for the 3 demo orders.
-- [ ] **P7.45** (M1) Try the edit flow: an edit changes the correction rate data (checked in Supabase).
+- [x] **P7.44** (M3) Review PR on the preview: full flow for the 3 demo orders. — full flow for the 3 demo orders on the PR #1 preview (PR #1 comment)
+- [x] **P7.45** (M1) Try the edit flow: an edit changes the correction rate data (checked in Supabase). — p-21 edited 5→6 cm on production: M1 null → 0.333 (1/3), corrections 0 → 1 row
 - [x] **P7.46** (M2) Test on phone width and desktop. — 390 px and 1440 px checked 2026-10-21
 - [ ] **P7.47** (M2) Update the dashboard. **Gate G7 check.**
 
@@ -747,7 +747,7 @@ CI needs **no** secrets because tests never call external services.
 ### 10E. Performance
 - [x] **P10.26** (M3) Cached order total time measured on production (target: well under 2 s). — cached 119–234 ms server-side (fra1)
 - [x] **P10.27** (M3) Uncached order total time measured on production. Within the function limit with margin. — uncached 1589 ms (Gemini 1205 ms), far below the function limit
-- [ ] **P10.28** (M2) 3D view loads in under ~2 s on the demo laptop.
+- [x] **P10.28** (M2) 3D view loads in under ~2 s on the demo laptop. — median 2001 ms over 3 runs on production, this laptop (docs/report/checks/README.md); borderline, re-check on the demo laptop
 - [x] **P10.29** (M3) Final M5 alert thresholds set from these numbers (P8.18). — thresholds kept (see P8.18)
 
 ### 10F. Repository final state
@@ -780,7 +780,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly). — states honestly: no merchant replies recorded yet
 - [x] **P11.12** (M1) 2. Solution and user flow (with screenshots). — screenshots 01–03 embedded in §2
 - [x] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
-- [x] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout.
+- [ ] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout. — REOPENED by audit 2026-10-21: ground truth was AI-drafted and its independent review (P3.12/P3.16) is still open; REPORT.md says so
 - [x] **P11.15** (M2) 5. Technical design: architecture, engine rules, validator, cost model (labeled estimates), fallback chain, cache.
 - [x] **P11.16** (M3) 6. Development environment: repo, branches, CI, previews, tests, decision log.
 - [x] **P11.17** (M3) 7. Selected metrics: the 7 metrics, why each, what each reveals, alert rules.
@@ -812,7 +812,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [x] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons). — decisions.md complete (2026-10-21)
 - [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest).
-- [ ] **P11.42** (ALL) `docs/report/results.md` final.
+- [x] **P11.42** (ALL) `docs/report/results.md` final. — marked FINAL 2026-10-21
 - [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
 
 ### 11F. Code walkthrough prep (team-participation requirement)
@@ -856,7 +856,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P12.15** (M3) Zoom level set so the judges can read the screen. Notifications off.
 - [ ] **P12.16** (M3) Mobile hotspot available as an internet backup.
 - [ ] **P12.17** (M3) Backup video + deck PDF stored locally (offline).
-- [ ] **P12.18** (M3) Local `npm run dev` fallback tested this morning.
+- [x] **P12.18** (M3) Local `npm run dev` fallback tested this morning. — tested 2026-10-21 with DATA_BACKEND=memory (docs/demo-script.md "Offline fallback"); repeat Thursday morning
 - [ ] **P12.19** (M2) HDMI/USB-C adapter if presenting from your own laptop.
 
 ### 12D. Submission
