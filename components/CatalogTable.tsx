@@ -6,7 +6,7 @@ import type { DataSource } from "@/lib/engine/types";
 import { fmtApiError, fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_HINT, SOURCE_LABEL } from "@/lib/ui/format";
 import { FlagChips, SourceBadge } from "./Badges";
 import FactsForm from "./FactsForm";
-import { EmptyState } from "./PageHeader";
+import { EmptyState, Notice } from "./PageHeader";
 
 export interface CatalogRow {
   productId: string;
@@ -66,25 +66,28 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="تصفية حسب مصدر المقاس">
-        <span className="text-muted">مصدر المقاس:</span>
-        {filters.map(([k, label]) => (
-          <button
-            key={k}
-            onClick={() => setFilter(k)}
-            aria-pressed={filter === k}
-            className={`rounded-full border px-3 py-1 transition-colors ${filter === k ? "border-brand bg-brand font-medium text-brand-contrast" : "border-border bg-surface hover:border-brand"}`}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 text-sm" role="group" aria-label="تصفية حسب مصدر المقاس">
+        <span className="shrink-0 text-muted">مصدر المقاس:</span>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none]">
+          {filters.map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setFilter(k)}
+              aria-pressed={filter === k}
+              className={`shrink-0 rounded-full border px-3.5 py-1.5 transition-colors ${filter === k ? "border-brand bg-brand font-medium text-brand-contrast" : "border-border bg-surface hover:border-brand"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
-      {message && <p className="text-sm text-critical">{message}</p>}
-      <div className="overflow-x-auto rounded-lg border border-border bg-surface">
-        <table className="w-full min-w-[900px] text-sm [&_td]:px-3 [&_td]:py-3 [&_th]:px-3 [&_th]:py-2.5">
-          <thead className="bg-background/60 text-xs text-muted">
+      {message && <Notice tone="critical">{message}</Notice>}
+      <p className="text-xs text-muted md:hidden">اسحب الجدول جانباً لرؤية بقية الأعمدة.</p>
+      <div className="table-scroll panel">
+        <table className="w-full min-w-[900px] text-sm [&_td]:px-3 [&_td]:py-3.5 [&_th]:px-3 [&_th]:py-3">
+          <thead className="bg-background text-xs text-muted">
             <tr className="border-b border-border">
-              <th className="text-start font-medium">المنتج</th>
+              <th className="sticky start-0 z-10 bg-background text-start font-medium">المنتج</th>
               <th className="text-start font-medium">
                 المقاس (سم)
                 <span className="block text-[11px] font-normal">الطول × العرض × الارتفاع</span>
@@ -103,10 +106,10 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
           </thead>
           <tbody>
             {visible.map((r) => (
-              <tr key={r.productId} className="border-b border-border align-top last:border-0 hover:bg-background/50">
-                <td className="min-w-[230px]">
-                  <span className="font-medium">{r.name}</span> <span className="ltr-nums text-xs text-muted" title="رمز المنتج">{r.productId}</span>
-                  {r.facts?.evidence && <p className="mt-0.5 max-w-xs text-xs text-muted">«{r.facts.evidence}»</p>}
+              <tr key={r.productId} className="group/row border-b border-border align-top last:border-0 hover:bg-background/60">
+                <td className={`min-w-[190px] sm:min-w-[230px] ${editing === r.productId ? "" : "sticky start-0 z-10 bg-surface group-hover/row:bg-background"}`}>
+                  <span className="font-medium">{r.name}</span> <span className="ltr-nums inline-block whitespace-nowrap text-xs text-muted" title="رمز المنتج">{r.productId}</span>
+                  {r.facts?.evidence && <p className="mt-1 max-w-xs text-xs leading-5 text-muted">«{r.facts.evidence}»</p>}
                   {editing === r.productId && (
                     <div className="mt-2 min-w-[520px]">
                       <FactsForm
@@ -147,7 +150,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
                 </td>
                 <td className="text-xs text-muted">{r.facts?.extractedAt ? fmtTime(r.facts.extractedAt) : "—"}</td>
                 <td className="whitespace-nowrap text-xs">
-                  <button onClick={() => setEditing(editing === r.productId ? null : r.productId)} className="text-brand underline">
+                  <button onClick={() => setEditing(editing === r.productId ? null : r.productId)} className="rounded px-1.5 py-1 font-medium text-brand underline underline-offset-4 hover:bg-brand/10">
                     {r.facts && r.facts.dimsSource !== "unknown" ? "تعديل" : "إدخال القياس"}
                   </button>
                   {demoMode && (
@@ -156,7 +159,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
                         disabled={busy === r.productId}
                         onClick={async () => setMessage(await call(r.productId, `/api/products/${r.productId}/extract`, "POST"))}
                         title="تقرأ رصّة صفحة المنتج من جديد بالذكاء الاصطناعي. لا تستبدل ما قاسه موظف يدوياً."
-                        className="ms-3 text-muted underline disabled:opacity-50"
+                        className="ms-2 rounded px-1.5 py-1 text-muted underline underline-offset-4 hover:bg-border/40 disabled:opacity-50"
                       >
                         {busy === r.productId ? "جارٍ القراءة…" : "إعادة القراءة"}
                       </button>
@@ -165,7 +168,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
                           disabled={busy === r.productId}
                           onClick={async () => setMessage(await call(r.productId, `/api/products/${r.productId}/facts`, "DELETE"))}
                           title="يحذف البيانات المحفوظة لهذا المنتج، فتُقرأ من جديد عند أول طلب يحتويه."
-                          className="ms-3 text-muted underline disabled:opacity-50"
+                          className="ms-2 rounded px-1.5 py-1 text-muted underline underline-offset-4 hover:bg-border/40 disabled:opacity-50"
                         >
                           حذف البيانات المحفوظة
                         </button>

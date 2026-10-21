@@ -53,9 +53,22 @@
     --critical-soft: #450a0a;
     --info-soft: #172554;
 
+    /* Lighter tints of the same hues so small text stays readable (4.5:1+) on the dark surfaces. Meaning is unchanged. */
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --critical: #f87171;
+    --info: #7db4ff;
+    --liquid: #7db4ff;
+    --sensitive: #b79cfb;
+
     --series-1: #3987e5;
     --series-2: #d95926;
     --chart-grid: #2c2c2a;
+  }
+
+  /* Solid status fills use white text in light mode; on the lighter dark-mode fills, dark text keeps the contrast. */
+  :is(.bg-critical, .bg-warn, .bg-ok).text-white {
+    color: #14100a;
   }
 }
 
@@ -117,18 +130,98 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Browser surfaces themed from the palette. In @layer base so component utilities (focus-visible:outline-*) still win. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 28%, transparent);
+  }
+  html {
+    scroll-behavior: smooth;
+    scrollbar-color: color-mix(in oklab, var(--muted) 45%, transparent) transparent;
+  }
+  summary {
+    cursor: pointer;
+  }
+  summary:focus-visible {
+    border-radius: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+}
+
+/* Shared console surfaces. One elevation system: a 1px border, no shadow. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Scroll container for wide tables: scrolls inside itself, never the page. */
+.table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Loading placeholder shimmer, still under prefers-reduced-motion (see above). */
+.skeleton {
+  background: color-mix(in oklab, var(--border) 70%, transparent);
+  border-radius: 8px;
+}
+
 /* Landing page palette (app/page.tsx). Deep teal from the brand, kraft for the carton, tape yellow for the one primary action. */
 .landing {
   --ink: #12211e;
+  --ink-2: #3d4e4a;
+  --ink-3: #566763;
   --paper: #f3f6f4;
+  --panel: #ffffff;
+  --rule: color-mix(in oklab, var(--ink) 14%, transparent);
   --deep: #0b3b36;
   --deep-2: #0e4a43;
   --kraft: #b98a55;
   --tape: #f2c14e;
   --on-deep: #e6efec;
   --on-deep-muted: #a9c3bd;
+  --ok-ink: #166534;
+  --bad-ink: #9f1d1d;
+  --warn-ink: #8a4b06;
   background: var(--paper);
   color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  .landing {
+    --ink: #e4ece9;
+    --ink-2: #bccac6;
+    --ink-3: #9bada8;
+    --paper: #0c1413;
+    --panel: #121b1a;
+    --deep: #0b3b36;
+    --deep-2: #0e4a43;
+    --ok-ink: #4ade80;
+    --bad-ink: #f87171;
+    --warn-ink: #fbbf24;
+  }
+}
+
+/* The shipping label always prints dark on white, in both themes, like a real parcel label. */
+.parcel-label {
+  --ink: #12211e;
+  background: #ffffff;
+  color: #12211e;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -137,5 +230,31 @@ body {
   .landing *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* One authored moment on the landing page: the proof bars grow in once when they scroll into view. */
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.bar-grow {
+  transform-origin: right center;
+  animation: bar-grow 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-timeline: view();
+  animation-range: entry 10% entry 90%;
+}
+@supports not (animation-timeline: view()) {
+  .bar-grow {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar-grow {
+    animation: none;
   }
 }

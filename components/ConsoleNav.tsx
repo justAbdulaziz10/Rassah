@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fmtCount } from "@/lib/ui/format";
+import { BellIcon, CrossIcon } from "./Icons";
 
 interface QueueSummary {
   counts: { new: number; ready: number; attention: number; done: number; remaining: number; total: number };
@@ -96,23 +97,24 @@ export default function ConsoleNav() {
 
   return (
     <>
-      <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3" aria-label="التنقل الرئيسي">
-        <Link href="/" className="font-display text-xl font-bold text-brand">
+      <nav className="mx-auto flex max-w-6xl items-center gap-x-5 px-4 py-2.5" aria-label="التنقل الرئيسي">
+        <Link href="/" className="shrink-0 font-display text-2xl font-bold leading-none text-brand" aria-label="رصّة، الصفحة الرئيسية">
           رصّة
         </Link>
-        <ul className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm">
+        <span className="h-5 w-px shrink-0 bg-border" aria-hidden />
+        <ul className="-mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 py-0.5 text-sm [scrollbar-width:none]">
           {NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
-              <li key={item.href}>
+              <li key={item.href} className="shrink-0">
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`inline-flex items-center rounded-md px-2.5 py-1.5 transition-colors ${
-                    active ? "bg-brand/10 font-bold text-foreground" : "text-muted hover:bg-border/40 hover:text-foreground"
+                  className={`inline-flex items-center rounded-lg px-3 py-2 transition-colors ${
+                    active ? "bg-brand/12 font-bold text-foreground" : "text-muted hover:bg-border/40 hover:text-foreground"
                   }`}
                 >
-                  {item.href === "/notifications" && <BellIcon />}
+                  {item.href === "/notifications" && <BellIcon className="me-1.5 size-4" />}
                   {item.label}
                   {item.href === "/orders" && c && (
                     <Badge n={c.remaining} tone={c.attention > 0 ? "critical" : "brand"} label={`${c.remaining} طلب متبقٍ`} />
@@ -124,14 +126,14 @@ export default function ConsoleNav() {
           })}
         </ul>
         {failures >= 2 && (
-          <span role="status" className="text-xs text-warn" title="الأرقام المعروضة قد تكون قديمة. ستُحدَّث تلقائياً عند عودة الاتصال.">
+          <span role="status" className="hidden shrink-0 text-xs text-warn sm:inline" title="الأرقام المعروضة قد تكون قديمة. ستُحدَّث تلقائياً عند عودة الاتصال.">
             تعذّر تحديث الأرقام
           </span>
         )}
       </nav>
 
       {arrived.length > 0 && (
-        <div role="status" className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-fit max-w-[92vw] items-center gap-3 rounded-xl border border-brand bg-surface px-4 py-3 text-sm shadow-lg">
+        <div role="status" className="fixed inset-x-0 bottom-4 z-50 mx-auto flex w-fit max-w-[92vw] items-center gap-3 rounded-xl border border-brand bg-surface px-4 py-3 text-sm shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]">
           <span className="size-2 shrink-0 rounded-full bg-brand" aria-hidden />
           <span>
             {arrived.length === 1 ? (
@@ -145,20 +147,11 @@ export default function ConsoleNav() {
           <Link href={arrived.length === 1 ? `/orders/${arrived[0]}` : "/orders?show=new"} onClick={() => setArrived([])} className="font-bold text-brand underline-offset-4 hover:underline">
             افتح
           </Link>
-          <button type="button" onClick={() => setArrived([])} className="text-muted hover:text-foreground" aria-label="إغلاق">
-            ✕
+          <button type="button" onClick={() => setArrived([])} className="grid size-7 place-items-center rounded-md text-muted hover:bg-border/40 hover:text-foreground" aria-label="إغلاق">
+            <CrossIcon className="size-4" />
           </button>
         </div>
       )}
     </>
-  );
-}
-
-function BellIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="me-1 size-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
   );
 }

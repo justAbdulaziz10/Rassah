@@ -32,7 +32,8 @@ import {
   STATUS_LABEL,
 } from "@/lib/ui/format";
 import { StatusPill } from "./Badges";
-import { CardSkeleton, EmptyState } from "./PageHeader";
+import { AlertIcon, CheckIcon, InfoIcon } from "./Icons";
+import { DashboardSkeleton, EmptyState, Notice } from "./PageHeader";
 
 const FIELD_LABEL: Record<string, string> = {
   lengthCm: "الطول",
@@ -119,11 +120,9 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
   if (!data) {
     return error ? (
-      <p className="rounded-lg border border-critical bg-critical-soft p-4 text-sm">
-        تعذّر تحميل أرقام الأداء. {fmtApiError(error)}
-      </p>
+      <Notice tone="critical">تعذّر تحميل أرقام الأداء. {fmtApiError(error)}</Notice>
     ) : (
-      <CardSkeleton />
+      <DashboardSkeleton />
     );
   }
 
@@ -150,6 +149,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="الفترة الزمنية">
           <span className="text-muted">الفترة:</span>
+          <span className="inline-flex gap-1 rounded-full border border-border bg-surface p-1">
           {WINDOWS.map(([w, label]) => (
             <button
               key={w}
@@ -159,18 +159,19 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                 setWin(w);
               }}
               aria-pressed={win === w}
-              className={`rounded-full border px-3 py-1 transition-colors ${win === w ? "border-brand bg-brand font-medium text-brand-contrast" : "border-border bg-surface hover:border-brand"}`}
+              className={`rounded-full px-3.5 py-1.5 transition-colors ${win === w ? "bg-brand font-bold text-brand-contrast" : "text-muted hover:bg-border/40 hover:text-foreground"}`}
             >
               {label}
             </button>
           ))}
+          </span>
         </div>
         <span className="ms-auto text-xs text-muted">
           {fmtCount(data.totals.runs, RUNS)} · {fmtCount(data.totals.extractions, READS)} · آخر تحديث {fmtTime(data.generatedAt)}
         </span>
       </div>
 
-      {error && <p className="text-sm text-critical">تعذّر تحديث الأرقام ({fmtApiError(error)}). المعروض هو آخر تحديث ناجح.</p>}
+      {error && <Notice tone="warn">تعذّر تحديث الأرقام ({fmtApiError(error)}). المعروض هو آخر تحديث ناجح.</Notice>}
       <Alerts alerts={data.alerts} failed={data.alertsError} />
 
       {/* Headline numbers: one number each, so stat tiles, not charts. */}
@@ -222,7 +223,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                 <LineChart data={latency} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="t" {...AXIS} minTickGap={24} />
-                  <YAxis {...AXIS} width={60} tickFormatter={(v: number) => fmtAxisMs(v, latencyMax)} />
+                  <YAxis {...AXIS} width={76} tickFormatter={(v: number) => fmtAxisMs(v, latencyMax)} />
                   <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => fmtMs(Number(v))} labelFormatter={(l) => `الساعة ${l}`} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line name="منتجاته معروفة مسبقاً" dataKey="cached" stroke="var(--series-1)" strokeWidth={2} dot={{ r: 4 }} connectNulls isAnimationActive={false} />
@@ -248,7 +249,14 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
         </Card>
 
         <Card code="M6" title="أسباب فشل قراءة المنتجات" hint="الأسباب مرتبة من الأكثر تكراراً." n={m.m6GeminiFailureRate.n}>
-          {failureRows.length === 0 ? <p className="py-8 text-center text-sm text-ok">✓ لم يفشل أي طلب في هذه الفترة</p> : <HBar rows={failureRows} />}
+          {failureRows.length === 0 ? (
+            <p className="flex items-center justify-center gap-2 py-8 text-sm font-medium text-ok">
+              <CheckIcon className="size-5" />
+              لم يفشل أي طلب في هذه الفترة
+            </p>
+          ) : (
+            <HBar rows={failureRows} />
+          )}
           <TableView
             head={["الحالة", "العدد"]}
             rows={Object.entries(m.m6GeminiFailureRate.byStatus).map(([s, v]) => [EXTRACTION_STATUS_LABEL[s] ?? s, String(v)])}
@@ -258,10 +266,16 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
         <div className="grid gap-4">
           <Card code="M3" title="ترتيبات رفضها المدقّق" hint="يفحص مدقّق مستقل كل ترتيب قبل أن يراه الموظف. يجب أن يبقى الرقم صفراً، وأي رقم غيره يعني خللاً يُبلَّغ به الفريق التقني.">
             {m.m3ValidatorRejections.value === 0 ? (
-              <p className="text-2xl font-bold text-ok">✓ 0</p>
+              <p className="flex items-center gap-2 text-3xl font-bold text-ok">
+                <CheckIcon className="size-7" />
+                <span className="ltr-nums">0</span>
+              </p>
             ) : (
               <div>
-                <p className="text-2xl font-bold text-critical">⚠ {m.m3ValidatorRejections.value}</p>
+                <p className="flex items-center gap-2 text-3xl font-bold text-critical">
+                  <AlertIcon className="size-7" />
+                  <span className="ltr-nums">{m.m3ValidatorRejections.value}</span>
+                </p>
                 <p className="mt-1 text-sm" dir="ltr">
                   {Object.entries(m.m3ValidatorRejections.byCode)
                     .map(([c, v]) => `${c}: ${v}`)
@@ -271,7 +285,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
             )}
           </Card>
           <Card code="M4" title="طلبات بلا كرتون مناسب" hint="إذا ارتفعت النسبة فالكراتين المتوفرة لا تناسب منتجاتك، أو هامش الأمان كبير أكثر من اللازم." n={m.m4NoBoxRate.n}>
-            <p className="text-2xl font-bold">{fmtPct(m.m4NoBoxRate.value)}</p>
+            <p className="text-3xl font-bold">{fmtPct(m.m4NoBoxRate.value)}</p>
             {Object.keys(m.m4NoBoxRate.skipReasons).length > 0 && (
               <ul className="mt-1 text-sm text-muted">
                 {Object.entries(m.m4NoBoxRate.skipReasons).map(([k, v]) => (
@@ -286,7 +300,8 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
       </section>
 
       <Card title="آخر الطلبات المجهّزة" hint="اضغط على أي صف لعرض تفاصيله: ما قرأته رصّة من المنتجات، والأزمنة، وتصحيحات الموظف.">
-        <div className="overflow-x-auto">
+        <p className="mb-2 text-xs text-muted md:hidden">اسحب الجدول جانباً لرؤية بقية الأعمدة.</p>
+        <div className="table-scroll">
           <table className="w-full min-w-[820px] text-sm [&_td]:px-2 [&_td]:py-2.5 [&_th]:px-2 [&_th]:py-2">
             <thead className="text-xs text-muted">
               <tr className="border-b border-border">
@@ -310,7 +325,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                   onClick={() => setTraceId(r.id)}
                   onKeyDown={(e) => e.key === "Enter" && setTraceId(r.id)}
                   aria-selected={traceId === r.id}
-                  className={`cursor-pointer border-b border-border last:border-0 hover:bg-background ${traceId === r.id ? "bg-background" : ""}`}
+                  className={`cursor-pointer border-b border-border last:border-0 hover:bg-background ${traceId === r.id ? "bg-brand/10" : ""}`}
                 >
                   <td className="text-xs">{fmtTime(r.createdAt)}</td>
                   <td className="ltr-nums">#{r.orderId}</td>
@@ -345,23 +360,36 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 }
 
 function Alerts({ alerts, failed }: { alerts: DashboardData["alerts"]; failed: boolean }) {
-  if (failed) return <p className="rounded-lg border border-warn bg-warn-soft p-3 text-sm">⚠ تعذّر فحص التنبيهات</p>;
-  if (alerts.length === 0) return <p className="rounded-lg border border-ok bg-ok-soft p-3 text-sm text-ok">✓ لا توجد تنبيهات مفتوحة</p>;
+  if (failed) return <Notice tone="warn">تعذّر فحص التنبيهات. حدّث الصفحة بعد قليل.</Notice>;
+  if (alerts.length === 0) {
+    return (
+      <p className="flex items-center gap-2 rounded-xl border border-ok bg-ok-soft px-4 py-3 text-sm font-medium text-ok">
+        <CheckIcon className="size-5" />
+        لا توجد تنبيهات مفتوحة
+      </p>
+    );
+  }
   const style = { critical: "border-critical bg-critical-soft", warning: "border-warn bg-warn-soft", info: "border-info bg-info-soft" };
-  const icon = { critical: "⛔ حرج", warning: "⚠ تحذير", info: "ℹ معلومة" };
+  const label = { critical: "حرج", warning: "تحذير", info: "معلومة" };
   return (
     <div className="space-y-2" role="alert">
-      {alerts.map((a) => (
-        <div key={a.id ?? a.rule} className={`rounded-lg border p-3 text-sm ${style[a.severity]}`}>
-          <span className="font-bold">{icon[a.severity]}</span> <span className="ltr-nums text-xs text-muted">{a.rule.split("_")[0]}</span>
-          <p className="mt-1">{a.message}</p>
-          <p className="mt-1 text-xs text-muted">
-            القيمة {alertNumber(a.rule, a.value)} · الحدّ المسموح {alertNumber(a.rule, a.threshold)} · بناءً على{" "}
-            <span className="ltr-nums">{a.sampleSize}</span> حالة · بتاريخ {fmtTime(a.createdAt)}
-            {a.simulated && " · (عطل تجريبي)"}
-          </p>
-        </div>
-      ))}
+      {alerts.map((a) => {
+        const Icon = a.severity === "info" ? InfoIcon : AlertIcon;
+        return (
+          <div key={a.id ?? a.rule} className={`rounded-xl border p-4 text-sm ${style[a.severity]}`}>
+            <p className="flex items-center gap-2 font-bold">
+              <Icon className="size-5" />
+              {label[a.severity]} <span className="ltr-nums text-xs font-normal text-muted">{a.rule.split("_")[0]}</span>
+            </p>
+            <p className="mt-1.5 leading-6">{a.message}</p>
+            <p className="mt-1.5 text-xs leading-5 text-muted">
+              القيمة {alertNumber(a.rule, a.value)} · الحدّ المسموح {alertNumber(a.rule, a.threshold)} · بناءً على{" "}
+              <span className="ltr-nums">{a.sampleSize}</span> حالة · بتاريخ {fmtTime(a.createdAt)}
+              {a.simulated && " · (عطل تجريبي)"}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -383,26 +411,24 @@ function Sample({ n }: { n: number }) {
 
 function Tile(props: { code?: string; title: string; value: string; n: number; sufficient: boolean; hint: string; detail?: string }) {
   return (
-    <div data-metric={props.code} className="rounded-lg border border-border bg-surface p-4">
-      <p className="text-xs text-muted">
-        {props.title}
+    <div data-metric={props.code} className="panel flex flex-col p-4">
+      <p className="text-sm font-medium leading-6">{props.title}</p>
+      <p className="ltr-nums mt-2 font-display text-[1.65rem] font-bold leading-tight">
+        {props.sufficient ? props.value : <span className="font-sans text-base font-medium text-muted">الحالات قليلة، لا يُعتمد على الرقم بعد</span>}
       </p>
-      <p className="mt-2 text-2xl font-bold">
-        {props.sufficient ? props.value : <span className="text-base font-medium text-muted">الحالات قليلة، لا يُعتمد على الرقم بعد</span>}
-      </p>
-      <p className="mt-1 text-xs text-muted">
+      <p className="mt-1.5 text-xs text-muted">
         {props.detail && props.sufficient ? `${props.detail} · ` : ""}
         <Sample n={props.n} />
       </p>
-      <p className="mt-2 text-xs text-muted">{props.hint}</p>
+      <p className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted">{props.hint}</p>
     </div>
   );
 }
 
 function Card({ code, title, hint, n, children }: { code?: string; title: string; hint?: string; n?: number; children: React.ReactNode }) {
   return (
-    <section data-metric={code} className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="font-bold">
+    <section data-metric={code} className="panel p-4 sm:p-5">
+      <h2 className="text-lg font-bold leading-7">
         {title}{" "}
         {n !== undefined && (
           <span className="text-xs font-normal text-muted">
@@ -410,7 +436,7 @@ function Card({ code, title, hint, n, children }: { code?: string; title: string
           </span>
         )}
       </h2>
-      {hint && <p className="mb-3 mt-1 text-xs text-muted">{hint}</p>}
+      {hint && <p className="mb-4 mt-1 text-sm leading-6 text-muted">{hint}</p>}
       {children}
     </section>
   );
@@ -477,7 +503,7 @@ function TraceView({ trace, onClose }: { trace: Trace; onClose: () => void }) {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, []);
   return (
-    <section ref={ref} className="rounded-lg border-2 border-brand bg-surface p-4" aria-label="تفاصيل الطلب">
+    <section ref={ref} className="rounded-xl border-2 border-brand bg-surface p-4 sm:p-5" aria-label="تفاصيل الطلب">
       <div className="flex items-center gap-2">
         <h2 className="font-bold">تفاصيل تجهيز الطلب #{r.orderId}</h2>
         <button onClick={onClose} className="ms-auto rounded border border-border px-3 py-1 text-xs hover:border-brand">
