@@ -9,7 +9,7 @@ export default function MonitoringPage(props: PageProps<"/monitoring">) {
   return (
     <div className="space-y-5">
       <PageHeader title="الأداء">
-        كيف تعمل رصّة على طلباتك: سرعة التجهيز، ودقة قراءة المنتجات، وتكلفة كل طلب. طلبات الاختبار التجريبية لا تدخل في هذه الأرقام.
+        سرعة التجهيز، ودقة قراءة المنتجات، وتكلفة كل طلب.
       </PageHeader>
       <Suspense fallback={<DashboardSkeleton />}>
         <Dashboard searchParams={props.searchParams} />

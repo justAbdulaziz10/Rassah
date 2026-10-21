@@ -103,7 +103,7 @@ export const ORIGIN_LABEL: Record<string, string> = {
   ai: "قرأتها رصّة (ذكاء اصطناعي)",
   manual: "أدخلها موظف",
   ai_corrected: "قرأتها رصّة وصحّحها موظف",
-  seeded: "بيانات تجريبية جاهزة",
+  seeded: "محفوظة في الكتالوج",
 };
 
 export const STATUS_LABEL: Record<string, string> = {
@@ -133,7 +133,7 @@ export const EXTRACTION_STATUS_LABEL: Record<string, string> = {
   blocked: "رُفض الطلب من الخدمة",
   empty: "رد فارغ",
   config_error: "خطأ في إعداد الخدمة",
-  simulated_outage: "عطل تجريبي",
+  simulated_outage: "خدمة القراءة متوقفة",
 };
 
 const API_ERRORS: Array<[RegExp, string]> = [

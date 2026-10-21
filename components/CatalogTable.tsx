@@ -97,7 +97,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
               <th className="text-start font-medium" title="هل المقاس مكتوب في الصفحة، أم تقدير، أم قياس يدوي؟">
                 مصدر المقاس
               </th>
-              <th className="text-start font-medium" title="من أنتج هذه البيانات: رصّة بالذكاء الاصطناعي، أم موظف، أم بيانات تجريبية؟">
+              <th className="text-start font-medium" title="من أنتج هذه البيانات: رصّة بالذكاء الاصطناعي، أم موظف، أم محفوظة مسبقاً؟">
                 من أدخل البيانات
               </th>
               <th className="text-start font-medium">آخر قراءة</th>

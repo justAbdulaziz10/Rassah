@@ -24,13 +24,13 @@
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 38 | 38 | ✅ Done (gate passed) |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 55 | 55 | ✅ Done (gate passed) |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 56 | 56 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **526** | **458** | |
+| **Total** | | | | **527** | **459** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -589,6 +589,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.53** (M2) Copy pass for end users: plain Arabic, no technical terms on employee screens (no cache, model name, tokens, run IDs, metric codes, env var names; technical detail only inside «تفاصيل تقنية»), API errors translated, Gregorian dates only, Arabic number agreement. — verified 2026-10-21 by screenshots of every page in dark and light; `tests/ui/format.test.ts`
 - [x] **P7.54** (M2) "اطبع الخطوات" prints the packing steps on white paper (navigation, buttons and 3D view hidden). — print styles in `app/globals.css`; checked 2026-10-21
 - [x] **P7.55** (M2) Page polish: landing page (problem → 3 steps → measured proof → comparison with generic packing tools → call to action), console pages (summary panel, empty states, skeletons, phone-width tables), dark-mode contrast for status colors; order page shows a split order carton by carton. — screenshots at 375/1440 px, light and dark, checked 2026-10-21
+- [x] **P7.56** (M2) No demo wording on the site: removed "تجريبي/للعرض فقط", the student/team and synthetic-data notes, the outage checkbox (now `?outage=1` only), the GitHub footer link and filler sentences on the landing and console pages. — rendered-HTML sweep of 6 pages + screenshots, 2026-10-21
 
 ---
 
@@ -705,7 +706,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.31** (M3) Latest packing run: headline metrics + engine version + date.
 - [x] **P9.32** (M3) Previous run shown next to the latest for before/after comparison.
 - [x] **P9.33** (M3) Per-case table (expandable) with pass/fail and details.
-- [x] **P9.34** (M3) Honesty note on the page: "Synthetic dataset written by the team. See the report."
+- [x] **P9.34** (M3) Honesty note on the page: "Synthetic dataset written by the team. See the report." — removed from the site on 2026-10-21 at the user's request; the note stays in the report
 
 ### 9F. Verification
 - [x] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`. — `/evaluation` reads the JSON (DB first, file fallback via `lib/monitoring/evaluation.ts`); results.md and REPORT.md checked against the JSON. Re-check on the deployed page if `eval_runs` holds an older run

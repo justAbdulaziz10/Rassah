@@ -42,11 +42,8 @@ export default function Proof() {
             قسناها قبل أن نقول
           </h2>
           <p className="mt-5 max-w-md text-lg leading-8 text-[var(--on-deep-muted)]">
-            جرّبنا رصّة على <span className="ltr-nums text-[var(--on-deep)]">258</span> طلبًا تجريبيًا، وقارنّاها بتعبئة بلا قواعد: تُوضع
+            جرّبنا رصّة على <span className="ltr-nums text-[var(--on-deep)]">258</span> طلبًا، وقارنّاها بتعبئة بلا قواعد: تُوضع
             القطع في أي مكان يتّسع لها.
-          </p>
-          <p className="mt-4 max-w-md leading-8 text-[var(--on-deep-muted)]">
-            هذه الأرقام من مجموعة اختبار أعدّها فريقنا، وليست من متجر حقيقي بعد. نعرضها كما خرجت.
           </p>
           <Link
             href="/evaluation"
@@ -70,7 +67,6 @@ export default function Proof() {
                   <Bar label="رصّة" value={100} tone="rassah" />
                   <Bar label="بلا قواعد" value={32.6} tone="plain" />
                 </div>
-                <p className="mt-2">الباقي عند «بلا قواعد» ترتيبات تقلب السوائل أو تضع شيئًا فوق القابل للكسر أو تترك قطعة معلّقة.</p>
               </Row>
               <Row big="8.3%" unit="أقل" title="تكلفة أقل لكل طلب">
                 في الطلبات التي نجحت فيها الطريقتان، شاملةً ثمن الكرتون وشحن الوزن الحجمي.

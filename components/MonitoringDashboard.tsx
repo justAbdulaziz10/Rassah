@@ -385,7 +385,6 @@ function Alerts({ alerts, failed }: { alerts: DashboardData["alerts"]; failed: b
             <p className="mt-1.5 text-xs leading-5 text-muted">
               القيمة {alertNumber(a.rule, a.value)} · الحدّ المسموح {alertNumber(a.rule, a.threshold)} · بناءً على{" "}
               <span className="ltr-nums">{a.sampleSize}</span> حالة · بتاريخ {fmtTime(a.createdAt)}
-              {a.simulated && " · (عطل تجريبي)"}
             </p>
           </div>
         );

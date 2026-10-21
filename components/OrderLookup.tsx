@@ -4,10 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SearchIcon } from "./Icons";
 
-export default function OrderLookup({ demoMode }: { demoMode: boolean }) {
+export default function OrderLookup() {
   const router = useRouter();
   const [value, setValue] = useState("");
-  const [outage, setOutage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function submit(e: React.FormEvent) {
@@ -17,7 +16,7 @@ export default function OrderLookup({ demoMode }: { demoMode: boolean }) {
       setError("اكتب رقم الطلب بالأرقام فقط");
       return;
     }
-    router.push(`/orders/${n}${outage ? "?outage=1" : ""}`);
+    router.push(`/orders/${n}`);
   }
 
   return (
@@ -52,12 +51,6 @@ export default function OrderLookup({ demoMode }: { demoMode: boolean }) {
         <p id="order-error" className="text-sm text-critical">
           {error}
         </p>
-      )}
-      {demoMode && (
-        <label className="flex items-center gap-2 text-xs text-muted">
-          <input type="checkbox" checked={outage} onChange={(e) => setOutage(e.target.checked)} className="size-4 accent-[var(--brand)]" />
-          للعرض فقط: جرّب الطلب كأن خدمة القراءة الآلية متوقفة
-        </label>
       )}
     </form>
   );

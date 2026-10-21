@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { AlertIcon, ArrowForwardIcon, CheckIcon, PackageCheckIcon } from "@/components/Icons";
 import OrderLookup from "@/components/OrderLookup";
 import { EmptyState, Notice, PageHeader, QueueSkeleton } from "@/components/PageHeader";
-import { appEnv } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { FILTERS, parseFilter, REASON_LABEL, STATE_LABEL, STATE_STYLE, type FilterKey } from "@/lib/orders/labels";
 import { loadQueue, type QueueSnapshot } from "@/lib/orders/load";
@@ -36,7 +35,7 @@ export default function OrdersPage(props: PageProps<"/orders">) {
 
 async function Lookup() {
   await connection();
-  return <OrderLookup demoMode={appEnv().DEMO_MODE} />;
+  return <OrderLookup />;
 }
 
 function matches(e: QueueEntry, f: FilterKey) {

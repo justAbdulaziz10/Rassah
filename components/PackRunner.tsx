@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
 import { fmtApiError, fmtCartons, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
-import { FlagChips, SeededBadge, SourceBadge, StatusPill } from "./Badges";
+import { FlagChips, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
 import FactsForm, { type FactsFormValues } from "./FactsForm";
 import Safe3D from "./Safe3D";
@@ -170,9 +170,6 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
           {packedBefore && !confirmed && (
             <p className="mt-2 text-sm text-ok">✓ غُلّف هذا الطلب {packedBefore.at ? fmtTime(packedBefore.at) : "من قبل"}. الخطوات أدناه للمراجعة فقط.</p>
           )}
-          {d.lines.some((l) => l.origin === "seeded") && (
-            <p className="mt-1 text-xs text-muted">وضع العرض بدون إنترنت: مقاسات المنتجات محمّلة مسبقاً.</p>
-          )}
           {!d.monitoring.saved && <p className="mt-1 text-xs text-warn">لم يُحفظ سجل هذا الطلب في صفحة الأداء. التغليف غير متأثر.</p>}
         </div>
         <div className="flex flex-wrap items-center gap-2 print:hidden">
@@ -276,7 +273,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
           {d.cost && (
             <section className="rounded-lg border border-border bg-surface p-4">
               <h2 className="font-bold">
-                التكلفة المتوقعة <span className="text-xs font-normal text-muted">(أسعار تجريبية للعرض)</span>
+                التكلفة المتوقعة
               </h2>
               <dl className="mt-2 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
                 <Stat label="الكرتون" value={fmtSar(d.cost.cartonSar)} />
@@ -354,7 +351,6 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
                       <td>{f ? <FlagChips {...f} /> : "—"}</td>
                       <td>
                         <SourceBadge source={l.dimsSource} />
-                        {l.origin === "seeded" && <SeededBadge />}
                       </td>
                       <td>
                         {f && d.status === "box_found" && (

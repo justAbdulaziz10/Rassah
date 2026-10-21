@@ -5,7 +5,6 @@ import CatalogTable, { type CatalogRow } from "@/components/CatalogTable";
 import { appEnv } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { Notice, PageHeader, TableSkeleton } from "@/components/PageHeader";
-import { fmtCount } from "@/lib/ui/format";
 
 export const metadata: Metadata = { title: "المنتجات" };
 
@@ -13,8 +12,7 @@ export default function CatalogPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="المنتجات">
-        مقاسات وأوزان كل منتج كما حفظتها رصّة. تقرأ رصّة صفحة المنتج مرة واحدة وتحفظ ما وجدته، وما يقيسه الموظف أو يصحّحه لا يُستبدل
-        بقراءة جديدة أبداً.
+        مقاسات وأوزان كل منتج. ما يقيسه الموظف أو يصحّحه لا يُستبدل أبداً.
       </PageHeader>
       <Suspense fallback={<TableSkeleton />}>
         <Catalog />
@@ -60,9 +58,7 @@ async function Catalog() {
     };
   });
   const extracted = rows.filter((r) => r.facts).length;
-  const seeded = rows.filter((r) => r.facts?.origin === "seeded").length;
   const pending = rows.length - extracted;
-  const products_ = (n: number) => fmtCount(n, { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجاً" });
   return (
     <>
       <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border text-center sm:max-w-xl">
@@ -71,12 +67,6 @@ async function Catalog() {
         <Stat label="لم تُقرأ بعد" value={pending} tone={pending > 0 ? "warn" : undefined} />
       </dl>
       {pending > 0 && <p className="text-sm leading-6 text-muted">المنتجات التي لم تُقرأ بعد ستقرأها رصّة عند أول طلب يحتويها.</p>}
-      {seeded > 0 && (
-        <Notice tone="info">
-          <strong>نسخة تجريبية:</strong> بيانات {products_(seeded)} جاهزة مسبقاً للعرض، ولم تقرأها رصّة من صفحات المنتجات. اضغط
-          «إعادة القراءة» بجانب أي منتج لتقرأه رصّة من صفحته.
-        </Notice>
-      )}
       <CatalogTable rows={rows} demoMode={appEnv().DEMO_MODE} />
     </>
   );

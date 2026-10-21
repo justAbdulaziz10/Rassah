@@ -80,8 +80,7 @@ export default function Compare() {
         لماذا رصّة وليست أداة تعبئة عامة؟
       </h2>
       <p className="mt-4 max-w-2xl text-lg leading-8 text-[var(--ink-2)]">
-        أدوات التعبئة العامة تحسب أين تتّسع الصناديق. رصّة تعرف أن هذا العسل زجاج، وأن هذا العطر لا يُحمل عليه شيء، وأن موظفك سيقرأ
-        التعليمات واقفًا بين الرفوف.
+        أدوات التعبئة العامة تحسب أين تتّسع الصناديق. رصّة تعرف أن العسل زجاج، وأن العطر لا يُحمل عليه شيء.
       </p>
 
       <div className="table-scroll mt-10 rounded-xl border border-[var(--rule)] bg-[var(--panel)]">
@@ -118,9 +117,6 @@ export default function Compare() {
           </tbody>
         </table>
       </div>
-      <p className="mt-4 max-w-2xl text-sm leading-6 text-[var(--ink-3)]">
-        «جزئيًا» تعني أن الأمر يختلف من أداة لأخرى. المقارنة بالأدوات العامة بوجه عام، لا بمنتج محدّد.
-      </p>
     </section>
   );
 }

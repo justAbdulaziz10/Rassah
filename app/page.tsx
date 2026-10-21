@@ -25,7 +25,7 @@ const PROBLEMS = [
   {
     Icon: AirIcon,
     title: "شحن يُدفع على هواء",
-    body: "شركات الشحن تحاسبك على حجم الكرتون لا على وزن ما فيه (الوزن الحجمي). كرتون أكبر من اللازم يعني فاتورة أعلى على كل طلب، ويدفعها العميل في كثير من الأحيان.",
+    body: "شركات الشحن تحاسبك على حجم الكرتون لا على وزن ما فيه (الوزن الحجمي). كرتون أكبر من اللازم يعني فاتورة أعلى على كل طلب.",
   },
   {
     Icon: GlassIcon,
@@ -116,10 +116,6 @@ export default function LandingPage() {
         <h2 id="problem-title" className="max-w-4xl font-display text-[clamp(1.9rem,4.2vw,3.3rem)] font-medium leading-[1.35]">
           الكرتون الكبير تدفع شحنه هواءً، والصغير يكسر العطر.
         </h2>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-2)]">
-          موظف التغليف يقرّر في ثوانٍ وبالنظر، وصفحة المنتج التي فيها المقاس والوزن مفتوحة في مكان آخر. هذه ثلاث خسائر تتكرر في كل
-          متجر.
-        </p>
         <ul className="mt-12 grid divide-y divide-[var(--rule)] border-y border-[var(--rule)] md:grid-cols-3 md:divide-y-0">
           {PROBLEMS.map(({ Icon, title, body }) => (
             <li key={title} className="py-7 md:border-s md:border-[var(--rule)] md:px-7 md:first:border-s-0 md:first:ps-0 md:last:pe-0">
@@ -137,9 +133,6 @@ export default function LandingPage() {
           <h2 id="how" className="font-display text-3xl font-bold md:text-4xl">
             كيف تعمل رصّة؟ ثلاث خطوات
           </h2>
-          <p className="mt-3 max-w-2xl text-lg leading-8 text-[var(--ink-2)]">
-            الأمثلة أدناه من الطلب <span className="ltr-nums">#{hero.orderId}</span> الظاهر في الأعلى.
-          </p>
 
           <ol className="mt-12 grid gap-12 md:grid-cols-3 md:gap-8">
             <Step n={1} title="يصل الطلب" text="يصل من متجرك، فتفتحه رصّة وتعرف ما فيه من منتجات.">
@@ -195,7 +188,7 @@ export default function LandingPage() {
         <div className="flex flex-col items-start justify-between gap-8 px-6 py-12 md:flex-row md:items-center md:px-12 md:py-16">
           <div>
             <h2 id="cta-title" className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold leading-tight">
-              جرّبها على طلب من المتجر التجريبي.
+              جرّبها على طلباتك.
             </h2>
             <p className="mt-3 max-w-lg leading-8 text-[var(--on-deep-muted)]">افتح قائمة الطلبات، واختر أي طلب، وشاهد رصّة تجهّزه خلال لحظات.</p>
           </div>
@@ -212,8 +205,7 @@ export default function LandingPage() {
       <footer className="mt-auto border-t border-[var(--rule)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 py-8 text-sm text-[var(--ink-3)]">
           <p className="max-w-md leading-7">
-            <span className="font-display text-base font-bold text-[var(--ink)]">رصّة</span>، مشروع فريق من ثلاثة طلاب. البيانات اصطناعية،
-            ولم نجرّبه بعد مع متجر حقيقي.
+            <span className="font-display text-base font-bold text-[var(--ink)]">رصّة</span>، الكرتون الصحيح لكل طلب.
           </p>
           <nav aria-label="روابط التذييل">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
@@ -224,14 +216,6 @@ export default function LandingPage() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <a
-                  href="https://github.com/justAbdulaziz10/Rassah"
-                  className={`rounded underline-offset-4 hover:text-[var(--ink)] hover:underline ${ringOnPaper}`}
-                >
-                  الكود على GitHub
-                </a>
-              </li>
             </ul>
           </nav>
         </div>

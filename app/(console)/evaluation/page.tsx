@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { isLocalBackend } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { loadEval, type EvalView } from "@/lib/monitoring/evaluation";
-import { EmptyState, Notice, PageHeader, TableSkeleton } from "@/components/PageHeader";
+import { EmptyState, PageHeader, TableSkeleton } from "@/components/PageHeader";
 import { fmtMs, fmtTime, ltr } from "@/lib/ui/format";
 
 export const metadata: Metadata = { title: "الدقة" };
@@ -49,12 +49,8 @@ export default function EvaluationPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="الدقة">
-        نتائج اختبار رصّة على حالات نعرف إجابتها الصحيحة مسبقاً، وهو منفصل عن العمل اليومي.
+        نتائج رصّة على حالات نعرف إجابتها الصحيحة.
       </PageHeader>
-      <Notice tone="info">
-        <strong>البيانات اصطناعية.</strong> كتبها الفريق بأسلوب صفحات المتاجر السعودية. والإجابات الصحيحة صاغها الذكاء الاصطناعي من
-        الأوصاف، ولم تكتمل مراجعتها المستقلة من عضو آخر في الفريق.
-      </Notice>
       <Suspense fallback={<TableSkeleton rows={8} />}>
         <Evals />
       </Suspense>

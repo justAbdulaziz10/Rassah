@@ -23,10 +23,10 @@
 ## Outage story (≈ 30 s, during Q&A if asked)
 
 1. `/catalog` → on **p-16** (perfume 50 ml) click "مسح الكاش" (clears its cached facts).
-2. `/orders` → tick **"محاكاة تعطل Gemini"** → order **1002**.
+2. Open **`/orders/1002?outage=1`** (the outage switch is no longer on the page; the URL flag simulates it).
 3. Result: "يحتاج قياس" with "تعذّر الاستخراج الآلي". Cached products in the same order were fine.
-4. Repeat once or twice until the M6 rule has ≥ 5 recent extraction events with >10% failures. `/monitoring` shows the **critical** banner "(عطل تجريبي)".
-5. Untick the toggle → run 1002 again (Gemini re-extracts p-16) → after the next clean runs the alert resolves.
+4. Repeat once or twice until the M6 rule has ≥ 5 recent extraction events with >10% failures. `/monitoring` shows the **critical** banner.
+5. Open `/orders/1002` without the flag → run it again (Gemini re-extracts p-16) → after the next clean runs the alert resolves.
 6. Say: "In a real outage the status would be `api_error` or `rate_limited`, and the webhook would notify the team. Simulated alerts never notify."
 
 ## Backup plan

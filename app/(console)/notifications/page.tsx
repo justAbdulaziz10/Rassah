@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "الإشعارات" };
 export default function NotificationsPage() {
   return (
     <div className="space-y-6">
-      <PageHeader title="الإشعارات">ما ينتظرك الآن، الأهم أولاً. تتحدّث الأرقام في الأعلى تلقائياً كل 20 ثانية.</PageHeader>
+      <PageHeader title="الإشعارات">ما ينتظرك الآن، الأهم أولاً.</PageHeader>
       <Suspense fallback={<ListSkeleton />}>
         <Inbox />
       </Suspense>
