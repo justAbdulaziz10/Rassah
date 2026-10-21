@@ -17,12 +17,18 @@ export async function POST(request: Request, ctx: RouteContext<"/api/products/[i
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
 
+  let deps: ReturnType<typeof serverExtractDeps>;
+  try {
+    deps = serverExtractDeps();
+  } catch {
+    return jsonError(503, "The AI settings on the server are invalid");
+  }
   let result: Awaited<ReturnType<typeof getOrExtractFacts>>;
   try {
     result = await getOrExtractFacts({
       repo,
       productIds: [id],
-      deps: serverExtractDeps(),
+      deps,
       trigger: "admin",
       runId: null,
       force: true,

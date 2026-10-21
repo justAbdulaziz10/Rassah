@@ -143,7 +143,7 @@ describe("extractFacts: reliability", () => {
     const generate = vi.fn<GenerateFn>();
     const r = await extractFacts(product, deps(generate, { deadlineAt: 0 }));
     expect(generate).not.toHaveBeenCalled();
-    expect(r.event).toMatchObject({ status: "timeout", errorCode: "timeout" });
+    expect(r.event).toMatchObject({ status: "timeout", errorCode: "budget_exhausted" });
   });
 
   it("simulated outage fails before any network call", async () => {

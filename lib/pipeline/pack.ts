@@ -278,7 +278,8 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
       if (result.status === "needs_measurement") {
         response.status = run.status = "needs_measurement";
         response.productsToMeasure = result.productIds.map((id) => {
-          const f = catalog.facts.get(id);
+          // A failed re-read leaves the older stored row out of catalog.facts; its flags still prefill the form.
+          const f = catalog.facts.get(id) ?? stored.get(id);
           return {
             productId: id,
             name: names.get(id) ?? id,

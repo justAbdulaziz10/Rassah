@@ -158,10 +158,10 @@ export async function extractFacts(
   }
 
   const deadlineAt = deps.deadlineAt ?? Infinity;
-  const timedOut = (afterMs: number): ExtractOutcome => {
+  const timedOut = (afterMs: number, code = "timeout"): ExtractOutcome => {
     event.latencyMs = now() - start;
     event.status = "timeout";
-    event.errorCode = "timeout";
+    event.errorCode = code;
     event.errorMessage = `No response within ${Math.round(afterMs)} ms`;
     return { facts: null, event };
   };
@@ -169,7 +169,8 @@ export async function extractFacts(
   let response: GenerateResponse | null = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const attemptMs = Math.min(timeoutMs, deadlineAt - now());
-    if (attemptMs <= 0) return timedOut(now() - start);
+    // budget_exhausted: earlier calls in this request used up the shared time, so this one never started.
+    if (attemptMs <= 0) return timedOut(now() - start, attempt === 1 ? "budget_exhausted" : "timeout");
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), attemptMs);
     try {

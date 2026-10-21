@@ -43,7 +43,8 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
         setError("أدخل الطول والعرض والارتفاع والوزن جميعاً");
         return;
       }
-      if (v !== initial[f.key] && v !== null) changes[f.key] = v;
+      // Measuring records every number as measured, even one that matches the stored guess.
+      if (v !== null && (mode === "measure" || v !== initial[f.key])) changes[f.key] = v;
     }
     // Editing one side means the packer measured the item: send all three so the size counts as measured.
     if (mode === "edit" && (["lengthCm", "widthCm", "heightCm"] as const).some((k) => k in changes)) {
