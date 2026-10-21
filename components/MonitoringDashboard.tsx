@@ -463,7 +463,7 @@ function Empty({ children = "لا توجد بيانات في هذه الفترة
 }
 
 function LatencyCard({ data }: { data: DashboardData }) {
-  const points = data.latency.slice(-60).map((p, i) => ({ i, ms: p.totalMs, cached: p.cached, order: p.orderId, at: p.at }));
+  const points = data.latency.slice(-40).map((p, i) => ({ i, ms: p.totalMs, cached: p.cached, order: p.orderId, at: p.at }));
   const max = Math.max(0, ...points.map((p) => p.ms));
   const limit = data.targets.cachedP95Ms;
   const showLimit = max >= limit * 0.5; // a far-away limit line would flatten every bar
@@ -483,7 +483,7 @@ function LatencyCard({ data }: { data: DashboardData }) {
                 <XAxis dataKey="i" reversed hide />
                 <YAxis orientation="right" {...AXIS} width={40} tickFormatter={(v: number) => (top >= 1000 ? (v / 1000).toFixed(1) : String(Math.round(v)))} domain={[0, showLimit ? top * 1.1 : "auto"]} />
                 <Tooltip cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} content={<LatencyTip />} />
-                {showLimit && <ReferenceLine y={limit} stroke="var(--critical)" strokeDasharray="4 4" label={{ value: `الحدّ ${(limit / 1000).toFixed(0)} ث`, position: "insideTopLeft", fill: "var(--critical)", fontSize: 12 }} />}
+                {showLimit && <ReferenceLine y={limit} stroke="var(--critical)" strokeDasharray="4 4" />}
                 <Bar dataKey="ms" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false}>
                   {points.map((p) => (
                     <Cell key={p.i} fill={p.cached ? "var(--series-1)" : "var(--series-2)"} />
@@ -501,6 +501,12 @@ function LatencyCard({ data }: { data: DashboardData }) {
               <span className="size-2.5 rounded-sm bg-[var(--series-2)]" aria-hidden />
               فيه منتج جديد احتاج قراءة
             </span>
+            {showLimit && (
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 border-t-2 border-dashed border-critical" aria-hidden />
+                الحدّ: {fmtMs(limit)}
+              </span>
+            )}
             <span className="ms-auto">الأبطأ: {fmtMs(max)}</span>
           </p>
         </>
