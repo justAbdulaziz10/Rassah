@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 44 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 34 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 42 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 46 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 47 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 29 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 1 | ⬜ Not started |
-| **Total** | | | | **517** | **424** | |
+| **Total** | | | | **517** | **425** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -639,7 +639,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written.
 - [x] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
 - [x] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo). — production: order 1002 with simulateOutage and all facts cached → box_found L (374 ms)
-- [ ] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves.
+- [x] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves. — verified on production 2026-10-21: simulated outage → M6 critical alert → toggle off → one successful run → 0 open alerts
 - [x] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
 
 ### 8E. Investigation story
