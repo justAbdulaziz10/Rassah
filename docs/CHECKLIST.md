@@ -26,11 +26,11 @@
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 31 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 39 | 🟨 In progress |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 28 | 🟨 In progress |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 11 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 26 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 27 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **357** | |
+| **Total** | | | | **517** | **365** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -75,8 +75,8 @@ In parallel and also blocking: `P2 schema` → `P2 seed`, and `P4 validator` →
 | C1 | GitHub repo `justAbdulaziz10/Rassah`: write access | Code, PRs, CI | Repo owner | GitHub | M1, M2, M3 | ⬜ |
 | C2 | Google account / project for AI Studio | Owns the Gemini key | M3 | Team password manager | ALL | ✅ |
 | C3 | `GEMINI_API_KEY` | Gemini API auth | M3 | Vercel env (Preview + Prod) + each `.env.local` | ALL | ✅ |
-| C4 | Gemini model id (`GEMINI_MODEL`) | Which Flash-tier model | M1 | Vercel env + `.env.example` (name only) | ALL | ✅ |
-| C5 | Gemini prices (`GEMINI_PRICE_INPUT_PER_M`, `GEMINI_PRICE_OUTPUT_PER_M`) + date copied | Cost metric | M1 | Vercel env + report | ALL | ✅ |
+| C4 | Gemini model id (`GEMINI_MODEL`) | Which Flash-tier model (now `gemini-3.5-flash-lite`, 2026-10-21) | M1 | Vercel env + `.env.example` (name only) | ALL | ✅ |
+| C5 | Gemini prices (`GEMINI_PRICE_INPUT_PER_M`, `GEMINI_PRICE_OUTPUT_PER_M`) + date copied | Cost metric ($0.30 in / $2.50 out per 1M, 2026-10-21) | M1 | Vercel env + report | ALL | ✅ |
 | C6 | Supabase account + organization | Database hosting | M3 | Password manager | ALL (invited to org) | ✅ |
 | C7 | Supabase project database password | Direct DB / CLI access | M3 | Password manager | ALL | ⬜ (DB password not recorded) |
 | C8 | `SUPABASE_URL` | DB endpoint | M3 | Vercel env + `.env.local` | ALL | ✅ |
@@ -124,9 +124,9 @@ CI needs **no** secrets because tests never call external services.
 
 ### 0C. Gemini (Google AI Studio)
 - [x] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.** — done 2026-10-21 (key created by the owner)
-- [x] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4). — gemini-3.6-flash (3.8-flash free quota was exhausted)
+- [x] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4). — gemini-3.5-flash-lite (3.8-flash and 3.6-flash free tier = 20 requests/day; switched 2026-10-21)
 - [x] **P0.12** (M1) Record the free-tier rate limits (requests/min, requests/day) shown for that model in `docs/decisions.md`. They decide concurrency (P5.27). — free tier = 20 requests/day/model; recorded in decisions.md
-- [x] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5). — $0.75 in / $3.75 out per 1M (2026-10-21); recorded in decisions.md
+- [x] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5). — $0.30 in / $2.50 out per 1M (2026-10-21); recorded in decisions.md
 - [ ] **P0.14** (M1) Quick sanity call: send one product description in AI Studio's UI and confirm it returns JSON. Screenshot it for the tools log.
 
 ### 0D. Supabase
@@ -672,16 +672,16 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.12** (M1) Holdout metrics reported separately.
 - [x] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
 - [x] **P9.14** (M1) Prints a summary table to the console.
-- [ ] **P9.15** (M1) Run v1 on all 30 products. Results committed. — NOT DONE: two runs were mostly rate_limited and discarded; blocked on Gemini billing
+- [x] **P9.15** (M1) Run v1 on all 30 products. Results committed. — `eval/results/extraction-2026-10-21-v1.json`, gemini-3.5-flash-lite, 30/30 ok (results file is in the working tree, commit pending)
 
 ### 9B. Prompt iteration (→T20)
-- [ ] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — blocked on P9.15
-- [ ] **P9.17** (M1) If changed: bump `PROMPT_VERSION`, re-run, and commit before/after numbers. — blocked on P9.15
-- [ ] **P9.18** (M1) Record the decision and the numbers in `docs/decisions.md`. — blocked on P9.15
+- [x] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — none: tuning metrics all 100% except inferred MAPE (12.3% dim), no failures to fix
+- [x] **P9.17** (M1) If changed: bump `PROMPT_VERSION`, re-run, and commit before/after numbers. — n/a: no change (prompt stays v1)
+- [x] **P9.18** (M1) Record the decision and the numbers in `docs/decisions.md`.
 
 ### 9C. Margin decision
-- [ ] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%. — blocked on P9.15
-- [ ] **P9.20** (M2) Re-run engine tests after any config change.
+- [x] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%. — all-30 MAPE 14.3% rounds up to 15%: unchanged. Holdout 18.2% (4 products) is above 15% and is disclosed
+- [x] **P9.20** (M2) Re-run engine tests after any config change. — n/a: no config change; `npm run check` run after the docs update
 
 ### 9D. Packing eval (`scripts/eval-packing.ts`)
 - [x] **P9.21** (M2, →T18) Runs the engine and the baseline on all 60 fixtures with the same catalog, cost model and budget.
@@ -702,7 +702,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.34** (M3) Honesty note on the page: "Synthetic dataset written by the team. See the report."
 
 ### 9F. Verification
-- [ ] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`.
+- [x] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`. — `/evaluation` reads the JSON (DB first, file fallback via `lib/monitoring/evaluation.ts`); results.md and REPORT.md checked against the JSON. Re-check on the deployed page if `eval_runs` holds an older run
 - [ ] **P9.36** (M1) Update the dashboard. **Gate G9 check.**
 
 ---
@@ -784,7 +784,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.15** (M2) 5. Technical design: architecture, engine rules, validator, cost model (labeled estimates), fallback chain, cache.
 - [x] **P11.16** (M3) 6. Development environment: repo, branches, CI, previews, tests, decision log.
 - [x] **P11.17** (M3) 7. Selected metrics: the 7 metrics, why each, what each reveals, alert rules.
-- [ ] **P11.18** (M1+M2) 8. Benchmarks & evaluation results: extraction + packing tables, before/after prompt, margin decision, holdout.
+- [x] **P11.18** (M1+M2) 8. Benchmarks & evaluation results: extraction + packing tables, before/after prompt, margin decision, holdout.
 - [ ] **P11.19** (M3) 9. Monitoring in action: the investigation story + the outage demo.
 - [ ] **P11.20** (ALL) 10. Tools & AI usage (summary of TOOLS.md).
 - [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
@@ -898,7 +898,7 @@ Never cut: **validator, event logging, tests, honesty about data.**
 
 | Date/time | ID | Blocker | Owner | Impact | Action | Resolved |
 |---|---|---|---|---|---|---|
-| 2026-10-21 | B1 | Gemini free tier allows only 20 requests/day/model (429 QuotaFailure); extraction eval runs were mostly rate_limited and discarded | Owner | P9.15-P9.19 (extraction eval, margin decision) cannot complete | Owner enabling billing (Paid Tier), then re-run the eval | No |
+| 2026-10-21 | B1 | Gemini free tier allows only 20 requests/day/model (429 QuotaFailure); extraction eval runs were mostly rate_limited and discarded | Owner | P9.15-P9.19 (extraction eval, margin decision) cannot complete | Owner enabling billing (Paid Tier), then re-run the eval | Yes (2026-10-21): switched to gemini-3.5-flash-lite (free tier 15 RPM / 500 RPD); eval completed, P9.15-P9.19 done |
 | 2026-10-21 | B2 | Supabase DB password not recorded (C7); Supabase and Vercel team invites for M1/M2 not done (P0.16, P0.18, P0.20) | M3 | No direct DB/CLI access; teammates lack dashboard access | Reset/record password in the password manager; send invites | No |
 
 ## Sync log

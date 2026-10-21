@@ -4,7 +4,30 @@
 
 ## Extraction evaluation
 
-_Pending: needs the Gemini key (CHECKLIST P9.15)._
+Source: `eval/results/extraction-2026-10-21-v1.json` (`npm run eval:extraction`; model `gemini-3.5-flash-lite`, prompt `v1`; 30 products, 30/30 calls ok, synthetic data). Tuning = 20 products, holdout = 10 products (looked at only after the prompt decision).
+
+| Metric | All (30) | Tuning (20) | Holdout (10) |
+|---|---|---|---|
+| Parse success | 100% | 100% | 100% |
+| Dim accuracy within 1 cm (group A) | 100% | 100% | 100% |
+| Weight accuracy within 10% (group A) | 100% | 100% | 100% |
+| Inferred dim MAPE (group B) | **14.3%** | 12.3% | **18.2%** |
+| Inferred weight MAPE (group B) | 14.0% | 16.8% | 8.3% |
+| Inferred products answered (group B) | 12/12 | 8/8 | 4/4 |
+| Source correctness | 100% | 100% | 100% |
+| Honesty (group C returned `unknown`) | 100% | 100% | 100% |
+| Fragile recall / precision | 100% / 100% | 100% / 100% | 100% / 100% |
+| Liquid accuracy | 100% | 100% | 100% |
+| Sensitive accuracy | 100% | 100% | 100% |
+| Avg latency | 1363 ms | 1425 ms | 1239 ms |
+| Avg tokens | 631 | 628 | 636 |
+| Cost per product | $0.000449 | $0.000444 | $0.000458 |
+
+**Prompt decision (P9.16):** every non-holdout (tuning) metric is perfect except the inferred-estimate errors (dim MAPE 12.3%, weight MAPE 16.8%). Those are estimates from clues (ml, pages, pieces), not extraction failures, so there is no failure pattern to fix with a prompt change. Decision: **no prompt change**, `PROMPT_VERSION` stays `v1`, so there is no before/after pair.
+
+**Margin decision (P9.19):** the rule is margin = observed inferred-dimension MAPE, rounded up. The measured MAPE over all 12 inferred products is 14.3%, which rounds up to **15%**, so `MARGIN_INFERRED` stays at 0.15. Caveat: the holdout MAPE (18.2%, only 4 inferred products) is above 15%, so the margin does not cover every estimate. The 12.3% / 18.2% spread on 8 and 4 products shows this is noisy; the pack instructions already say "check the fit" for estimated sizes. Raising the margin to 20% would trade carton cost for cover and is the first change to make if a real-merchant pilot confirms the higher error.
+
+**Model note:** `gemini-3.5-flash-lite`, $0.30 / 1M input and $2.50 / 1M output (ai.google.dev pricing, 2026-10-21). Free tier 15 RPM / 500 RPD (AI Studio rate-limit page, 2026-10-21). See `docs/decisions.md` for why `gemini-3.8-flash` and `gemini-3.6-flash` were not used.
 
 ## Packing evaluation
 

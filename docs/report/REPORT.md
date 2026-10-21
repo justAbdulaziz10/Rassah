@@ -4,7 +4,7 @@
 **Team:** M1 (AI & Data) · M2 (Engine & UI) · M3 (Platform & Monitoring)
 **Live demo:** https://rassah.vercel.app · **Repository:** https://github.com/justAbdulaziz10/Rassah
 
-> Status: **draft**. Items marked ⏳ wait on the Gemini key or the deployed environment. Every number comes from `eval/results/*.json` or the dashboard.
+> Status: **draft**. Items marked ⏳ wait on the deployed environment or outside inputs. Every number comes from `eval/results/*.json` or the dashboard.
 
 ---
 
@@ -108,7 +108,26 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 **Evaluation-driven iteration:** recall 3/20 (extreme points) → 9/20 (corner grid + seeded restarts; more restarts gave no gain) → 15/20 ("tight" placement scores, found by diagnosing fixture `feasible-05`) → **20/20** (engine-0.2: backtracking anchor search for the exact fills the greedy passes missed). The 0 SAR saving is by construction (both pick the cheapest fitting carton), not a bug.
 
-**Extraction** ⏳ (`npm run eval:extraction`, all / tuning / holdout): dims ±1 cm, weight ±10%, inferred MAPE (→ safety margin), honesty on no-info products, fragile recall/precision, liquid accuracy, parse success, latency, tokens, cost per product.
+**Extraction** (`eval/results/extraction-2026-10-21-v1.json`, `gemini-3.5-flash-lite`, prompt v1, 30 synthetic products, 30/30 calls ok):
+
+| Metric | All (30) | Tuning (20) | Holdout (10) |
+|---|---|---|---|
+| Parse success | 100% | 100% | 100% |
+| Dims within 1 cm / weight within 10% (group A) | 100% / 100% | 100% / 100% | 100% / 100% |
+| Inferred dim MAPE (group B) | 14.3% | 12.3% | 18.2% |
+| Inferred weight MAPE (group B) | 14.0% | 16.8% | 8.3% |
+| Source correctness | 100% | 100% | 100% |
+| Honesty on no-info products | 100% | 100% | 100% |
+| Fragile recall / precision | 100% / 100% | 100% / 100% | 100% / 100% |
+| Liquid accuracy | 100% | 100% | 100% |
+| Avg latency / tokens | 1363 ms / 631 | 1425 ms / 628 | 1239 ms / 636 |
+| Cost per product | $0.000449 | $0.000444 | $0.000458 |
+
+**Prompt iteration:** none. Tuning-set failures were limited to estimate error on inferred products (no extraction failures), so the prompt stays `v1` and there is no before/after row.
+
+**Margin decision:** inferred dim MAPE over all 12 inferred products is 14.3%, rounded up to 15%, so `MARGIN_INFERRED` stays 0.15. The holdout MAPE (18.2%, 4 products) is above 15%. With so few inferred products this is noisy, and the instructions already say "check the fit". A real-merchant pilot should re-measure it before the margin is trusted or raised.
+
+**Model:** `gemini-3.5-flash-lite` ($0.30 in / $2.50 out per 1M tokens, 2026-10-21). The faster-tier models had a free quota of 20 requests/day, too low for a 30-call eval.
 
 ## 9. Monitoring in action
 
@@ -131,7 +150,7 @@ Pilot with one merchant (100 real orders, packer vs Rassah: carton spend, courie
 ## 13. References
 
 - Project 1 brief (Tuwaiq Academy × Startupbootcamp × Meta), October 2026.
-- Google Gen AI SDK for JavaScript (`@google/genai`) and the Gemini API docs (structured output, pricing). ⏳ Note the pricing date.
+- Google Gen AI SDK for JavaScript (`@google/genai`) and the Gemini API docs (structured output, pricing). Pricing as of 2026-10-21.
 - Next.js 16 documentation (Route Handlers, Cache Components), bundled in `node_modules/next/dist/docs/`.
 - Supabase docs (Postgres, RLS, JS client). Vercel docs (deployments, function limits).
 - Paccurate API documentation: existing cartonization product (positioning).

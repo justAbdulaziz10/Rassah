@@ -1,0 +1,1174 @@
+{
+  "kind": "extraction",
+  "createdAt": "2026-10-21T07:00:38.902Z",
+  "summary": {
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "all": {
+      "products": 30,
+      "parseSuccess": 1,
+      "dimAccuracy1cm": 1,
+      "weightAccuracy10pct": 1,
+      "inferredDimMape": 0.143,
+      "inferredWeightMape": 0.14,
+      "inferredAnswered": "12/12",
+      "sourceCorrectness": 1,
+      "honestyRate": 1,
+      "fragileRecall": 1,
+      "fragilePrecision": 1,
+      "liquidAccuracy": 1,
+      "sensitiveAccuracy": 1,
+      "avgLatencyMs": 1363,
+      "avgTokens": 631,
+      "costPerProductUsd": 0.000449
+    },
+    "tuning": {
+      "products": 20,
+      "parseSuccess": 1,
+      "dimAccuracy1cm": 1,
+      "weightAccuracy10pct": 1,
+      "inferredDimMape": 0.123,
+      "inferredWeightMape": 0.168,
+      "inferredAnswered": "8/8",
+      "sourceCorrectness": 1,
+      "honestyRate": 1,
+      "fragileRecall": 1,
+      "fragilePrecision": 1,
+      "liquidAccuracy": 1,
+      "sensitiveAccuracy": 1,
+      "avgLatencyMs": 1425,
+      "avgTokens": 628,
+      "costPerProductUsd": 0.000444
+    },
+    "holdout": {
+      "products": 10,
+      "parseSuccess": 1,
+      "dimAccuracy1cm": 1,
+      "weightAccuracy10pct": 1,
+      "inferredDimMape": 0.182,
+      "inferredWeightMape": 0.083,
+      "inferredAnswered": "4/4",
+      "sourceCorrectness": 1,
+      "honestyRate": 1,
+      "fragileRecall": 1,
+      "fragilePrecision": 1,
+      "liquidAccuracy": 1,
+      "sensitiveAccuracy": 1,
+      "avgLatencyMs": 1239,
+      "avgTokens": 636,
+      "costPerProductUsd": 0.000458
+    }
+  },
+  "results": [
+    {
+      "caseId": "p-01",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-01",
+          "lengthCm": 7,
+          "widthCm": 7,
+          "heightCm": 16,
+          "weightG": 420,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "أبعاد العلبة: ٧ × ٧ × ١٦ سم، والوزن مع التغليف ٤٢٠ جرام"
+        },
+        "truth": {
+          "productId": "p-01",
+          "lengthCm": 7,
+          "widthCm": 7,
+          "heightCm": 16,
+          "weightG": 420,
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1634.804208,
+        "tokens": 688
+      }
+    },
+    {
+      "caseId": "p-02",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-02",
+          "lengthCm": 14,
+          "widthCm": 2,
+          "heightCm": 21,
+          "weightG": 350,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "المقاس: 21 x 14 x 2 سم | الوزن: 350 غ"
+        },
+        "truth": {
+          "productId": "p-02",
+          "lengthCm": 21,
+          "widthCm": 14,
+          "heightCm": 2,
+          "weightG": 350,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1157.2991659999998,
+        "tokens": 639
+      }
+    },
+    {
+      "caseId": "p-03",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-03",
+          "lengthCm": 18,
+          "widthCm": 12,
+          "heightCm": 22,
+          "weightG": 1200,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "الطول ١٨ سم، العرض ١٢ سم، الارتفاع ٢٢ سم. الوزن ١٫٢ كجم شامل العلبة."
+        },
+        "truth": {
+          "productId": "p-03",
+          "lengthCm": 18,
+          "widthCm": 12,
+          "heightCm": 22,
+          "weightG": 1200,
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": true
+        },
+        "latencyMs": 1177.2947079999976,
+        "tokens": 668
+      }
+    },
+    {
+      "caseId": "p-04",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-04",
+          "lengthCm": 7.5,
+          "widthCm": 2.8,
+          "heightCm": 15,
+          "weightG": 430,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "high",
+          "evidence": "Dimensions: 15 × 7.5 × 2.8 cm, Weight: 430 g"
+        },
+        "truth": {
+          "productId": "p-04",
+          "lengthCm": 15,
+          "widthCm": 7.5,
+          "heightCm": 2.8,
+          "weightG": 430,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1187.2838330000013,
+        "tokens": 656
+      }
+    },
+    {
+      "caseId": "p-05",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-05",
+          "lengthCm": 10.16,
+          "widthCm": 10.16,
+          "heightCm": 12.7,
+          "weightG": 498.96,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "Box size: 4 x 4 x 5 in, weight 1.1 lb"
+        },
+        "truth": {
+          "productId": "p-05",
+          "lengthCm": 10.16,
+          "widthCm": 10.16,
+          "heightCm": 12.7,
+          "weightG": 499,
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": true
+        },
+        "latencyMs": 1091.9240419999987,
+        "tokens": 655
+      }
+    },
+    {
+      "caseId": "p-06",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-06",
+          "lengthCm": 10,
+          "widthCm": 2,
+          "heightCm": 18,
+          "weightG": 80,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "أبعاد العبوة 18×10×2 سم ووزنها 80 جرام"
+        },
+        "truth": {
+          "productId": "p-06",
+          "lengthCm": 18,
+          "widthCm": 10,
+          "heightCm": 2,
+          "weightG": 80,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1109.0241659999956,
+        "tokens": 638
+      }
+    },
+    {
+      "caseId": "p-07",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-07",
+          "lengthCm": 9,
+          "widthCm": 9,
+          "heightCm": 13,
+          "weightG": 850,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "أبعاد العبوة ٩ × ٩ × ١٣ سم والوزن الإجمالي ٨٥٠ جرام"
+        },
+        "truth": {
+          "productId": "p-07",
+          "lengthCm": 9,
+          "widthCm": 9,
+          "heightCm": 13,
+          "weightG": 850,
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1142.2114169999986,
+        "tokens": 656
+      }
+    },
+    {
+      "caseId": "p-08",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-08",
+          "lengthCm": 20,
+          "widthCm": 10,
+          "heightCm": 10,
+          "weightG": 650,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "high",
+          "evidence": "20×10×10 سم مع كيبل شحن، ويبلغ وزنها مع العلبة 650 جرام"
+        },
+        "truth": {
+          "productId": "p-08",
+          "lengthCm": 20,
+          "widthCm": 10,
+          "heightCm": 10,
+          "weightG": 650,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "page",
+          "holdout": true
+        },
+        "latencyMs": 1339.3118749999994,
+        "tokens": 686
+      }
+    },
+    {
+      "caseId": "p-09",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-09",
+          "lengthCm": 25,
+          "widthCm": 12,
+          "heightCm": 11,
+          "weightG": 900,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "الطول 25 سم - العرض 12 سم - الارتفاع 11 سم، الوزن 900 جرام"
+        },
+        "truth": {
+          "productId": "p-09",
+          "lengthCm": 25,
+          "widthCm": 12,
+          "heightCm": 11,
+          "weightG": 900,
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1357.533083000002,
+        "tokens": 653
+      }
+    },
+    {
+      "caseId": "p-10",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-10",
+          "lengthCm": 8.89,
+          "widthCm": 8.89,
+          "heightCm": 30.48,
+          "weightG": 1496.88,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "3.5 x 3.5 x 12 in, 3.3 lb"
+        },
+        "truth": {
+          "productId": "p-10",
+          "lengthCm": 8.89,
+          "widthCm": 8.89,
+          "heightCm": 30.48,
+          "weightG": 1497,
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1274.0364590000027,
+        "tokens": 650
+      }
+    },
+    {
+      "caseId": "p-11",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-11",
+          "lengthCm": 30,
+          "widthCm": 21,
+          "heightCm": 3,
+          "weightG": 1000,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "المقاس 30x21x3 cm، الوزن 1 كجم"
+        },
+        "truth": {
+          "productId": "p-11",
+          "lengthCm": 30,
+          "widthCm": 21,
+          "heightCm": 3,
+          "weightG": 1000,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1158.236499999999,
+        "tokens": 632
+      }
+    },
+    {
+      "caseId": "p-12",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-12",
+          "lengthCm": 12,
+          "widthCm": 9,
+          "heightCm": 8,
+          "weightG": 300,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "high",
+          "evidence": "12 × 9 × 8 سم، والوزن الكلي 300 غرام"
+        },
+        "truth": {
+          "productId": "p-12",
+          "lengthCm": 12,
+          "widthCm": 9,
+          "heightCm": 8,
+          "weightG": 300,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "page",
+          "holdout": true
+        },
+        "latencyMs": 1060.904749999987,
+        "tokens": 663
+      }
+    },
+    {
+      "caseId": "p-13",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-13",
+          "lengthCm": 28,
+          "widthCm": 20,
+          "heightCm": 6,
+          "weightG": 1150,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "مقاس العلبة: 28 × 20 × 6 سم، الوزن 1.15 كجم"
+        },
+        "truth": {
+          "productId": "p-13",
+          "lengthCm": 28,
+          "widthCm": 20,
+          "heightCm": 6,
+          "weightG": 1150,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1685.220874999999,
+        "tokens": 650
+      }
+    },
+    {
+      "caseId": "p-14",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-14",
+          "lengthCm": 4,
+          "widthCm": 4,
+          "heightCm": 12,
+          "weightG": 120,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "high",
+          "evidence": "أبعاد العلبة: 4 x 4 x 12 سم، الوزن 120 جرام"
+        },
+        "truth": {
+          "productId": "p-14",
+          "lengthCm": 4,
+          "widthCm": 4,
+          "heightCm": 12,
+          "weightG": 120,
+          "fragile": false,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "page",
+          "holdout": true
+        },
+        "latencyMs": 1186.3453750000044,
+        "tokens": 651
+      }
+    },
+    {
+      "caseId": "p-15",
+      "passed": true,
+      "details": {
+        "group": "A",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-15",
+          "lengthCm": 26,
+          "widthCm": 22,
+          "heightCm": 10,
+          "weightG": 1200,
+          "dimsSource": "page",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "high",
+          "evidence": "Package size: 26 × 22 × 10 cm | Weight: 1.2 kg"
+        },
+        "truth": {
+          "productId": "p-15",
+          "lengthCm": 26,
+          "widthCm": 22,
+          "heightCm": 10,
+          "weightG": 1200,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "page",
+          "holdout": false
+        },
+        "latencyMs": 1514.5167499999952,
+        "tokens": 646
+      }
+    },
+    {
+      "caseId": "p-16",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-16",
+          "lengthCm": 8,
+          "widthCm": 6,
+          "heightCm": 12,
+          "weightG": 300,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "medium",
+          "evidence": "inferred from 50 ml perfume bottle in a carton box"
+        },
+        "truth": {
+          "productId": "p-16",
+          "lengthCm": 6,
+          "widthCm": 5,
+          "heightCm": 12,
+          "weightG": 250,
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1185.6000829999975,
+        "tokens": 630
+      }
+    },
+    {
+      "caseId": "p-17",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-17",
+          "lengthCm": 14,
+          "widthCm": 3,
+          "heightCm": 21,
+          "weightG": 400,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "medium",
+          "evidence": "inferred from 400 page paperback novel"
+        },
+        "truth": {
+          "productId": "p-17",
+          "lengthCm": 21,
+          "widthCm": 14,
+          "heightCm": 2.5,
+          "weightG": 450,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1218.1944999999978,
+        "tokens": 616
+      }
+    },
+    {
+      "caseId": "p-18",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-18",
+          "lengthCm": 5,
+          "widthCm": 5,
+          "heightCm": 10,
+          "weightG": 120,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from 30 ml glass dropper bottle"
+        },
+        "truth": {
+          "productId": "p-18",
+          "lengthCm": 4,
+          "widthCm": 4,
+          "heightCm": 11,
+          "weightG": 120,
+          "fragile": true,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": true
+        },
+        "latencyMs": 1231.2587499999936,
+        "tokens": 620
+      }
+    },
+    {
+      "caseId": "p-19",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-19",
+          "lengthCm": 5,
+          "widthCm": 5,
+          "heightCm": 6,
+          "weightG": 80,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "low",
+          "evidence": "inferred from 20W wall charger"
+        },
+        "truth": {
+          "productId": "p-19",
+          "lengthCm": 10,
+          "widthCm": 6,
+          "heightCm": 4,
+          "weightG": 120,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1275.976583999989,
+        "tokens": 598
+      }
+    },
+    {
+      "caseId": "p-20",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-20",
+          "lengthCm": 10,
+          "widthCm": 7,
+          "heightCm": 18,
+          "weightG": 250,
+          "dimsSource": "inferred",
+          "weightSource": "page",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "medium",
+          "evidence": "inferred from 250g coffee bag"
+        },
+        "truth": {
+          "productId": "p-20",
+          "lengthCm": 15,
+          "widthCm": 9,
+          "heightCm": 6,
+          "weightG": 280,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1362.664042000004,
+        "tokens": 635
+      }
+    },
+    {
+      "caseId": "p-21",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-21",
+          "lengthCm": 10,
+          "widthCm": 10,
+          "heightCm": 5,
+          "weightG": 200,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from 12 pieces mabkhour incense box"
+        },
+        "truth": {
+          "productId": "p-21",
+          "lengthCm": 12,
+          "widthCm": 12,
+          "heightCm": 4,
+          "weightG": 150,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": true
+        },
+        "latencyMs": 1901.6839159999945,
+        "tokens": 609
+      }
+    },
+    {
+      "caseId": "p-22",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-22",
+          "lengthCm": 9,
+          "widthCm": 9,
+          "heightCm": 26,
+          "weightG": 550,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from 750 ml glass water bottle"
+        },
+        "truth": {
+          "productId": "p-22",
+          "lengthCm": 8,
+          "widthCm": 8,
+          "heightCm": 27,
+          "weightG": 450,
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1082.5677500000165,
+        "tokens": 598
+      }
+    },
+    {
+      "caseId": "p-23",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-23",
+          "lengthCm": 6,
+          "widthCm": 6,
+          "heightCm": 18,
+          "weightG": 300,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": true,
+          "sensitive": false,
+          "confidence": "medium",
+          "evidence": "inferred from 250 ml plastic spray bottle"
+        },
+        "truth": {
+          "productId": "p-23",
+          "lengthCm": 6,
+          "widthCm": 6,
+          "heightCm": 18,
+          "weightG": 290,
+          "fragile": false,
+          "liquid": true,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1078.3079169999983,
+        "tokens": 618
+      }
+    },
+    {
+      "caseId": "p-24",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-24",
+          "lengthCm": 10,
+          "widthCm": 10,
+          "heightCm": 5,
+          "weightG": 150,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "confidence": "low",
+          "evidence": "inferred from wireless earbuds with charging case"
+        },
+        "truth": {
+          "productId": "p-24",
+          "lengthCm": 10,
+          "widthCm": 8,
+          "heightCm": 4,
+          "weightG": 150,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": true,
+          "expectedDimsSource": "inferred",
+          "holdout": true
+        },
+        "latencyMs": 1048.3331670000043,
+        "tokens": 615
+      }
+    },
+    {
+      "caseId": "p-25",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-25",
+          "lengthCm": 28,
+          "widthCm": 28,
+          "heightCm": 8,
+          "weightG": 2000,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "طقم صحون بورسلين (4 قطع)"
+        },
+        "truth": {
+          "productId": "p-25",
+          "lengthCm": 29,
+          "widthCm": 29,
+          "heightCm": 10,
+          "weightG": 3000,
+          "fragile": true,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1239.6864999999816,
+        "tokens": 621
+      }
+    },
+    {
+      "caseId": "p-26",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-26",
+          "lengthCm": 15,
+          "widthCm": 8,
+          "heightCm": 18,
+          "weightG": 250,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from 100 tea bags carton"
+        },
+        "truth": {
+          "productId": "p-26",
+          "lengthCm": 16,
+          "widthCm": 12,
+          "heightCm": 8,
+          "weightG": 250,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": false
+        },
+        "latencyMs": 1069.7730410000077,
+        "tokens": 604
+      }
+    },
+    {
+      "caseId": "p-27",
+      "passed": true,
+      "details": {
+        "group": "B",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-27",
+          "lengthCm": 12,
+          "widthCm": 8,
+          "heightCm": 3,
+          "weightG": 200,
+          "dimsSource": "inferred",
+          "weightSource": "inferred",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from metal desktop phone holder"
+        },
+        "truth": {
+          "productId": "p-27",
+          "lengthCm": 12,
+          "widthCm": 9,
+          "heightCm": 5,
+          "weightG": 200,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "inferred",
+          "holdout": true
+        },
+        "latencyMs": 1353.9582079999964,
+        "tokens": 617
+      }
+    },
+    {
+      "caseId": "p-28",
+      "passed": true,
+      "details": {
+        "group": "C",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-28",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "dimsSource": "unknown",
+          "weightSource": "unknown",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "هدية فاخرة"
+        },
+        "truth": {
+          "productId": "p-28",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "unknown",
+          "holdout": false
+        },
+        "latencyMs": 4580.705458000011,
+        "tokens": 559
+      }
+    },
+    {
+      "caseId": "p-29",
+      "passed": true,
+      "details": {
+        "group": "C",
+        "holdout": true,
+        "status": "ok",
+        "facts": {
+          "productId": "p-29",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "dimsSource": "unknown",
+          "weightSource": "unknown",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "unknown"
+        },
+        "truth": {
+          "productId": "p-29",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "unknown",
+          "holdout": true
+        },
+        "latencyMs": 997.425917000015,
+        "tokens": 573
+      }
+    },
+    {
+      "caseId": "p-30",
+      "passed": true,
+      "details": {
+        "group": "C",
+        "holdout": false,
+        "status": "ok",
+        "facts": {
+          "productId": "p-30",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "dimsSource": "unknown",
+          "weightSource": "unknown",
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "confidence": "low",
+          "evidence": "inferred from unknown product set"
+        },
+        "truth": {
+          "productId": "p-30",
+          "lengthCm": null,
+          "widthCm": null,
+          "heightCm": null,
+          "weightG": null,
+          "fragile": false,
+          "liquid": false,
+          "sensitive": false,
+          "expectedDimsSource": "unknown",
+          "holdout": false
+        },
+        "latencyMs": 1177.9031670000113,
+        "tokens": 580
+      }
+    }
+  ]
+}
