@@ -41,3 +41,18 @@
 ## Smoke test (Wed night, all 20 orders)
 
 `/orders/1001` … `/orders/1020`, expected outcome per order in `data/orders.json` (`expect`). Record anything unexpected in CHECKLIST → Blockers.
+
+## Production smoke test (2026-10-21, https://rassah.vercel.app, engine-0.2, gemini-3.5-flash-lite, functions in fra1)
+
+All 30 products pre-extracted on production (`trigger='admin'`): 15 page, 12 inferred, 3 unknown (group C, as designed).
+
+| Orders | Result |
+|---|---|
+| 1001–1005, 1007–1016, 1018, 1019 (17) | `box_found` (1001 → FLAT, 1018 → M, 1003/1013/1019 → XL, rest → L) |
+| 1006, 1017 | `needs_measurement` (contain a group-C product with no measurements on the page; the AI does not guess) |
+| 1020 | `no_box` (S/FLAT/M/L too small, XL overweight) |
+
+Timings (server `totalMs`): cached orders 119–234 ms after moving functions to fra1 (were 358–1896 ms in iad1). Uncached order 1001 (facts cleared for p-02): 1589 ms total, of which Gemini extraction 1205 ms.
+
+### Rollback (if a deploy breaks the demo)
+Vercel → project `rassah` → Deployments → pick the last good production deployment → ⋯ → **Promote to Production**. Or CLI: `vercel promote <deployment-url> --scope abdulazizs-projects-cb679bdc`.

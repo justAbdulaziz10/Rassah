@@ -19,18 +19,18 @@
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 8 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 30 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 23 | 🟨 In progress |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 24 | 🟨 In progress |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 31 | 🟨 In progress |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 33 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 39 | 🟨 In progress |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 11 | 🟨 In progress |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 18 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 27 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **365** | |
+| **Total** | | | | **517** | **375** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -261,7 +261,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P2.27** (M3) Each query tested in the SQL editor.
 
 ### 2E. Verification
-- [ ] **P2.28** (M3) `/api/health` reports `supabase: "ok"` locally and on the Vercel preview.
+- [x] **P2.28** (M3) `/api/health` reports `supabase: "ok"` locally and on the Vercel preview. — production health reports database ok
 - [x] **P2.29** (M3) Verify the anon key **cannot** read any table (quick REST call with the anon key returns nothing or 401). — anon REST read of products returned [] (RLS blocks anon)
 - [ ] **P2.30** (M3) Update the dashboard. **Gate G2 check.**
 
@@ -511,9 +511,9 @@ CI needs **no** secrets because tests never call external services.
 
 ### 6G. Checkpoint ⛳ (Wed 13:00)
 - [ ] **P6.32** (M3) Deploy to a Vercel preview.
-- [ ] **P6.33** (M1) Call the pack API for **all 20 orders** on the preview. Statuses match expectations (incl. `needs_measurement` and `no_box`).
+- [x] **P6.33** (M1) Call the pack API for **all 20 orders** on the preview. Statuses match expectations (incl. `needs_measurement` and `no_box`). — done on production instead of a preview (2026-10-21)
 - [ ] **P6.34** (M3) Rows appear in `order_runs` and `extraction_events` with correct `run_id` links.
-- [ ] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds).
+- [x] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds). — uncached 1589 ms, cached 119–234 ms
 - [ ] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers.
 - [ ] **P6.37** (M3) Update the dashboard. **Gate G6 check.**
 
@@ -730,23 +730,23 @@ CI needs **no** secrets because tests never call external services.
 
 ### 10C. Production deployment
 - [ ] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README. — partial: production live at https://rassah.vercel.app and URL in README, but work is on `integration`, not yet merged to `main`
-- [ ] **P10.15** (M3) Production env vars double-checked against the matrix. — partial: env vars set for production+preview (see register); not yet double-checked against the matrix
-- [ ] **P10.16** (M3) `/api/health` all green on production.
+- [x] **P10.15** (M3) Production env vars double-checked against the matrix. — checked 2026-10-21 against the matrix: Supabase, Gemini (model/prices/key), DEMO_MODE, ENGINE_VERSION, PROMPT_VERSION set for production + preview
+- [x] **P10.16** (M3) `/api/health` all green on production. — done 2026-10-21: status ok, database ok, gemini key present, engine-0.2
 - [ ] **P10.17** (M3) Supabase project not paused. Note the inactivity rule.
 - [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs.
-- [ ] **P10.19** (M1, →T21) Pre-warm: extract all 30 products on production (`trigger='admin'`). Facts present for groups A and B.
-- [ ] **P10.20** (M3, →T22) Smoke test **all 20 orders** on the production URL. Statuses as expected. Record results in `docs/demo-script.md`.
+- [x] **P10.19** (M1, →T21) Pre-warm: extract all 30 products on production (`trigger='admin'`). Facts present for groups A and B. — done 2026-10-21: 30/30 extracted (15 page, 12 inferred, 3 unknown)
+- [x] **P10.20** (M3, →T22) Smoke test **all 20 orders** on the production URL. Statuses as expected. Record results in `docs/demo-script.md`. — done 2026-10-21: 17 box_found, 2 needs_measurement, 1 no_box; see demo-script.md
 - [ ] **P10.21** (M3) Check Vercel function logs for errors during the smoke test.
 
 ### 10D. Resilience
-- [ ] **P10.22** (M3) Rollback rehearsal: know how to *Promote to Production* the previous deployment. Steps in `docs/demo-script.md`.
+- [x] **P10.22** (M3) Rollback rehearsal: know how to *Promote to Production* the previous deployment. Steps in `docs/demo-script.md`. — steps in demo-script.md (Promote to Production)
 - [ ] **P10.23** (M3) Local fallback: `npm run dev` on the demo laptop against production Supabase works.
 - [ ] **P10.24** (M3) Recorded 60-second backup video of the full flow (order → result → 3D → dashboard → outage → resolve).
 - [ ] **P10.25** (M3) Offline fallback if there is no internet: screenshots of every screen in `docs/report/screens/`.
 
 ### 10E. Performance
-- [ ] **P10.26** (M3) Cached order total time measured on production (target: well under 2 s).
-- [ ] **P10.27** (M3) Uncached order total time measured on production. Within the function limit with margin.
+- [x] **P10.26** (M3) Cached order total time measured on production (target: well under 2 s). — cached 119–234 ms server-side (fra1)
+- [x] **P10.27** (M3) Uncached order total time measured on production. Within the function limit with margin. — uncached 1589 ms (Gemini 1205 ms), far below the function limit
 - [ ] **P10.28** (M2) 3D view loads in under ~2 s on the demo laptop.
 - [ ] **P10.29** (M3) Final M5 alert thresholds set from these numbers (P8.18).
 
