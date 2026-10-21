@@ -21,7 +21,7 @@ Slide 5 (extraction honesty rules) is a Q&A backup, or 10 s inside M1 only if M1
 ## M1 (0:00-1:00): problem and idea
 
 - **0:00-0:10** "Rassah (رصّة): the packer types an order number and gets the cheapest safe carton, instructions and a 3D layout."
-- **0:10-0:30** Three problems: volumetric weight bills oversized cartons, items break when packed badly, and product data is free text on store pages, not a clean table. Say plainly: "We didn't interview merchants yet and our data is synthetic, so the size of the problem is our hypothesis."
+- **0:10-0:30** Three problems: volumetric weight bills oversized cartons, items break when packed badly, and product data is free text on store pages, not a clean table. Say plainly: the size of the problem is a hypothesis; add what the merchant outreach produced (`docs/discovery.md`) and nothing more. If nobody replied, say so.
 - **0:30-0:45** Before: guesswork. After: order number in; carton, instructions and 3D layout out; the packer stays in control.
 - **0:45-1:00** "Gemini only reads text. The engine searches positions. A validator that shares no code with the engine checks every layout before the packer sees it."
 
