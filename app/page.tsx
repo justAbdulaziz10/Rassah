@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AirIcon, ArrowForwardIcon, GlassIcon, RulerIcon } from "@/components/Icons";
+import { AirIcon, ArrowForwardIcon, GitHubIcon, GlassIcon, RulerIcon } from "@/components/Icons";
 import Compare from "@/components/landing/Compare";
 import HeroPacking from "@/components/landing/HeroPacking";
 import Proof from "@/components/landing/Proof";
+import { REPO_URL } from "@/components/SiteFooter";
 import hero from "@/lib/landing/hero-order.json";
 import { placementOrder } from "@/lib/ui/three";
 
@@ -212,6 +213,8 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 py-8 text-sm text-[var(--ink-3)]">
           <p className="max-w-md leading-7">
             <span className="font-display text-base font-bold text-[var(--ink)]">رصّة</span>، الكرتون الصحيح لكل طلب.
+            <br />
+            نسخة أولية (MVP) بُنيت في يومين ضمن مشروع أكاديمية طويق، وكل بياناتها تجريبية.
           </p>
           <nav aria-label="روابط التذييل">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
@@ -222,6 +225,18 @@ export default function LandingPage() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href={REPO_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-1.5 rounded underline-offset-4 hover:text-[var(--ink)] hover:underline ${ringOnPaper}`}
+                >
+                  <GitHubIcon className="size-4" />
+                  الكود على GitHub
+                  <span className="sr-only">(يفتح في نافذة جديدة)</span>
+                </a>
+              </li>
             </ul>
           </nav>
         </div>

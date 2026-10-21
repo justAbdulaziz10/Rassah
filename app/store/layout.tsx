@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BoxIcon } from "@/components/Icons";
+import SiteFooter from "@/components/SiteFooter";
 
 export const metadata: Metadata = {
   title: { default: "متجر الواحة", template: "%s · متجر الواحة" },
@@ -26,6 +27,7 @@ export default function StoreLayout({ children }: LayoutProps<"/store">) {
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:py-8">{children}</main>
+      <SiteFooter />
     </>
   );
 }
