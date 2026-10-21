@@ -2,12 +2,11 @@ import { GitHubIcon } from "@/components/Icons";
 
 export const REPO_URL = "https://github.com/justAbdulaziz10/Rassah";
 
-// Shared by the console and the store: says this is the two-day MVP and links back to the source.
+// Shared by the console and the store: a link back to the source on GitHub.
 export default function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-border print:hidden">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-4 text-sm text-muted">
-        <p>رصّة نسخة أولية (MVP) بُنيت في يومين ضمن مشروع أكاديمية طويق، وكل بياناتها تجريبية.</p>
+      <div className="mx-auto flex w-full max-w-6xl justify-end px-4 py-4 text-sm text-muted">
         <a
           href={REPO_URL}
           target="_blank"

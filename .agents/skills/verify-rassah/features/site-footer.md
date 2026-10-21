@@ -1,12 +1,12 @@
 # Site footer
 
-Every page ends with a footer that says Rassah is a two-day MVP built for Tuwaiq Academy on synthetic data, and links to the GitHub repository in a new tab so visitors can get back to the code.
+Every page ends with a footer that links to the GitHub repository in a new tab, so visitors can get back to the code. The site itself carries no MVP or Tuwaiq wording; that framing lives only in the English README on GitHub.
 
 ## Sub-features
 
 - `footer.console`: the console pages (orders, notifications, catalog, monitoring, evaluation) share `components/SiteFooter.tsx`.
 - `footer.store`: the store uses the same footer.
-- `footer.landing`: the landing page footer has the MVP line and the same repo link beside its page links.
+- `footer.landing`: the landing page footer has the same repo link beside its page links.
 
 ## How to get to it (user POV)
 

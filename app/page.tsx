@@ -213,8 +213,6 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-4 px-5 py-8 text-sm text-[var(--ink-3)]">
           <p className="max-w-md leading-7">
             <span className="font-display text-base font-bold text-[var(--ink)]">رصّة</span>، الكرتون الصحيح لكل طلب.
-            <br />
-            نسخة أولية (MVP) بُنيت في يومين ضمن مشروع أكاديمية طويق، وكل بياناتها تجريبية.
           </p>
           <nav aria-label="روابط التذييل">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
