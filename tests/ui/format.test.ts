@@ -44,4 +44,10 @@ describe("dates and errors", () => {
     expect(fmtApiError("خطأ")).toBe("خطأ");
     expect(fmtApiError(undefined)).toMatch(/[؀-ۿ]/);
   });
+
+  it("explains connected-store failures in Arabic instead of a generic error", () => {
+    expect(fmtApiError("Could not reach the store's orders API: store API answered HTTP 502")).toContain("المتجر");
+    expect(fmtApiError("Products not in Rassah's catalog yet: p-99")).toContain("غير مضافة");
+    expect(fmtApiError("Run not found")).toBe("عملية التجهيز غير موجودة.");
+  });
 });

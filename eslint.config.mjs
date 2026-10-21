@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Agent worktrees live here; each is a separate checkout.
     ".claude/**",
+    // The demo store is a separate app with its own package.json (store/README.md).
+    "store/**",
   ]),
 ]);
 

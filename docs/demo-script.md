@@ -71,3 +71,12 @@ It never clears facts or calls the admin extract endpoint. Packing writes a few 
 3. `DATA_BACKEND=memory DEMO_MODE=true GEMINI_API_KEY= npx next start -H 127.0.0.1 -p 3000`
 4. Open `http://127.0.0.1:3000/orders`, pack **1001** and **1002** (facts are seeded from `data/ground_truth.json`, labelled "بيانات تجريبية"); `/api/health` shows `status: degraded, offline: true`.
 5. Stop with Ctrl+C; verified 2026-10-21 (result, 3D and `/monitoring` render; Gemini is never called).
+
+## Optional: connected demo store (branch `feat/mock-store`, only if merged and deployed)
+
+Shows the integration story: "once connected to a store, the packer only types the order number."
+
+1. Open the store (separate URL, `store/README.md`) → add **عطر أو دو بارفان 50 مل**, **رواية ساق البامبو**, **شاحن جداري سريع 20W** → **إتمام الطلب** → a new number appears (e.g. **5001**).
+2. Say: "This is a separate store with its own database, standing in for Salla. Rassah has never seen this order."
+3. Open Rassah → type **5001** → carton + instructions + 3D. The order was read from the store's Orders API (read-only). Nothing was copied into Rassah's tables.
+4. If the store is down, Rassah says "Could not reach the store's orders API". Fall back to the seeded orders (1001–1020).

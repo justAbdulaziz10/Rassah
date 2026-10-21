@@ -50,6 +50,8 @@ export interface PackResponse {
   cache: { hits: number; misses: number };
   monitoring: { saved: boolean };
   errorMessage: string | null;
+  /** Where the order came from: "rassah" (own database) or the external platform's name. */
+  orderSource: string;
 }
 
 export interface PackRequest {
@@ -63,6 +65,18 @@ export interface PackRequest {
   webhookUrl?: string;
   now?: () => number;
   nowMs?: () => number;
+  /**
+   * Optional external order source (an e-commerce platform's orders API, e.g. the demo store or,
+   * later, Salla). Used only when the order is not in Rassah's own database. The order is read,
+   * never written to Rassah's tables; its products must already be in Rassah's catalog.
+   */
+  externalOrders?: (orderId: string) => Promise<ExternalOrder | null>;
+}
+
+export interface ExternalOrder {
+  id: string;
+  source: string;
+  lines: Array<{ productId: string; qty: number }>;
 }
 
 const zeroSources = (): Record<DataSource, number> => ({ page: 0, inferred: 0, manual: 0, unknown: 0 });
@@ -89,6 +103,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
     cache: { hits: 0, misses: 0 },
     monitoring: { saved: true },
     errorMessage: null,
+    orderSource: "rassah",
   };
   const run: OrderRun = {
     id: req.runId,
@@ -125,11 +140,38 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
   let extractionEvents: Awaited<ReturnType<typeof getOrExtractFacts>>["events"] = [];
 
   try {
-    const order = await req.repo.getOrder(req.orderId);
-    if (!order) {
+    let order = await req.repo.getOrder(req.orderId);
+    let externalError: string | null = null;
+    if (!order && req.externalOrders) {
+      // Not in Rassah's own store: ask the connected platform (read-only, nothing is copied in).
+      try {
+        const ext = await req.externalOrders(req.orderId);
+        if (ext) {
+          order = { id: ext.id, demo: null, lines: ext.lines };
+          response.orderSource = ext.source;
+        }
+      } catch (err) {
+        externalError = (err as Error)?.message?.slice(0, 200) ?? "store unreachable";
+      }
+    }
+    const missing = order
+      ? await req.repo.getProducts(order.lines.map((l) => l.productId)).then((ps) => {
+          const known = new Set(ps.map((p) => p.id));
+          return order!.lines.map((l) => l.productId).filter((id) => !known.has(id));
+        })
+      : [];
+    if (externalError) {
+      response.status = "error";
+      response.errorMessage = `Could not reach the store's orders API: ${externalError}`;
+      run.errorCode = "store_unreachable";
+    } else if (!order) {
       response.status = "not_found";
       response.errorMessage = `Order ${req.orderId} not found`;
       run.errorCode = "order_not_found";
+    } else if (missing.length > 0) {
+      response.status = "error";
+      response.errorMessage = `Products not in Rassah's catalog yet: ${missing.join(", ")}`;
+      run.errorCode = "product_not_in_catalog";
     } else {
       const productIds = order.lines.map((l) => l.productId);
       const [products, cartons, rates] = await Promise.all([

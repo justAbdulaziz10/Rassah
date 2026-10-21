@@ -135,6 +135,8 @@ const API_ERRORS: Array<[RegExp, string]> = [
   [/^Order( .*)? not found/i, "الطلب غير موجود. تأكد من رقم الطلب."],
   [/^Product( .*)? not found/i, "المنتج غير موجود."],
   [/^Run( .*)? not found/i, "عملية التجهيز غير موجودة."],
+  [/Could not reach the store's orders API/i, "تعذّر الوصول إلى المتجر لقراءة هذا الطلب. حاول مرة أخرى بعد قليل."],
+  [/Products not in Rassah's catalog/i, "بعض منتجات هذا الطلب غير مضافة إلى رصّة بعد. أضفها ثم أعد المحاولة."],
   [/order has no items/i, "الطلب لا يحتوي على أي منتجات."],
   [/order has \d+ units, maximum is (\d+)/i, "عدد القطع في الطلب أكبر من الحد المسموح به للتجهيز."],
   [/Length, width and height are all required/i, "أدخل الطول والعرض والارتفاع كلها."],
