@@ -1,5 +1,6 @@
 import { after, connection } from "next/server";
-import { isUuid, jsonError, log, readJson, repoOrError } from "@/lib/http";
+import { jsonError, log, readJson, repoOrError } from "@/lib/http";
+import { isUuid } from "@/lib/ids";
 import { applyRunAction, FactsError, RunActionSchema } from "@/lib/pipeline/facts";
 import { refreshAlerts } from "@/lib/pipeline/pack";
 import { appEnv } from "@/lib/env";

@@ -2,17 +2,17 @@ import { connection } from "next/server";
 import { z } from "zod";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, readJson, repoOrError } from "@/lib/http";
+import { isProductId } from "@/lib/ids";
 import { FactChangesSchema, FactsError, updateProductFacts } from "@/lib/pipeline/facts";
 import { extractLimiter, rateLimitOrNull } from "@/lib/rate-limit";
 
-const PRODUCT_ID = /^p-\d{2,4}$/;
 const BodySchema = z.object({ changes: FactChangesSchema, runId: z.uuid().nullable().optional() }).strict();
 
 /** Manual measurement or correction by a packer. */
 export async function PATCH(request: Request, ctx: RouteContext<"/api/products/[id]/facts">) {
   await connection();
   const { id } = await ctx.params;
-  if (!PRODUCT_ID.test(id)) return jsonError(400, "Invalid product id");
+  if (!isProductId(id)) return jsonError(400, "Invalid product id");
   const parsed = BodySchema.safeParse(await readJson(request));
   if (!parsed.success) return jsonError(400, "Invalid changes", { issues: parsed.error.issues.map((i) => i.message) });
 
@@ -36,7 +36,7 @@ export async function DELETE(request: Request, ctx: RouteContext<"/api/products/
   const limited = rateLimitOrNull(extractLimiter, request);
   if (limited) return limited;
   const { id } = await ctx.params;
-  if (!PRODUCT_ID.test(id)) return jsonError(400, "Invalid product id");
+  if (!isProductId(id)) return jsonError(400, "Invalid product id");
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
   try {

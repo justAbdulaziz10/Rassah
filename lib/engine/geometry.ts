@@ -10,11 +10,6 @@ export function sortDesc(d: readonly number[]): Dims {
   return [s[0], s[1], s[2]];
 }
 
-/** Round to 2 decimal places (cm, kg, SAR). */
-export function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 /**
  * Allowed orientations (dx, dy, dz) of a unit.
  * Normal items: all 6 axis permutations, deduplicated when sides are equal.

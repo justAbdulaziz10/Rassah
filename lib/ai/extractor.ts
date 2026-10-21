@@ -4,6 +4,8 @@ import "server-only";
 
 import type { ExtractionEvent, ExtractionStatus } from "@/lib/db/types";
 import type { ProductFacts } from "@/lib/engine/types";
+import { LIMITS } from "@/lib/limits";
+import { round2 } from "@/lib/math";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompt";
 import { ModelFactsSchema, type ModelFacts } from "./schema";
 
@@ -68,9 +70,6 @@ export interface ExtractOutcome {
   event: ExtractionEventBody;
 }
 
-const MAX_DIM_CM = 150;
-const MAX_WEIGHT_G = 30_000;
-const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Post-validation rules applied after Zod (see docs/stack/02):
@@ -82,7 +81,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 export function sanitize(productId: string, m: ModelFacts): ExtractedFacts {
   let dims = [m.lengthCm, m.widthCm, m.heightCm];
   let dimsSource = m.dimsSource;
-  if (dims.some((d) => d === null || !(d > 0) || d > MAX_DIM_CM)) {
+  if (dims.some((d) => d === null || !(d > 0) || d > LIMITS.maxSideCm)) {
     dims = [null, null, null];
     dimsSource = "unknown";
   }
@@ -90,7 +89,7 @@ export function sanitize(productId: string, m: ModelFacts): ExtractedFacts {
 
   let weightG = m.weightG;
   let weightSource = m.weightSource;
-  if (weightG === null || !(weightG > 0) || weightG > MAX_WEIGHT_G) {
+  if (weightG === null || !(weightG > 0) || weightG > LIMITS.maxWeightG) {
     weightG = null;
     weightSource = "unknown";
   }

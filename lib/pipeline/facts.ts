@@ -4,14 +4,15 @@
 import { z } from "zod";
 import type { Repo } from "@/lib/db/repo";
 import type { Correction, StoredFacts } from "@/lib/db/types";
+import { LIMITS } from "@/lib/limits";
 
-const dim = z.number().positive().max(150);
+const dim = z.number().positive().max(LIMITS.maxSideCm);
 export const FactChangesSchema = z
   .object({
     lengthCm: dim.optional(),
     widthCm: dim.optional(),
     heightCm: dim.optional(),
-    weightG: z.number().positive().max(30_000).optional(),
+    weightG: z.number().positive().max(LIMITS.maxWeightG).optional(),
     fragile: z.boolean().optional(),
     liquid: z.boolean().optional(),
     sensitive: z.boolean().optional(),

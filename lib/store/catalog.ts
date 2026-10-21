@@ -1,5 +1,6 @@
 import { z } from "zod";
 import prices from "@/data/store-prices.json";
+import { ENGINE_CONFIG } from "@/lib/engine/config";
 
 // The built-in store (/store): customers fill a cart, the order lands in Rassah's orders table
 // and shows up in the packer's queue. Products are Rassah's own catalog; only prices live here.
@@ -7,7 +8,7 @@ import prices from "@/data/store-prices.json";
 export const PRICE_SAR: Record<string, number> = prices.prices;
 
 /** Rassah packs at most 12 units per order (order_items.qty check), so checkout enforces the same caps. */
-export const MAX_UNITS = 12;
+export const MAX_UNITS = ENGINE_CONFIG.maxUnits;
 export const MAX_QTY_PER_LINE = 3;
 
 export const CATEGORY_LABEL: Record<string, string> = {

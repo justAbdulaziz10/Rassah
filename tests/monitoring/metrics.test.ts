@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeMetrics, percentile, windowSince } from "@/lib/monitoring/metrics";
+import { percentile } from "@/lib/math";
+import { computeMetrics, windowSince } from "@/lib/monitoring/metrics";
 import { correction, extraction, NOW, run } from "./fixtures";
 
 describe("percentile (nearest rank)", () => {

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { serverExtractDeps } from "@/lib/ai";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, readJson, repoOrError } from "@/lib/http";
+import { isOrderId } from "@/lib/ids";
 import { makeStoreOrderFetcher, storeIntegrationConfig } from "@/lib/integrations/store";
 import { runPack, type PackResponse } from "@/lib/pipeline/pack";
 import { packLimiter, rateLimitOrNull } from "@/lib/rate-limit";
@@ -17,7 +18,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/orders/[id]
   const limited = rateLimitOrNull(packLimiter, request);
   if (limited) return limited;
   const { id } = await ctx.params;
-  if (!/^\d{1,10}$/.test(id)) return jsonError(400, "Order number must be digits only");
+  if (!isOrderId(id)) return jsonError(400, "Order number must be digits only");
 
   const body = BodySchema.safeParse(await readJson(request));
   if (!body.success) return jsonError(400, "Invalid request body");

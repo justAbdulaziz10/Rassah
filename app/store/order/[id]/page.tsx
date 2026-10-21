@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { CheckIcon } from "@/components/Icons";
 import { repoOrError } from "@/lib/http";
+import { isOrderId } from "@/lib/ids";
 import { PRICE_SAR } from "@/lib/store/catalog";
 import { fmtPieces } from "@/lib/ui/format";
 
@@ -21,7 +22,7 @@ export default function OrderPlacedPage(props: PageProps<"/store/order/[id]">) {
 async function Placed({ params }: Pick<PageProps<"/store/order/[id]">, "params">) {
   await connection();
   const { id } = await params;
-  if (!/^\d{1,10}$/.test(id)) notFound();
+  if (!isOrderId(id)) notFound();
   const repo = repoOrError();
   if (repo instanceof Response) notFound();
   const order = await repo.getOrder(id);

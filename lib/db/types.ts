@@ -19,7 +19,7 @@ export interface Product {
  * Their numbers start at 5001 so they never collide with the seeded orders (1001–1020).
  */
 export const STORE_ORDER_TAG = "store";
-export const STORE_FIRST_ORDER_ID = 5001;
+export { STORE_FIRST_ORDER_ID } from "@/lib/ids";
 
 export interface OrderSummary {
   id: string;

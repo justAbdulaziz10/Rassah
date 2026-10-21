@@ -14,17 +14,13 @@ import { estimateCost } from "../lib/engine/cost";
 import { packUnits } from "../lib/engine/packer";
 import type { Unit, ViolationCode } from "../lib/engine/types";
 import { validateLayout } from "../lib/engine/validator";
+import { percentile } from "../lib/math";
 import { hasSupabaseEnv, must, scriptSupabase } from "./_supabase";
 
 const ENGINE_VERSION = process.env.ENGINE_VERSION?.trim() || DEFAULT_ENGINE_VERSION;
 const WRITE = process.argv.includes("--write");
 const VOPTS = { minSupport: ENGINE_CONFIG.minSupport, eps: ENGINE_CONFIG.eps };
 
-function percentile(values: number[], p: number) {
-  if (!values.length) return null;
-  const s = [...values].sort((a, b) => a - b);
-  return s[Math.max(1, Math.ceil((p / 100) * s.length)) - 1];
-}
 const round = (n: number, d = 3) => Math.round(n * 10 ** d) / 10 ** d;
 
 async function main() {

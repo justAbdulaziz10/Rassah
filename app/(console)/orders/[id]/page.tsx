@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import PackRunner from "@/components/PackRunner";
 import { repoOrError } from "@/lib/http";
+import { isOrderId } from "@/lib/ids";
 
 export const metadata: Metadata = { title: "نتيجة الطلب" };
 
@@ -16,7 +17,7 @@ export const instant = false;
 export default async function OrderResultPage(props: PageProps<"/orders/[id]">) {
   const { id } = await props.params;
   await connection();
-  if (!/^\d{1,10}$/.test(id)) notFound();
+  if (!isOrderId(id)) notFound();
 
   const repo = repoOrError();
   let customerName: string | null = null;

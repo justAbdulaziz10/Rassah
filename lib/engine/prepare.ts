@@ -1,7 +1,8 @@
 // Turns product facts + order lines into placeable units.
 
 import type { EngineConfig } from "./config";
-import { round2, sortDesc } from "./geometry";
+import { round2 } from "../math";
+import { sortDesc } from "./geometry";
 import type { OrderLine, ProductFacts, Unit } from "./types";
 
 export type PrepareResult =

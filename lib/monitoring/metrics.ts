@@ -4,6 +4,7 @@ import "server-only";
 
 import type { Correction, ExtractionEvent, OrderRun } from "@/lib/db/types";
 import type { DataSource, ViolationCode } from "@/lib/engine/types";
+import { percentile } from "@/lib/math";
 
 export type MetricWindow = "1h" | "24h" | "7d" | "all";
 export const WINDOWS: MetricWindow[] = ["1h", "24h", "7d", "all"];
@@ -22,14 +23,6 @@ interface Metric<T = number | null> {
 
 function metric<T>(value: T, n: number, minN: number): Metric<T> {
   return { value, n, minN, sufficient: n >= minN };
-}
-
-export function percentile(values: number[], p: number): number | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  // Nearest-rank method: the smallest value with at least p% of samples at or below it.
-  const rank = Math.max(1, Math.ceil((p / 100) * sorted.length));
-  return sorted[rank - 1];
 }
 
 export interface MetricInput {

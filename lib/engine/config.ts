@@ -29,14 +29,5 @@ export const ENGINE_CONFIG = {
   eps: 1e-6,
 } as const;
 
-export type EngineConfig = {
-  marginInferred: number;
-  paddingCm: number;
-  minSupport: number;
-  maxSearchMs: number;
-  restarts: number;
-  anchorNodes: number;
-  wallCm: number;
-  maxUnits: number;
-  eps: number;
-};
+/** The engine's tunables: the keys of ENGINE_CONFIG, widened to plain numbers so tests and evals can override them. */
+export type EngineConfig = { -readonly [K in keyof typeof ENGINE_CONFIG]: number };

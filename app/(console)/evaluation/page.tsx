@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { isLocalBackend } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
+import { round2 } from "@/lib/math";
 import { loadEval, type EvalView } from "@/lib/monitoring/evaluation";
 import { EmptyState, PageHeader, TableSkeleton } from "@/components/PageHeader";
 import { fmtMs, fmtTime, ltr } from "@/lib/ui/format";
@@ -41,7 +42,7 @@ function fmt(v: unknown, f: Fmt): string {
   if (f === "pct") return ltr(`${Math.round(v * 1000) / 10}%`);
   if (f === "ms") return fmtMs(v);
   if (f === "usd") return ltr(`$${v.toFixed(5)}`);
-  if (f === "sar") return `${ltr(String(Math.round(v * 100) / 100))} ر.س`;
+  if (f === "sar") return `${ltr(String(round2(v)))} ر.س`; // not fmtSar: no trailing zeros here
   return ltr(String(v));
 }
 

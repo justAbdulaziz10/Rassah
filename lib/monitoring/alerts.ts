@@ -4,8 +4,8 @@ import "server-only";
 
 import type { Repo } from "@/lib/db/repo";
 import type { Alert, Correction, ExtractionEvent, OrderRun, Severity } from "@/lib/db/types";
+import { percentile } from "@/lib/math";
 import { fmtCount, fmtMs } from "@/lib/ui/format";
-import { percentile } from "./metrics";
 
 export interface RuleEvaluation {
   rule: string;

@@ -1,6 +1,6 @@
 // Estimated packaging + shipping cost. All rates are synthetic demo values and labeled as estimates.
 
-import { round2 } from "./geometry";
+import { round2 } from "../math";
 import type { Carton, CostEstimate, ShippingRates, Unit } from "./types";
 
 export function estimateCost(carton: Carton, units: Unit[], rates: ShippingRates, wallCm: number): CostEstimate {

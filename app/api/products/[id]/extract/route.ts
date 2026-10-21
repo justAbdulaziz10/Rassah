@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { getOrExtractFacts, serverExtractDeps } from "@/lib/ai";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, repoOrError } from "@/lib/http";
+import { isProductId } from "@/lib/ids";
 import { extractLimiter, rateLimitOrNull } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
@@ -13,7 +14,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/products/[i
   const limited = rateLimitOrNull(extractLimiter, request);
   if (limited) return limited;
   const { id } = await ctx.params;
-  if (!/^p-\d{2,4}$/.test(id)) return jsonError(400, "Invalid product id");
+  if (!isProductId(id)) return jsonError(400, "Invalid product id");
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
 

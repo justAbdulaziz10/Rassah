@@ -26,6 +26,7 @@ import { prepareUnits } from "../lib/engine/prepare";
 import { splitPack } from "../lib/engine/split";
 import type { Carton, OrderLine, ProductFacts, Unit, ViolationCode } from "../lib/engine/types";
 import { validateLayout } from "../lib/engine/validator";
+import { percentile, round2 } from "../lib/math";
 
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
@@ -248,7 +249,7 @@ function score(c: Case, a: EngineAnswer, ms: number): Scored {
     outcome: a.boxes.length === 1 ? "one_box" : "multi_box",
     valid: codes.size === 0,
     violations: [...codes],
-    costSar: Math.round(cost * 100) / 100,
+    costSar: round2(cost),
     fill: real / inner,
     ms,
   };
@@ -256,12 +257,7 @@ function score(c: Case, a: EngineAnswer, ms: number): Scored {
 
 const pct = (n: number, d: number) => (d ? `${Math.round((n / d) * 1000) / 10}%` : "—");
 const mean = (xs: number[]) => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
-function percentile(xs: number[], p: number) {
-  if (!xs.length) return null;
-  const s = [...xs].sort((a, b) => a - b);
-  return s[Math.max(1, Math.ceil((p / 100) * s.length)) - 1];
-}
-const r2 = (n: number | null) => (n === null ? "—" : (Math.round(n * 100) / 100).toFixed(2));
+const r2 = (n: number | null) => (n === null ? "—" : round2(n).toFixed(2));
 
 // ---------------------------------------------------------------------------------------------- main
 

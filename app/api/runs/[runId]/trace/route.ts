@@ -1,5 +1,6 @@
 import { connection } from "next/server";
-import { isUuid, jsonError, log, repoOrError } from "@/lib/http";
+import { jsonError, log, repoOrError } from "@/lib/http";
+import { isUuid } from "@/lib/ids";
 
 export async function GET(_request: Request, ctx: RouteContext<"/api/runs/[runId]/trace">) {
   await connection();

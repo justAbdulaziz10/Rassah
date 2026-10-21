@@ -8,6 +8,7 @@ import { buildInstructions, type InstructionStep } from "./instructions";
 import { packUnits, type PackOptions } from "./packer";
 import type { Carton, CostEstimate, PackSuccess, Placement, Unit } from "./types";
 import { volume } from "./geometry";
+import { round2 } from "../math";
 
 interface SplitBox {
   carton: Carton;
@@ -123,7 +124,7 @@ export function splitPack(units: Unit[], cartons: Carton[], opts: PackOptions & 
       cost: b.cost,
       instructions: buildInstructions(b.carton, b.placements, b.units, cfg.paddingCm),
     })),
-    totalSar: Math.round(totalOf(best) * 100) / 100,
+    totalSar: round2(totalOf(best)),
     searchMs: Math.round(now() - start),
   };
 }
