@@ -6,8 +6,8 @@
 
 1. `GET /api/health` on the production URL → `status: ok`, `database: ok`, `geminiKeyPresent: true`, `demoMode: true`.
 2. Catalog pre-warmed (CHECKLIST P10.19): `/catalog` shows facts for groups A and B, and group C as unknown.
-3. Run 3–5 orders so the dashboard has fresh data (`/monitoring`, window "آخر ساعة").
-4. No unexpected open alerts. Leftovers from the rehearsal resolve after a few clean runs.
+3. Run `npm run demo:data -- --apply` about 15 minutes before going on stage. Every page then shows every state: in `/orders` and `/notifications` new, waiting, done, and each attention reason (needs measuring, no carton, split, error); in `/monitoring` all charts with data, four open alerts (one critical, three warnings), "few cases" in the last hour, and every read-failure reason. The story ends when the command runs, so it looks recent.
+4. The only open alerts are the four from the mock history (M6 critical; M1, M5, M4 warnings). Anything else is a real problem.
 5. Tabs open: `/orders`, `/monitoring`, `/evaluation`, GitHub repo, deck.
 
 ## Live flow (≈ 90 s)
@@ -21,6 +21,8 @@
 | 5 | `/monitoring` | The health list at the top says what is over its limit. Then walk 3 tiles: M1 correction rate, M6 read failures (causes in "أسباب فشل قراءة المنتجات"), M5 p95 for known vs new products; each shows its limit and case count. Under "آخر الطلبات المجهّزة" press "التفاصيل" on a run → the trace opens under the row (products read by name, each carton tried, timings, corrections; tokens under "تفاصيل تقنية"). |
 
 ## Outage story (≈ 30 s, during Q&A if asked)
+
+With the mock history loaded, M6 is already critical from mock failures, so the simulated outage does not open a new alert. To tell this story, run `npm run demo:data -- --remove` first.
 
 1. `/catalog` → on **p-16** (perfume 50 ml) click "حذف البيانات المحفوظة" (clears its cached facts; shown only with `DEMO_MODE=true`).
 2. Open **`/orders/1002?outage=1`** (the URL flag simulates the outage; it is ignored unless `DEMO_MODE=true`).
@@ -62,6 +64,7 @@ Vercel → project `rassah` → Deployments → pick the last good production de
 Run `npm run demo:morning` (needs `.env.local` with the Supabase service-role key).
 It checks `/api/health`, the Supabase counts (30 products, 5 cartons, 20 seeded orders, 27+ facts; store orders are not counted), packs orders 1001, 1002, 1003 and 1020 (expects `no_box`), and confirms 0 open alerts. With `-- --reset` it clears the monitoring events (order runs, extraction events, corrections, alerts; eval runs and product facts are kept) after the counts and before the sample packs.
 Each step prints a check or cross with timing; exit code 1 on any failure. `BASE_URL` overrides the default `https://rassah.vercel.app`.
+Mock orders (`demo = 'mock'`) are not counted either, and when the mock history is loaded its open alerts are reported as expected instead of failing the check. `--reset` also deletes the mock runs, leaving the mock orders as "new": run `npm run demo:data -- --apply` again afterwards.
 It never clears facts or calls the admin extract endpoint. The 4 sample packs always write `order_runs`, so after a `--reset` run the dashboard shows only those 4 runs.
 
 ## Offline fallback

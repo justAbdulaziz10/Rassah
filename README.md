@@ -48,6 +48,7 @@ npm run dev                    # http://localhost:3000
 | `npm run eval:extraction` | Extraction evaluation against ground truth (calls Gemini, costs tokens) |
 | `npm run bench` | Head-to-head packing benchmark (protocol in [docs/benchmark.md](docs/benchmark.md)) |
 | `npm run demo:morning` | Readiness check against production: health, DB counts, 4 sample packs, open alerts. `-- --reset` clears events (keeps eval runs and facts) after the counts and before the packs. `BASE_URL` overrides the target |
+| `npm run demo:data -- --apply` | Writes a mock history to Supabase so every page shows every state for a presentation: orders 9001+ (tagged `demo = 'mock'`) in each queue state and attention reason, every product-read failure, corrections, slow reads, a validator rejection and the alerts they cause. It ends at the moment you run it, so re-run it shortly before presenting. `-- --remove` deletes exactly those rows and resolves the alerts they caused |
 | `npm run clear-facts -- --product p-16` | Deletes one product's cached facts so the next order re-extracts it (`--all --yes` clears all) |
 
 `scripts/reset-events.ts --yes` (run with `npx tsx --env-file-if-exists=.env.local`) deletes all monitoring events and alerts and keeps facts and eval runs.
@@ -79,6 +80,7 @@ Copy `.env.example` to `.env.local`. Never commit real values; server-only varia
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | for the database | Server-side database access |
 | `DATA_BACKEND` | optional | `memory` runs on `data/*.json` in process memory, no Supabase (local only, ignored on Vercel) |
 | `MEMORY_SEED_FACTS` | optional | Memory mode only: `auto` (default, seed only when no Gemini key), `true`, `false`. Seeded facts have origin `seeded` and are never shown as AI output |
+| `MEMORY_MOCK_DATA` | optional | Memory mode only: `true` loads the same mock history as `npm run demo:data` at start-up |
 | `STORE_API_URL`, `STORE_API_KEY` | optional | An external store's Orders API (for example Salla later). When both are set, an order number not in Rassah's database is read from it, read-only. `/store` needs neither |
 | `DEMO_MODE` | optional | `true` enables demo controls: fault injection (`/orders/<id>?outage=1`), re-extract, clear cached facts |
 | `ENGINE_VERSION`, `PROMPT_VERSION` | optional | Stamped into events and eval runs |

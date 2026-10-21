@@ -7,7 +7,7 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 | Tool | Used for | Why this tool | Generated / assisted / manual | How we verified it | Limitations / trade-offs |
 |---|---|---|---|---|---|
 | **Gemini API** (Flash-tier, `@google/genai` 2.30) | **Runtime product feature**: reads each product page and returns outer-package dimensions, weight, fragile/liquid/sensitive flags, the source of each value, confidence, and evidence | Team has access. Flash tier is fast and cheap for short structured extraction. Strong Arabic and mixed-unit understanding. | Product feature (our prompt + schema, see `lib/ai/`) | Extraction eval against hand-labeled ground truth (dims ±1 cm, weight ±10%, inferred MAPE, honesty, fragile recall). Zod validation + sanity rules on every response. | Can misread or guess. Mitigated by source tags, never-invent rule, safety margin on inferred values, packer confirmation, and the M1/M6 metrics. Synthetic data only. |
-| **Claude (Claude Code)** | Idea critique and planning, `docs/` drafts, project scaffold, engine/validator/extractor/pipeline/UI code drafts, tests, eval scripts | Agentic coding assistant with repository access. Fast iteration with tests. | **Generated**, then reviewed by the team (review owners in PLAN §10) | `npm run check` (lint, typecheck, data validation, 219 unit/property/pipeline tests), GitHub Actions CI on every push, production build, end-to-end API run, screenshots of the running app, packing eval | Generated code must be understood by every member (Q&A drill, CHECKLIST P11.44–P11.49). Synthetic ground truth was drafted by the same tool that wrote the descriptions, so **M2 must review it independently** (CHECKLIST P3.12). |
+| **Claude (Claude Code)** | Idea critique and planning, `docs/` drafts, project scaffold, engine/validator/extractor/pipeline/UI code drafts, tests, eval scripts | Agentic coding assistant with repository access. Fast iteration with tests. | **Generated**, then reviewed by the team (review owners in PLAN §10) | `npm run check` (lint, typecheck, data validation, 227 unit/property/pipeline tests), GitHub Actions CI on every push, production build, end-to-end API run, screenshots of the running app, packing eval | Generated code must be understood by every member (Q&A drill, CHECKLIST P11.44–P11.49). Synthetic ground truth was drafted by the same tool that wrote the descriptions, so **M2 must review it independently** (CHECKLIST P3.12). |
 | Google AI Studio | Creating the Gemini key, trying prompts by hand | Official console for the Gemini API | Manual | n/a | Free-tier rate limits decide our concurrency (2) and the eval delay |
 
 ## Development tools
@@ -39,7 +39,7 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 
 ## Verification steps we can show
 
-1. `npm run check` → lint, typecheck, `validate-data`, 219 tests (incl. a 200-order property test: every layout passes the independent validator).
+1. `npm run check` → lint, typecheck, `validate-data`, 227 tests (incl. a 200-order property test: every layout passes the independent validator).
 2. CI green on every commit (GitHub Actions).
 3. `npm run eval:packing` → `eval/results/packing-*.json` (validity 40/40, 0 false claims, recall 20/20, baseline failing 20/28).
 4. `npm run eval:extraction` → `eval/results/extraction-2026-10-21-v1.json` (30/30 calls ok, `gemini-3.5-flash-lite`).

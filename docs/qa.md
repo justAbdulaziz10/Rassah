@@ -27,7 +27,7 @@ No. It's synthetic: 30 products written in the style of Saudi store pages, with 
 Not the global optimum (it's time-bounded). It finds all 20 of 20 zero-slack exact-fill test cases (engine-0.2), but that is a stress test on our own fixtures, not proof of optimality. No crush strength, stacking load or void-fill modeling. No deformable items (clothing is out of scope). When no single carton fits, the split into several cartons is a heuristic, not the cheapest possible split. Costs are illustrative, not courier quotes. "No carton found" means "not found within the search budget", not "impossible".
 
 **9. What did AI tools generate, and how did you verify it?**
-See `docs/report/TOOLS.md`. Claude generated most code drafts and the synthetic data. We verified with 219 tests, CI, evals, an end-to-end API run, and screenshots. The ground truth needs our independent review. Gemini is the runtime feature, verified by the extraction eval.
+See `docs/report/TOOLS.md`. Claude generated most code drafts and the synthetic data. We verified with 227 tests, CI, evals, an end-to-end API run, and screenshots. The ground truth needs our independent review. Gemini is the runtime feature, verified by the extraction eval.
 
 **10. What if Gemini is down during packing?**
 Cached products keep working. Uncached ones fail visibly ("needs measurement", marked "تعذّرت قراءة صفحة المنتج"), the event is logged with its status, and M6 crosses 10% → critical alert (+ webhook for real outages). The packer can measure manually.

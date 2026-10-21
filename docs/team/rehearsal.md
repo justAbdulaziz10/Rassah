@@ -28,7 +28,7 @@ Method: the reader asks the question, the answerer speaks up to 20 seconds witho
 | Q10 | What if Gemini is down during packing? | Cached products keep working. Uncached ones fail visibly ("يحتاج قياس", "تعذّرت قراءة صفحة المنتج"), the event is logged with its status, M6 above 10% raises a critical alert, and a webhook fires for real outages only. |
 | Q11 | Why Supabase, Vercel, TypeScript? | One language for UI, API and engine; serverless has no persistent disk so we need a durable database for events; Vercel for hosting and deploy from GitHub. Trade-off: the team is stronger in Python, mitigated with cross-reviews and walkthroughs. |
 | Q12 | What's next after the camp? | Pilot with one merchant (real catalog, 100 orders, packer vs Rassah), live Salla/Zid integration (today only an optional read-only Orders API hook), manufacturer-spec lookup, scale-weight feedback. |
-| Q9 | What did AI tools generate, and how did you verify it? | Claude generated most code drafts and the synthetic data (`docs/report/TOOLS.md`). Verified with 219 tests, CI, the evals, an end-to-end API run and screenshots. Gemini is the runtime feature, verified by the extraction eval. |
+| Q9 | What did AI tools generate, and how did you verify it? | Claude generated most code drafts and the synthetic data (`docs/report/TOOLS.md`). Verified with 227 tests, CI, the evals, an end-to-end API run and screenshots. Gemini is the runtime feature, verified by the extraction eval. |
 
 ### M3 answers about M1's lane (AI and data)
 

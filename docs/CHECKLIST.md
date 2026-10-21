@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 39 | 39 | ✅ Done (gate passed) |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 59 | 59 | ✅ Done (gate passed) |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 50 | 49 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 52 | 51 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 34 | 33 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **535** | **467** | |
+| **Total** | | | | **537** | **469** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -666,6 +666,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.48** (M3) The dashboard shows real Supabase data on the preview. — production dashboard shows real Supabase data (screens/04-monitoring.png)
 - [x] **P8.49** (M3) Update the dashboard. **Gate G8 check.** — G8 passed (verified): seven metrics from real events; simulated outage fires and resolves the M6 alert on production (P8.43); P8.47 (M1 explains every tile) stays open
 - [x] **P8.50** (M3) Make the dashboard readable without help, adding to it without removing anything. — verified 2026-10-21 (memory backend plus real production metrics, 1440 light and dark, 834 and 390 px, no page errors, no horizontal overflow). Added a health list at the top that merges in the open alerts and shows each metric with its result, limit and verdict. The M1/M6/M5/M7 tiles keep their explanations and case counts and now add the limit, a "فوق الحدّ" badge, and the value even when the sample is small (marked unreliable, with the number of cases still needed). Speed is shown as two labelled values; cost is in riyals per order, per 1000 orders and for the period. Kept the failure-reasons card, now with an explanation for each cause. Kept the M3 card and its codes. Merged M4 into an outcomes card with visible carton-rejection reasons and links to orders that need follow-up. Added a cache card. Bars stay in the single colour from before; latency is one bar per order with the limit line. Every chart keeps "عرض البيانات في جدول". Recent runs keep the measurement-source column and add filters with counts, order links, a Riyadh clock, cards on phones, and details under the row with product names. Fixed the correction field labels (they used camelCase keys that never matched). Removed the dead helpers `fmtUsd` and `fmtAxisMs`.
+- [x] **P8.51** (M3) Latency chart at half width with an M1 chart beside it in the same style: one bar per reviewed order, products read correctly vs corrected by the packer, the rate against its limit, the fields corrected most, and a table view. — verified 2026-10-21 (memory backend with mock history, 1440 light and dark, 390 px, no page errors, no horizontal overflow); `reviewSeries` covered by `tests/monitoring/dashboard.test.ts`
+- [x] **P8.52** (M3) Mock history for presentations (`npm run demo:data -- --apply | --remove`, or `MEMORY_MOCK_DATA=true` locally): orders 9001+ tagged `demo = 'mock'` in every queue state and attention reason, every read-failure status, every carton outcome, corrections, slow reads, a validator rejection and the alerts that follow. Rows use one id prefix so removal is exact. — verified 2026-10-21 by `tests/demo/mock-data.test.ts` (every state present; M6, M1, M5, M4 breached over 7 days and in the 24-hour view) and screenshots of /monitoring, /orders and /notifications
 
 ---
 
