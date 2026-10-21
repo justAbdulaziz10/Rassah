@@ -24,7 +24,12 @@ async function remove() {
 
 async function apply() {
   const now = Date.now();
-  const data = buildMockData(now, { promptVersion: PROMPT_VERSION, engineVersion: ENGINE_VERSION, model: process.env.GEMINI_MODEL?.trim() || undefined });
+  // The same versions and model the deployed app stamps (lib/env.ts falls back to the same defaults).
+  const data = buildMockData(now, {
+    promptVersion: process.env.PROMPT_VERSION?.trim() || PROMPT_VERSION,
+    engineVersion: process.env.ENGINE_VERSION?.trim() || ENGINE_VERSION,
+    model: process.env.GEMINI_MODEL?.trim() || undefined,
+  });
   must("orders", await db.from("orders").insert(data.orders.map((o) => ({ id: o.id, demo: MOCK_ORDER_TAG, expect: o.expect, created_at: o.createdAt }))));
   must("order_items", await db.from("order_items").insert(data.orders.flatMap((o) => o.lines.map((l) => ({ order_id: o.id, product_id: l.productId, qty: l.qty })))));
   must("order_runs", await db.from("order_runs").insert(data.runs.map((r) => ({ ...fromRun(r), created_at: r.createdAt }))));
