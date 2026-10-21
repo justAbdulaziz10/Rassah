@@ -49,8 +49,8 @@ async function main() {
     const bad: string[] = [];
     for (const [table, n, op] of want) {
       const q = db.from(table).select("*", { count: "exact", head: true });
-      // Seeded orders only: orders placed in the built-in store (demo = 'store') come and go.
-      const { count, error } = await (table === "orders" ? q.or("demo.is.null,demo.neq.store") : q);
+      // Seeded orders only: store orders (demo = 'store') and mock orders (demo = 'mock') come and go.
+      const { count, error } = await (table === "orders" ? q.or("demo.is.null,demo.not.in.(store,mock)") : q);
       if (error) throw new Error(`${table}: ${error.message}`);
       out.push(`${table}=${count}`);
       if (count === null || (op === "eq" ? count !== n : count < n)) bad.push(`${table} expected ${op === "eq" ? "" : ">="}${n}, got ${count}`);
@@ -81,7 +81,13 @@ async function main() {
     if (status !== 200) throw new Error(`http ${status}`);
     const alerts = (body.alerts ?? body.openAlerts ?? []) as Array<Record<string, unknown>>;
     const open = alerts.filter((a) => !a.resolvedAt && a.status !== "resolved");
-    if (open.length) throw new Error(`${open.length} open: ${open.map((a) => String(a.rule ?? a.ruleId ?? a.id)).join(", ")}`);
+    const list = `${open.length} open: ${open.map((a) => String(a.rule ?? a.ruleId ?? a.id)).join(", ")}`;
+    // The mock history (npm run demo:data) breaks some rules on purpose, so its alerts are expected.
+    const mock = hasSupabaseEnv()
+      ? (await scriptSupabase().from("orders").select("*", { count: "exact", head: true }).eq("demo", "mock")).count
+      : 0;
+    if (open.length && mock) return `${list} (expected: mock history loaded)`;
+    if (open.length) throw new Error(list);
     return "0 open";
   });
 

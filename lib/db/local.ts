@@ -1,6 +1,9 @@
 import "server-only";
 import { computeSourceHash } from "@/lib/data/hash";
 import { loadCartons, loadGroundTruth, loadOrders, loadProducts } from "@/lib/data/load";
+import { buildMockData, MOCK_ORDER_TAG } from "@/lib/demo/mock-data";
+import { PROMPT_VERSION } from "@/lib/ai/prompt";
+import { ENGINE_VERSION } from "@/lib/engine/config";
 import { MemoryRepo } from "./memory";
 import { seededFactsFromGroundTruth, shouldSeedFacts } from "./seed-facts";
 
@@ -11,8 +14,11 @@ import { seededFactsFromGroundTruth, shouldSeedFacts } from "./seed-facts";
 const KEY = Symbol.for("rassah.localRepo");
 type WithRepo = typeof globalThis & { [KEY]?: MemoryRepo };
 
-/** Builds a fresh local repo from data/*.json. `seedFacts` pre-loads ground-truth facts (origin "seeded"). */
-export function buildLocalRepo(opts: { seedFacts: boolean }): MemoryRepo {
+/**
+ * Builds a fresh local repo from data/*.json. `seedFacts` pre-loads ground-truth facts (origin "seeded");
+ * `mockData` adds the demo history from lib/demo/mock-data.ts (orders 9001+ and their events).
+ */
+export function buildLocalRepo(opts: { seedFacts: boolean; mockData?: boolean }): MemoryRepo {
   const repo = new MemoryRepo();
   for (const p of loadProducts()) {
     repo.products.set(p.id, {
@@ -34,13 +40,25 @@ export function buildLocalRepo(opts: { seedFacts: boolean }): MemoryRepo {
       repo.facts.set(f.productId, f);
     }
   }
+  if (opts.mockData) {
+    const mock = buildMockData(Date.now(), { promptVersion: PROMPT_VERSION, engineVersion: ENGINE_VERSION });
+    for (const o of mock.orders) repo.orders.set(o.id, { id: o.id, demo: MOCK_ORDER_TAG, expect: o.expect, createdAt: o.createdAt, lines: o.lines });
+    repo.orderRuns.push(...mock.runs);
+    repo.extractionEvents.push(...mock.extractions);
+    repo.corrections.push(...mock.corrections);
+  }
   repo.useRealClock = true;
   return repo;
 }
 
 export function getLocalRepo(): MemoryRepo {
   const g = globalThis as WithRepo;
-  if (!g[KEY]) g[KEY] = buildLocalRepo({ seedFacts: shouldSeedFacts({ MEMORY_SEED_FACTS: process.env.MEMORY_SEED_FACTS, GEMINI_API_KEY: process.env.GEMINI_API_KEY }) });
+  if (!g[KEY]) {
+    g[KEY] = buildLocalRepo({
+      seedFacts: shouldSeedFacts({ MEMORY_SEED_FACTS: process.env.MEMORY_SEED_FACTS, GEMINI_API_KEY: process.env.GEMINI_API_KEY }),
+      mockData: process.env.MEMORY_MOCK_DATA?.trim() === "true",
+    });
+  }
   return g[KEY];
 }
 

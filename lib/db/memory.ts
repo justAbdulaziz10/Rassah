@@ -70,7 +70,9 @@ export class MemoryRepo implements Repo {
     this.guard("createStoreOrder");
     const unknown = lines.find((l) => !this.products.has(l.productId));
     if (unknown) throw new Error(`createStoreOrder: unknown product ${unknown.productId}`); // the FK in Supabase
-    const id = String(Math.max(STORE_FIRST_ORDER_ID - 1, ...[...this.orders.keys()].map(Number)) + 1);
+    // Next number after the highest store order, as in Supabase (other orders don't move it).
+    const storeIds = [...this.orders.values()].filter((o) => o.demo === STORE_ORDER_TAG).map((o) => Number(o.id));
+    const id = String(Math.max(STORE_FIRST_ORDER_ID - 1, ...storeIds) + 1);
     this.orders.set(id, { id, demo: STORE_ORDER_TAG, expect: customerName, createdAt: this.stamp(), lines: lines.map((l) => ({ ...l })) });
     return { id };
   }

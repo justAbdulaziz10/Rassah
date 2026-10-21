@@ -168,6 +168,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
       <section className="grid gap-4 lg:grid-cols-2">
         <LatencyCard data={data} />
+        <CorrectionsCard data={data} />
         <SourcesCard data={data} />
         <FailuresCard data={data} />
         <OutcomesCard data={data} />
@@ -624,7 +625,6 @@ function LatencyCard({ data }: { data: DashboardData }) {
       title="زمن تجهيز كل طلب"
       hint="كل عمود طلب واحد، والأحدث على اليسار. الطلب الأبطأ غالباً فيه منتجات جديدة احتاجت قراءة. مرّر المؤشر على العمود لترى رقم الطلب ووقته."
       n={points.length}
-      className="lg:col-span-2"
     >
       {points.length === 0 ? (
         <Empty />
@@ -685,6 +685,79 @@ function LatencyTip({ active, payload }: { active?: boolean; payload?: Array<{ p
       <p>
         {fmtMs(p.ms)} · {p.cached ? "منتجاته معروفة مسبقاً" : "فيه منتجات جديدة"}
       </p>
+      <p className="text-muted">الساعة {fmtClock(p.at)}</p>
+    </div>
+  );
+}
+
+function CorrectionsCard({ data }: { data: DashboardData }) {
+  const m1 = data.metrics.m1CorrectionRate;
+  const points = data.reviews.slice(-40).map((p, i) => ({ i, ok: p.reviewed - p.corrected, fixed: p.corrected, order: p.orderId, at: p.at, fields: p.fields }));
+  const fields = Object.entries(m1.byField).sort((a, b) => b[1] - a[1]);
+  return (
+    <Card
+      code="M1"
+      title="منتجات صحّح الموظف بياناتها"
+      hint="كل عمود طلب راجعه الموظف، والأحدث على اليسار. طول العمود عدد المنتجات التي قرأتها رصّة في الطلب، والجزء الملوّن بالثاني ما صحّح الموظف مقاسه أو وزنه أو صفته. مرّر المؤشر على العمود لترى ما تغيّر."
+      n={points.length}
+    >
+      {points.length === 0 ? (
+        <Empty />
+      ) : (
+        <>
+          <p className="mb-1 text-xs text-muted">عدد المنتجات في الطلب</p>
+          <div className="h-60">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={points} margin={{ top: 8, right: 4, bottom: 0, left: 4 }} barCategoryGap={2}>
+                <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                <XAxis dataKey="i" reversed hide />
+                <YAxis orientation="right" {...AXIS} width={40} allowDecimals={false} />
+                <Tooltip cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} content={<CorrectionTip />} />
+                <Bar dataKey="ok" stackId="m1" fill="var(--series-1)" maxBarSize={18} isAnimationActive={false} />
+                <Bar dataKey="fixed" stackId="m1" fill="var(--series-2)" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-[var(--series-1)]" aria-hidden />
+              قرأتها رصّة صحيحة
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-[var(--series-2)]" aria-hidden />
+              صحّحها الموظف
+            </span>
+            <span className="ms-auto">
+              النسبة {fmtPct(m1.value)} · الحدّ {fmtPct(data.targets.correctionRate)}
+            </span>
+          </p>
+          {fields.length > 0 && (
+            <p className="mt-1 text-xs text-muted">
+              أكثر ما صُحّح: {fields.map(([f, n]) => `${FIELD_LABEL[f] ?? f} (${n})`).join(" · ")}
+            </p>
+          )}
+        </>
+      )}
+      <TableView
+        head={["الوقت", "رقم الطلب", "منتجات قرأتها رصّة", "صحّحها الموظف", "ما تغيّر"]}
+        rows={[...points].reverse().map((p) => [fmtClock(p.at), `#${p.order}`, String(p.ok + p.fixed), String(p.fixed), p.fields.map((f) => FIELD_LABEL[f] ?? f).join("، ") || "—"])}
+      />
+    </Card>
+  );
+}
+
+function CorrectionTip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { ok: number; fixed: number; order: string; at: string; fields: string[] } }> }) {
+  if (!active || !payload?.length) return null;
+  const p = payload[0].payload;
+  return (
+    <div dir="rtl" className="rounded-lg border border-border bg-surface px-3 py-2 text-xs shadow-sm">
+      <p className="font-bold">
+        الطلب <span className="ltr-nums">#{p.order}</span>
+      </p>
+      <p>
+        {p.fixed === 0 ? `${fmtCount(p.ok + p.fixed, PRODUCTS)}، لم يُصحَّح شيء` : `صحّح الموظف ${ltr(String(p.fixed))} من ${fmtCount(p.ok + p.fixed, PRODUCTS)}`}
+      </p>
+      {p.fields.length > 0 && <p>{p.fields.map((f) => FIELD_LABEL[f] ?? f).join("، ")}</p>}
       <p className="text-muted">الساعة {fmtClock(p.at)}</p>
     </div>
   );

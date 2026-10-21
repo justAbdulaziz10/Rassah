@@ -3,7 +3,7 @@ import "server-only";
 // the latency series, recent runs, and alerts (re-evaluated on every load).
 
 import type { Repo } from "@/lib/db/repo";
-import type { Alert, OrderRun, RunStatus } from "@/lib/db/types";
+import type { Alert, Correction, OrderRun, RunStatus } from "@/lib/db/types";
 import { refreshAlerts } from "@/lib/pipeline/pack";
 import { THRESHOLDS } from "./alerts";
 import { computeMetrics, latencySeries, windowSince, type LatencyPoint, type Metrics, type MetricWindow } from "./metrics";
@@ -13,6 +13,8 @@ export interface DashboardData {
   generatedAt: string;
   metrics: Metrics;
   latency: LatencyPoint[];
+  /** Orders the packer reviewed, oldest first: how many AI-read products each had and how many were corrected (M1). */
+  reviews: ReviewPoint[];
   recentRuns: OrderRun[];
   alerts: Alert[];
   totals: { runs: number; extractions: number; corrections: number };
@@ -30,6 +32,41 @@ export interface DashboardData {
     noBoxRate: number;
     unknownShare: number;
   };
+}
+
+export interface ReviewPoint {
+  at: string;
+  orderId: string;
+  /** Products in the order whose facts Rassah had read (origin "ai") when it was packed. */
+  reviewed: number;
+  /** Of those, how many the packer corrected in this order. */
+  corrected: number;
+  /** Fields corrected in this order (database column names, e.g. height_cm). */
+  fields: string[];
+}
+
+/** One point per reviewed order that had AI-read products, oldest first. */
+export function reviewSeries(runs: OrderRun[], corrections: Correction[]): ReviewPoint[] {
+  const byRun = new Map<string, Correction[]>();
+  for (const c of corrections) {
+    if (c.priorOrigin !== "ai" || !c.runId) continue;
+    const list = byRun.get(c.runId);
+    if (list) list.push(c);
+    else byRun.set(c.runId, [c]);
+  }
+  return runs
+    .filter((r) => r.trigger !== "eval" && r.createdAt && r.employeeAction !== "pending" && r.aiProducts.length > 0)
+    .map((r) => {
+      const own = (byRun.get(r.id) ?? []).filter((c) => r.aiProducts.includes(c.productId));
+      return {
+        at: r.createdAt!,
+        orderId: r.orderId,
+        reviewed: r.aiProducts.length,
+        corrected: new Set(own.map((c) => c.productId)).size,
+        fields: [...new Set(own.map((c) => c.field))],
+      };
+    })
+    .sort((a, b) => a.at.localeCompare(b.at));
 }
 
 const NOT_PACKABLE: RunStatus[] = ["no_box", "needs_measurement", "error"];
@@ -68,6 +105,7 @@ export async function loadDashboard(repo: Repo, window: MetricWindow, nowMs: num
     generatedAt: new Date(nowMs).toISOString(),
     metrics: computeMetrics({ extractions, runs, corrections }),
     latency: latencySeries(runs).slice(-200),
+    reviews: reviewSeries(runs, corrections).slice(-200),
     recentRuns: newest.slice(0, 25),
     alerts,
     totals: { runs: live.length, extractions: extractions.filter((e) => e.trigger !== "eval").length, corrections: corrections.length },

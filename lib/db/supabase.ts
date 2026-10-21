@@ -121,7 +121,7 @@ const fromFacts = (f: StoredFacts): Row => ({
   updated_at: f.updatedAt,
 });
 
-const fromExtraction = (e: ExtractionEvent): Row => ({
+export const fromExtraction = (e: ExtractionEvent): Row => ({
   run_id: e.runId,
   trigger: e.trigger,
   product_id: e.productId,
@@ -165,7 +165,7 @@ const toExtraction = (r: Row): ExtractionEvent => ({
   errorMessage: (r.error_message as string) ?? null,
 });
 
-const fromRun = (r: OrderRun): Row => ({
+export const fromRun = (r: OrderRun): Row => ({
   id: r.id,
   trigger: r.trigger,
   order_id: r.orderId,
