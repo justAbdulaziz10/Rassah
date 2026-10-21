@@ -62,26 +62,31 @@ export function fmtMs(ms: number | null | undefined): string {
   return ms >= 1000 ? `${ltr((ms / 1000).toFixed(1))} ثانية` : `${ltr(String(Math.round(ms)))} ملّي ثانية`;
 }
 
-/** Short form for chart axes. Seconds when the chart reaches a second ("0.8 ث"), otherwise milliseconds ("12 مل.ث"). */
-export function fmtAxisMs(ms: number | null | undefined, maxMs: number): string {
-  if (ms === null || ms === undefined) return "—";
-  if (maxMs >= 1000) return `${(ms / 1000).toFixed(1)} ث`;
-  return `${maxMs < 10 ? ms.toFixed(1) : Math.round(ms)} مل.ث`;
-}
-
 export function fmtPct(x: number | null | undefined): string {
   return x === null || x === undefined ? "—" : ltr(`${Math.round(x * 100)}%`);
-}
-
-export function fmtUsd(x: number | null | undefined): string {
-  if (x === null || x === undefined) return "—";
-  return ltr(x < 0.01 ? `$${x.toFixed(5)}` : `$${x.toFixed(3)}`);
 }
 
 /** Fixed to Riyadh time so server-rendered pages (Vercel runs in UTC) and client components show the same clock. */
 export function fmtTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("ar-SA-u-ca-gregory-nu-latn", { dateStyle: "short", timeStyle: "medium", timeZone: "Asia/Riyadh" });
+}
+
+/** Time of day only ("7:38 م"), Riyadh time; the full date goes in a tooltip via fmtTime. */
+export function fmtClock(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("ar-SA-u-nu-latn", { hour: "numeric", minute: "2-digit", timeZone: "Asia/Riyadh" });
+}
+
+const SAR_PER_USD = 3.75; // fixed peg
+
+/** AI cost in riyals. Per-order costs are fractions of a halala, so tiny amounts say so instead of "0.00". */
+export function fmtAiSar(usd: number | null | undefined): string {
+  if (usd === null || usd === undefined) return "—";
+  const sar = usd * SAR_PER_USD;
+  if (sar === 0) return `${ltr("0")} ر.س`;
+  if (sar < 0.01) return "أقل من هللة";
+  return `${ltr(sar.toFixed(2))} ر.س`;
 }
 
 export const SOURCE_LABEL: Record<DataSource, string> = {

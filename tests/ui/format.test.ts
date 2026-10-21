@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AR } from "@/lib/engine/instructions.ar";
-import { fmtApiError, fmtCartons, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime } from "@/lib/ui/format";
+import { fmtAiSar, fmtApiError, fmtCartons, fmtClock, fmtCount, fmtDims, fmtMs, fmtPieces, fmtTime } from "@/lib/ui/format";
 
 const LRI = "⁦";
 const PDI = "⁩";
@@ -38,6 +38,13 @@ describe("dates and errors", () => {
     expect(fmtTime("2026-10-21T13:40:37Z")).toMatch(/2026/);
     expect(fmtTime("2026-10-21T13:40:37Z")).not.toMatch(/١٤٤٨|١٤٤٧/);
     expect(fmtTime("2026-10-21T13:40:37Z")).toMatch(/4:40:37/); // Riyadh is UTC+3 whatever the server's TZ
+    expect(fmtClock("2026-10-21T13:40:37Z")).toMatch(/^4:40/);
+  });
+
+  it("shows AI cost in riyals, and says so when it is under a halala", () => {
+    expect(fmtAiSar(0.0001)).toBe("أقل من هللة");
+    expect(fmtAiSar(0.4)).toContain("1.50");
+    expect(fmtAiSar(null)).toBe("—");
   });
 
   it("turns API errors into Arabic and passes Arabic through", () => {

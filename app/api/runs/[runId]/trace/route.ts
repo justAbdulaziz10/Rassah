@@ -10,7 +10,10 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/runs/[runId
   try {
     const trace = await repo.getRunTrace(runId);
     if (!trace.run) return jsonError(404, "Run not found");
-    return Response.json(trace);
+    // Product names, so the details read "عطر 50 مل" instead of "p-16".
+    const ids = [...new Set([...trace.run.aiProducts, ...trace.extractions.map((e) => e.productId), ...trace.corrections.map((c) => c.productId)])];
+    const names = Object.fromEntries((await repo.getProducts(ids)).map((p) => [p.id, p.name]));
+    return Response.json({ ...trace, names });
   } catch (e) {
     log({ runId, stage: "trace", error: (e as Error).message });
     return jsonError(500, "Could not load the trace");

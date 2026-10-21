@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 39 | 39 | ✅ Done (gate passed) |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 59 | 59 | ✅ Done (gate passed) |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 50 | 49 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 34 | 33 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **534** | **466** | |
+| **Total** | | | | **535** | **467** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -663,6 +663,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P8.47** (M1) Review PR: M1 can explain every tile and what to do when it turns red. — not verifiable by agent; needs M1 confirmation
 - [x] **P8.48** (M3) The dashboard shows real Supabase data on the preview. — production dashboard shows real Supabase data (screens/04-monitoring.png)
 - [x] **P8.49** (M3) Update the dashboard. **Gate G8 check.** — G8 passed (verified): seven metrics from real events; simulated outage fires and resolves the M6 alert on production (P8.43); P8.47 (M1 explains every tile) stays open
+- [x] **P8.50** (M3) Make the dashboard readable without help. — verified 2026-10-21 (memory backend, 1440 light and dark plus 390 px, no page errors, no horizontal overflow). Changes: a health list at the top that merges in the open alerts and shows each metric with its limit and a verdict (fine, over the limit, or not enough data, keeping the value and saying how many cases are needed); AI cost in riyals per order, per 1000 orders and for the period; a latency bar per order (blue for known products, orange for a new one) with the limit line; stacked share bars with counts and % for outcomes, measurement sources and page reads; links to orders that need follow-up; recent runs with filters, order links, a short Riyadh clock, cards on phones, and details opening under the row with product names; a refresh button and a note that it updates every 15 s. Removed the dead helpers `fmtUsd` and `fmtAxisMs`.
 
 ---
 
