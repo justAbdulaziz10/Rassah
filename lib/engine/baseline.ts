@@ -1,6 +1,6 @@
 // Naive baseline for EVALUATION ONLY: "what a simple tool would do".
-// Volume-descending first-fit over extreme points, all 6 rotations, smallest carton first,
-// and NO support, fragile, or liquid rules. Its layouts are run through the same validator
+// Volume-descending first-fit over extreme points, all 6 rotations, smallest carton first
+// that is strong enough for the total weight, and NO support, fragile, or liquid rules. Its layouts are run through the same validator
 // to show which real-world rules a naive packer breaks. Never import this from app routes.
 
 import { boxesOverlap, volume } from "./geometry";
@@ -23,7 +23,11 @@ export function baselinePack(units: Unit[], cartons: Carton[], eps = 1e-6): Base
   const order = [...units].sort((a, b) => volume(b.dims) - volume(a.dims) || a.unitId.localeCompare(b.unitId));
   const byVolume = [...cartons].sort((a, b) => volume(a.inner) - volume(b.inner) || a.id.localeCompare(b.id));
 
+  const totalG = units.reduce((s, u) => s + u.weightG, 0);
   for (const carton of byVolume) {
+    // Even a simple tool respects the carton's weight limit (py3dbp does too). Only the
+    // support, fragile and liquid rules are left out.
+    if (totalG + carton.tareG > carton.maxWeightG + eps) continue;
     const [L, W, H] = carton.inner;
     const placed: Placement[] = [];
     const points: Dims[] = [[0, 0, 0]];

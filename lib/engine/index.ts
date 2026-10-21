@@ -6,7 +6,7 @@ import { packUnits } from "./packer";
 import { prepareUnits } from "./prepare";
 import type { Carton, OrderLine, PackResult, ProductFacts, ShippingRates } from "./types";
 
-export { ENGINE_CONFIG } from "./config";
+export { ENGINE_CONFIG, ENGINE_VERSION } from "./config";
 export type { EngineConfig } from "./config";
 export { validateLayout } from "./validator";
 export { estimateCost } from "./cost";

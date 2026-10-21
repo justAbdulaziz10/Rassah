@@ -73,7 +73,7 @@ pick candidate with lowest estimated total cost (tie → smallest carton volume)
 > - **Candidate positions = corner grid.** Every combination of x ∈ {0, right edges}, y ∈ {0, back edges}, z ∈ {0, top faces} of placed boxes. This is a superset of classic extreme points.
 > - **9 fixed strategies.** The 7 below plus `volume_tight_x` and `volume_tight_y`, which use a "tight" score: gravity, then the smallest far edge along x or y. That score stands a thin item on its side to fill an exact strip.
 > - **Then up to 40 seeded restarts per carton.** Random orderings from a fixed seed (order + carton id), cycling the 4 scores and fragile-last on/off. Each carton's restarts stop at its fair share of the remaining budget, so larger cartons still get searched. Same input → same output.
-> - Known-feasible recall on the 100%-fill fixtures: 3/20 (extreme points) → 9/20 (corner grid + restarts) → **15/20** (tight scores). Engine validity stays 100%, false claims on impossible cases stay 0, p95 runtime is about 31 ms.
+> - Known-feasible recall on the 100%-fill fixtures: 3/20 (extreme points) → 9/20 (corner grid + restarts) → 15/20 (tight scores, engine-0.1) → **20/20** (engine-0.2: after the greedy passes and restarts, a bounded backtracking anchor search takes the lowest uncovered corner and tries every remaining unit in every rotation, with a node limit of `anchorNodes`). Engine validity stays 100%, false claims on impossible cases stay 0, p95 runtime is about 13 ms.
 
 `STRATEGIES` are tried in order. Each is (item ordering, whether fragile units go last, position score):
 
@@ -169,7 +169,7 @@ Arabic is the UI language. Keep the templates in one file (`instructions.ar.ts`)
 | `MIN_SUPPORT` | 0.70 | Common stability heuristic. Documented as an assumption. |
 | `MAX_SEARCH_MS` | 1500 | Keeps total request time low |
 | `VOLUMETRIC_DIVISOR` | 5000 | Common courier divisor (cm³/kg). Some couriers use 4000 or 6000, so it is configurable. |
-| `ENGINE_VERSION` | `engine-0.1` | Stamped into every order event |
+| `ENGINE_VERSION` | `engine-0.2` | Stamped into every order event |
 
 ## 10. Tests (Vitest), written **before** the packer is finished
 

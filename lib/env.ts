@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { ENGINE_VERSION } from "./engine/config";
 
 // Env vars are validated lazily per feature, so a missing Gemini key does not
 // stop the engine or the dashboard from working (the health check reports it).
@@ -11,7 +12,7 @@ const optionalString = z
 
 const AppEnvSchema = z.object({
   DEMO_MODE: optionalString.transform((v) => v === "true"),
-  ENGINE_VERSION: optionalString.transform((v) => v ?? "engine-0.1"),
+  ENGINE_VERSION: optionalString.transform((v) => v ?? ENGINE_VERSION),
   PROMPT_VERSION: optionalString.transform((v) => v ?? "v1"),
   ALERT_WEBHOOK_URL: optionalString,
 });
