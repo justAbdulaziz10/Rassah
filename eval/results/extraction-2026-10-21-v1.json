@@ -1,6 +1,6 @@
 {
   "kind": "extraction",
-  "createdAt": "2026-10-21T07:00:38.902Z",
+  "createdAt": "2026-10-21T07:17:30.400Z",
   "summary": {
     "model": "gemini-3.5-flash-lite",
     "promptVersion": "v1",
@@ -9,44 +9,44 @@
       "parseSuccess": 1,
       "dimAccuracy1cm": 1,
       "weightAccuracy10pct": 1,
-      "inferredDimMape": 0.143,
-      "inferredWeightMape": 0.14,
+      "inferredDimMape": 0.129,
+      "inferredWeightMape": 0.135,
       "inferredAnswered": "12/12",
       "sourceCorrectness": 1,
       "honestyRate": 1,
       "fragileRecall": 1,
-      "fragilePrecision": 1,
+      "fragilePrecision": 0.909,
       "liquidAccuracy": 1,
       "sensitiveAccuracy": 1,
-      "avgLatencyMs": 1363,
-      "avgTokens": 631,
-      "costPerProductUsd": 0.000449
+      "avgLatencyMs": 1795,
+      "avgTokens": 632,
+      "costPerProductUsd": 0.000452
     },
     "tuning": {
       "products": 20,
       "parseSuccess": 1,
       "dimAccuracy1cm": 1,
       "weightAccuracy10pct": 1,
-      "inferredDimMape": 0.123,
-      "inferredWeightMape": 0.168,
+      "inferredDimMape": 0.113,
+      "inferredWeightMape": 0.119,
       "inferredAnswered": "8/8",
       "sourceCorrectness": 1,
       "honestyRate": 1,
       "fragileRecall": 1,
-      "fragilePrecision": 1,
+      "fragilePrecision": 0.875,
       "liquidAccuracy": 1,
       "sensitiveAccuracy": 1,
-      "avgLatencyMs": 1425,
-      "avgTokens": 628,
-      "costPerProductUsd": 0.000444
+      "avgLatencyMs": 1976,
+      "avgTokens": 632,
+      "costPerProductUsd": 0.000453
     },
     "holdout": {
       "products": 10,
       "parseSuccess": 1,
       "dimAccuracy1cm": 1,
       "weightAccuracy10pct": 1,
-      "inferredDimMape": 0.182,
-      "inferredWeightMape": 0.083,
+      "inferredDimMape": 0.161,
+      "inferredWeightMape": 0.167,
       "inferredAnswered": "4/4",
       "sourceCorrectness": 1,
       "honestyRate": 1,
@@ -54,9 +54,9 @@
       "fragilePrecision": 1,
       "liquidAccuracy": 1,
       "sensitiveAccuracy": 1,
-      "avgLatencyMs": 1239,
-      "avgTokens": 636,
-      "costPerProductUsd": 0.000458
+      "avgLatencyMs": 1433,
+      "avgTokens": 633,
+      "costPerProductUsd": 0.00045
     }
   },
   "results": [
@@ -93,7 +93,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1634.804208,
+        "latencyMs": 1259.462084,
         "tokens": 688
       }
     },
@@ -130,7 +130,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1157.2991659999998,
+        "latencyMs": 1262.6753749999998,
         "tokens": 639
       }
     },
@@ -167,8 +167,8 @@
           "expectedDimsSource": "page",
           "holdout": true
         },
-        "latencyMs": 1177.2947079999976,
-        "tokens": 668
+        "latencyMs": 1154.2360840000001,
+        "tokens": 660
       }
     },
     {
@@ -204,7 +204,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1187.2838330000013,
+        "latencyMs": 1149.0499170000003,
         "tokens": 656
       }
     },
@@ -241,7 +241,7 @@
           "expectedDimsSource": "page",
           "holdout": true
         },
-        "latencyMs": 1091.9240419999987,
+        "latencyMs": 1534.9622080000008,
         "tokens": 655
       }
     },
@@ -278,8 +278,8 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1109.0241659999956,
-        "tokens": 638
+        "latencyMs": 1066.8537079999987,
+        "tokens": 646
       }
     },
     {
@@ -315,8 +315,8 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1142.2114169999986,
-        "tokens": 656
+        "latencyMs": 1215.4924170000013,
+        "tokens": 648
       }
     },
     {
@@ -352,8 +352,8 @@
           "expectedDimsSource": "page",
           "holdout": true
         },
-        "latencyMs": 1339.3118749999994,
-        "tokens": 686
+        "latencyMs": 1209.458292000003,
+        "tokens": 678
       }
     },
     {
@@ -389,7 +389,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1357.533083000002,
+        "latencyMs": 1247.5877919999984,
         "tokens": 653
       }
     },
@@ -426,7 +426,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1274.0364590000027,
+        "latencyMs": 1894.087999999996,
         "tokens": 650
       }
     },
@@ -463,7 +463,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1158.236499999999,
+        "latencyMs": 4667.016125000002,
         "tokens": 632
       }
     },
@@ -486,7 +486,7 @@
           "liquid": false,
           "sensitive": true,
           "confidence": "high",
-          "evidence": "12 × 9 × 8 سم، والوزن الكلي 300 غرام"
+          "evidence": "12 × 9 × 8 سم، الوزن الكلي 300 غرام"
         },
         "truth": {
           "productId": "p-12",
@@ -500,8 +500,8 @@
           "expectedDimsSource": "page",
           "holdout": true
         },
-        "latencyMs": 1060.904749999987,
-        "tokens": 663
+        "latencyMs": 1046.176416000002,
+        "tokens": 653
       }
     },
     {
@@ -537,8 +537,8 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1685.220874999999,
-        "tokens": 650
+        "latencyMs": 1129.1067500000063,
+        "tokens": 658
       }
     },
     {
@@ -574,7 +574,7 @@
           "expectedDimsSource": "page",
           "holdout": true
         },
-        "latencyMs": 1186.3453750000044,
+        "latencyMs": 1103.5482499999925,
         "tokens": 651
       }
     },
@@ -611,7 +611,7 @@
           "expectedDimsSource": "page",
           "holdout": false
         },
-        "latencyMs": 1514.5167499999952,
+        "latencyMs": 1179.7930419999902,
         "tokens": 646
       }
     },
@@ -633,7 +633,7 @@
           "fragile": true,
           "liquid": true,
           "sensitive": false,
-          "confidence": "medium",
+          "confidence": "low",
           "evidence": "inferred from 50 ml perfume bottle in a carton box"
         },
         "truth": {
@@ -648,7 +648,7 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1185.6000829999975,
+        "latencyMs": 1072.1285420000058,
         "tokens": 630
       }
     },
@@ -664,7 +664,7 @@
           "lengthCm": 14,
           "widthCm": 3,
           "heightCm": 21,
-          "weightG": 400,
+          "weightG": 450,
           "dimsSource": "inferred",
           "weightSource": "inferred",
           "fragile": false,
@@ -685,7 +685,7 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1218.1944999999978,
+        "latencyMs": 2436.5915419999947,
         "tokens": 616
       }
     },
@@ -698,8 +698,8 @@
         "status": "ok",
         "facts": {
           "productId": "p-18",
-          "lengthCm": 5,
-          "widthCm": 5,
+          "lengthCm": 4.5,
+          "widthCm": 4.5,
           "heightCm": 10,
           "weightG": 120,
           "dimsSource": "inferred",
@@ -708,7 +708,7 @@
           "liquid": true,
           "sensitive": false,
           "confidence": "low",
-          "evidence": "inferred from 30 ml glass dropper bottle"
+          "evidence": "inferred from 30 ml glass bottle of argan oil"
         },
         "truth": {
           "productId": "p-18",
@@ -722,8 +722,8 @@
           "expectedDimsSource": "inferred",
           "holdout": true
         },
-        "latencyMs": 1231.2587499999936,
-        "tokens": 620
+        "latencyMs": 1228.7422080000106,
+        "tokens": 623
       }
     },
     {
@@ -738,13 +738,13 @@
           "lengthCm": 5,
           "widthCm": 5,
           "heightCm": 6,
-          "weightG": 80,
+          "weightG": 100,
           "dimsSource": "inferred",
           "weightSource": "inferred",
           "fragile": false,
           "liquid": false,
           "sensitive": true,
-          "confidence": "low",
+          "confidence": "medium",
           "evidence": "inferred from 20W wall charger"
         },
         "truth": {
@@ -759,8 +759,8 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1275.976583999989,
-        "tokens": 598
+        "latencyMs": 1930.961832999994,
+        "tokens": 599
       }
     },
     {
@@ -774,7 +774,7 @@
           "productId": "p-20",
           "lengthCm": 10,
           "widthCm": 7,
-          "heightCm": 18,
+          "heightCm": 15,
           "weightG": 250,
           "dimsSource": "inferred",
           "weightSource": "page",
@@ -782,7 +782,7 @@
           "liquid": false,
           "sensitive": false,
           "confidence": "medium",
-          "evidence": "inferred from 250g coffee bag"
+          "evidence": "inferred from 250g coffee beans in cardboard box with valve"
         },
         "truth": {
           "productId": "p-20",
@@ -796,8 +796,8 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1362.664042000004,
-        "tokens": 635
+        "latencyMs": 1202.5693750000064,
+        "tokens": 640
       }
     },
     {
@@ -819,7 +819,7 @@
           "liquid": false,
           "sensitive": false,
           "confidence": "low",
-          "evidence": "inferred from 12 pieces mabkhour incense box"
+          "evidence": "inferred from 12 pieces bukhour mamoul box"
         },
         "truth": {
           "productId": "p-21",
@@ -833,8 +833,8 @@
           "expectedDimsSource": "inferred",
           "holdout": true
         },
-        "latencyMs": 1901.6839159999945,
-        "tokens": 609
+        "latencyMs": 1143.460208000004,
+        "tokens": 602
       }
     },
     {
@@ -848,8 +848,8 @@
           "productId": "p-22",
           "lengthCm": 9,
           "widthCm": 9,
-          "heightCm": 26,
-          "weightG": 550,
+          "heightCm": 25,
+          "weightG": 500,
           "dimsSource": "inferred",
           "weightSource": "inferred",
           "fragile": true,
@@ -870,8 +870,8 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1082.5677500000165,
-        "tokens": 598
+        "latencyMs": 4833.7863749999815,
+        "tokens": 623
       }
     },
     {
@@ -907,7 +907,7 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1078.3079169999983,
+        "latencyMs": 7508.317916,
         "tokens": 618
       }
     },
@@ -923,7 +923,7 @@
           "lengthCm": 10,
           "widthCm": 10,
           "heightCm": 5,
-          "weightG": 150,
+          "weightG": 200,
           "dimsSource": "inferred",
           "weightSource": "inferred",
           "fragile": false,
@@ -944,7 +944,7 @@
           "expectedDimsSource": "inferred",
           "holdout": true
         },
-        "latencyMs": 1048.3331670000043,
+        "latencyMs": 3634.26112499999,
         "tokens": 615
       }
     },
@@ -957,9 +957,9 @@
         "status": "ok",
         "facts": {
           "productId": "p-25",
-          "lengthCm": 28,
-          "widthCm": 28,
-          "heightCm": 8,
+          "lengthCm": 30,
+          "widthCm": 30,
+          "heightCm": 10,
           "weightG": 2000,
           "dimsSource": "inferred",
           "weightSource": "inferred",
@@ -967,7 +967,7 @@
           "liquid": false,
           "sensitive": false,
           "confidence": "low",
-          "evidence": "طقم صحون بورسلين (4 قطع)"
+          "evidence": "طقم صحون بورسلين 4 قطع قطر 27 سم"
         },
         "truth": {
           "productId": "p-25",
@@ -981,8 +981,8 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1239.6864999999816,
-        "tokens": 621
+        "latencyMs": 1088.3310830000264,
+        "tokens": 619
       }
     },
     {
@@ -996,7 +996,7 @@
           "productId": "p-26",
           "lengthCm": 15,
           "widthCm": 8,
-          "heightCm": 18,
+          "heightCm": 20,
           "weightG": 250,
           "dimsSource": "inferred",
           "weightSource": "inferred",
@@ -1004,7 +1004,7 @@
           "liquid": false,
           "sensitive": false,
           "confidence": "low",
-          "evidence": "inferred from 100 tea bags carton"
+          "evidence": "inferred from 100 tea bags carton box"
         },
         "truth": {
           "productId": "p-26",
@@ -1018,8 +1018,8 @@
           "expectedDimsSource": "inferred",
           "holdout": false
         },
-        "latencyMs": 1069.7730410000077,
-        "tokens": 604
+        "latencyMs": 1197.9759169999743,
+        "tokens": 613
       }
     },
     {
@@ -1055,7 +1055,7 @@
           "expectedDimsSource": "inferred",
           "holdout": true
         },
-        "latencyMs": 1353.9582079999964,
+        "latencyMs": 1220.2724999999919,
         "tokens": 617
       }
     },
@@ -1092,8 +1092,8 @@
           "expectedDimsSource": "unknown",
           "holdout": false
         },
-        "latencyMs": 4580.705458000011,
-        "tokens": 559
+        "latencyMs": 1000.5836250000284,
+        "tokens": 584
       }
     },
     {
@@ -1129,7 +1129,7 @@
           "expectedDimsSource": "unknown",
           "holdout": true
         },
-        "latencyMs": 997.425917000015,
+        "latencyMs": 1059.40745899998,
         "tokens": 573
       }
     },
@@ -1148,11 +1148,11 @@
           "weightG": null,
           "dimsSource": "unknown",
           "weightSource": "unknown",
-          "fragile": false,
+          "fragile": true,
           "liquid": false,
           "sensitive": false,
           "confidence": "low",
-          "evidence": "inferred from unknown product set"
+          "evidence": "مجموعة مختارة"
         },
         "truth": {
           "productId": "p-30",
@@ -1166,8 +1166,8 @@
           "expectedDimsSource": "unknown",
           "holdout": false
         },
-        "latencyMs": 1177.9031670000113,
-        "tokens": 580
+        "latencyMs": 1182.1382079999894,
+        "tokens": 577
       }
     }
   ]

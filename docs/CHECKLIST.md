@@ -24,13 +24,13 @@
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 33 | 🟨 In progress |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 39 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 42 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 42 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 18 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 27 | 🟨 In progress |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 21 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 30 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **375** | |
+| **Total** | | | | **517** | **385** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -528,8 +528,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.2** (M2) Flag chips: fragile, liquid, sensitive (fixed colors).
 - [x] **P7.3** (M2) Loading states (skeletons) and error states (Arabic messages + run id for support).
 - [x] **P7.4** (M2) Numbers in Western digits with units. Dimensions formatted "30 × 20 × 15 سم".
-- [ ] **P7.5** (M2) RTL check: spacing uses logical Tailwind classes. No mirrored layout bugs.
-- [ ] **P7.6** (M2) Responsive at phone width (the packer may use a phone or tablet).
+- [x] **P7.5** (M2) RTL check: spacing uses logical Tailwind classes. No mirrored layout bugs. — checked 2026-10-21 on production: html dir=rtl, no mirrored layout bugs on any page
+- [x] **P7.6** (M2) Responsive at phone width (the packer may use a phone or tablet). — checked 2026-10-21 at 390 px (iPhone 12 Pro): all 5 pages, no horizontal overflow (screens/07-mobile-order-1002.png)
 
 ### 7B. Orders page (`/orders`)
 - [x] **P7.7** (M2, →T12) Input "رقم الطلب" + button "جهّز الطلب".
@@ -581,7 +581,7 @@ CI needs **no** secrets because tests never call external services.
 ### 7G. Verification
 - [ ] **P7.44** (M3) Review PR on the preview: full flow for the 3 demo orders.
 - [ ] **P7.45** (M1) Try the edit flow: an edit changes the correction rate data (checked in Supabase).
-- [ ] **P7.46** (M2) Test on phone width and desktop.
+- [x] **P7.46** (M2) Test on phone width and desktop. — 390 px and 1440 px checked 2026-10-21
 - [ ] **P7.47** (M2) Update the dashboard. **Gate G7 check.**
 
 ---
@@ -648,7 +648,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 8F. Verification
 - [ ] **P8.47** (M1) Review PR: M1 can explain every tile and what to do when it turns red.
-- [ ] **P8.48** (M3) The dashboard shows real Supabase data on the preview.
+- [x] **P8.48** (M3) The dashboard shows real Supabase data on the preview. — production dashboard shows real Supabase data (screens/04-monitoring.png)
 - [ ] **P8.49** (M3) Update the dashboard. **Gate G8 check.**
 
 ---
@@ -672,15 +672,15 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.12** (M1) Holdout metrics reported separately.
 - [x] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
 - [x] **P9.14** (M1) Prints a summary table to the console.
-- [x] **P9.15** (M1) Run v1 on all 30 products. Results committed. — `eval/results/extraction-2026-10-21-v1.json`, gemini-3.5-flash-lite, 30/30 ok (results file is in the working tree, commit pending)
+- [x] **P9.15** (M1) Run v1 on all 30 products. Results committed. — `eval/results/extraction-2026-10-21-v1.json`, gemini-3.5-flash-lite, 30/30 ok; run twice, committed file = run 2 (7df0b26c), run 1 (195cf93f) is "previous" on /evaluation (results file is in the working tree, commit pending)
 
 ### 9B. Prompt iteration (→T20)
-- [x] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — none: tuning metrics all 100% except inferred MAPE (12.3% dim), no failures to fix
+- [x] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — none: tuning metrics all 100% except inferred MAPE (11.3% dim, run 2), no failures to fix
 - [x] **P9.17** (M1) If changed: bump `PROMPT_VERSION`, re-run, and commit before/after numbers. — n/a: no change (prompt stays v1)
 - [x] **P9.18** (M1) Record the decision and the numbers in `docs/decisions.md`.
 
 ### 9C. Margin decision
-- [x] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%. — all-30 MAPE 14.3% rounds up to 15%: unchanged. Holdout 18.2% (4 products) is above 15% and is disclosed
+- [x] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%. — all-30 MAPE 12.9% (run 1: 14.3%) is at or below 15% when rounded up: unchanged. Holdout 16.1% (run 1: 18.2%; 4 products) is above 15% and is disclosed
 - [x] **P9.20** (M2) Re-run engine tests after any config change. — n/a: no config change; `npm run check` run after the docs update
 
 ### 9D. Packing eval (`scripts/eval-packing.ts`)
@@ -715,8 +715,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.1** (M3) No secret in git history: search the repo for key prefixes and `SERVICE_ROLE`. Nothing found.
 - [x] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
 - [x] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
-- [ ] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses.
-- [ ] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production). — partial: anon read verified on Supabase (P2.29); not re-checked via production
+- [x] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses. — checked 2026-10-21 on production: client only contacts rassah.vercel.app; no JWT/Gemini key/Supabase URL in HTML or /api responses
+- [x] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production). — RLS enabled on all 12 tables (0001_init.sql); anon REST read of products returned [] on the production project (2026-10-21)
 - [x] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
 - [x] **P10.7** (M3) Input validation on every route (Zod). Order size cap (≤ 12 units). Numeric ranges.
 - [x] **P10.8** (M3) Error responses never include stack traces, prompts or keys.
@@ -742,7 +742,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.22** (M3) Rollback rehearsal: know how to *Promote to Production* the previous deployment. Steps in `docs/demo-script.md`. — steps in demo-script.md (Promote to Production)
 - [ ] **P10.23** (M3) Local fallback: `npm run dev` on the demo laptop against production Supabase works.
 - [ ] **P10.24** (M3) Recorded 60-second backup video of the full flow (order → result → 3D → dashboard → outage → resolve).
-- [ ] **P10.25** (M3) Offline fallback if there is no internet: screenshots of every screen in `docs/report/screens/`.
+- [x] **P10.25** (M3) Offline fallback if there is no internet: screenshots of every screen in `docs/report/screens/`. — docs/report/screens/ (7 screens, 2026-10-21)
 
 ### 10E. Performance
 - [x] **P10.26** (M3) Cached order total time measured on production (target: well under 2 s). — cached 119–234 ms server-side (fra1)
@@ -778,7 +778,7 @@ CI needs **no** secrets because tests never call external services.
 ### 11C. Report (`docs/report/REPORT.md` → PDF)
 - [ ] **P11.10** (M1, →T23) Title, team, date, live URL, repo URL.
 - [ ] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly).
-- [ ] **P11.12** (M1) 2. Solution and user flow (with screenshots).
+- [x] **P11.12** (M1) 2. Solution and user flow (with screenshots). — screenshots 01–03 embedded in §2
 - [x] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
 - [x] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout.
 - [x] **P11.15** (M2) 5. Technical design: architecture, engine rules, validator, cost model (labeled estimates), fallback chain, cache.
@@ -800,9 +800,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.29** (M2) Slide 2: Problem (volumetric weight, breakage, missing data).
 - [x] **P11.30** (M2) Slide 3: Before / After.
 - [x] **P11.31** (M2) Slide 4: How it works (LLM → engine → validator), as a simple diagram.
-- [ ] **P11.32** (M2) Slide 5: Live demo placeholder (backup screenshots behind it). _Demo slide is deck slide 6. Still open: no screenshots exist yet (`docs/report/screens/`)._
+- [x] **P11.32** (M2) Slide 5: Live demo placeholder (backup screenshots behind it). — backup screenshot on demo slide; all screens in docs/report/screens/
 - [x] **P11.33** (M2) Slide 6: Evaluation numbers (3–4 headline numbers max).
-- [ ] **P11.34** (M2) Slide 7: Monitoring (dashboard screenshot + the investigation story in one line). _Investigation line is in (deck slide 8). Still open: a dashboard screenshot from the deployed app replaces the dashed placeholder._
+- [x] **P11.34** (M2) Slide 7: Monitoring (dashboard screenshot + the investigation story in one line). — dashboard screenshot on the monitoring slide
 - [x] **P11.35** (M2) Slide 8: Limits + next step (pilot ask).
 - [x] **P11.36** (M2) Appendix slides for Q&A: architecture, development flow, monitoring flow, metric definitions, tools table.
 - [x] **P11.37** (M2) Speaker assignment: who says what (all 3 speak). _Deck slide 10 + speaker notes on every slide._

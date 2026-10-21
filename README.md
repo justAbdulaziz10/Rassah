@@ -7,6 +7,15 @@ A packer types an order number. Rassah reads each product's page with an LLM (Ge
 > Status: **MVP live** at https://rassah.vercel.app. Repository: https://github.com/justAbdulaziz10/Rassah. The implementation follows [`docs/PLAN.md`](docs/PLAN.md).
 > Built for *Project 1: AI Product Development and Monitoring* (Tuwaiq Academy × Startupbootcamp × Meta). Demo day: **Thursday 22 October 2026**.
 
+## Screenshots
+
+| | |
+|---|---|
+| ![Orders list](docs/report/screens/01-orders.png) | ![Order 1002 result](docs/report/screens/02-order-1002-result.png) |
+| Orders: the packer picks an order to pack. | Order 1002: chosen carton, numbered Arabic packing steps and cost. |
+| ![Monitoring dashboard](docs/report/screens/04-monitoring.png) | <img src="docs/report/screens/07-mobile-order-1002.png" alt="Order 1002 on mobile" width="180"> |
+| Monitoring: the seven metrics and per-run traces. | Order 1002 on a phone-width screen. |
+
 ## Getting started
 
 **Prerequisites:** Node.js 24 LTS (see `.nvmrc`), npm, Git.

@@ -29,7 +29,11 @@ The packer types an order number. Rassah:
 
 If a value has no basis, the order stops with "needs measurement" (the packer measures once). If no carton fits within the search budget, it says so. It never invents a layout.
 
-_Screenshots: ⏳ `docs/report/screens/` (orders, result + 3D, catalog, monitoring, evaluation)._
+![Orders list](screens/01-orders.png)
+
+![Order 1002: carton, packing steps, cost](screens/02-order-1002-result.png)
+
+![Order 1002: 3D layout, cost and products](screens/03-order-1002-3d-cost-products.png)
 
 ## 3. Where the AI is, and why
 
@@ -108,24 +112,24 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 **Evaluation-driven iteration:** recall 3/20 (extreme points) → 9/20 (corner grid + seeded restarts; more restarts gave no gain) → 15/20 ("tight" placement scores, found by diagnosing fixture `feasible-05`) → **20/20** (engine-0.2: backtracking anchor search for the exact fills the greedy passes missed). The 0 SAR saving is by construction (both pick the cheapest fitting carton), not a bug.
 
-**Extraction** (`eval/results/extraction-2026-10-21-v1.json`, `gemini-3.5-flash-lite`, prompt v1, 30 synthetic products, 30/30 calls ok):
+**Extraction** (`eval/results/extraction-2026-10-21-v1.json`, `gemini-3.5-flash-lite`, prompt v1, 30 synthetic products, 30/30 calls ok). Table = run 2 (latest). Two runs were made (same model and prompt): estimated-dim MAPE 14.3% -> 12.9%, holdout 18.2% -> 16.1%, and one fragile false positive in run 2. This is LLM run-to-run variation; the committed file and the /evaluation page show run 2 (latest), run 1 is "previous".
 
 | Metric | All (30) | Tuning (20) | Holdout (10) |
 |---|---|---|---|
 | Parse success | 100% | 100% | 100% |
 | Dims within 1 cm / weight within 10% (group A) | 100% / 100% | 100% / 100% | 100% / 100% |
-| Inferred dim MAPE (group B) | 14.3% | 12.3% | 18.2% |
-| Inferred weight MAPE (group B) | 14.0% | 16.8% | 8.3% |
+| Inferred dim MAPE (group B) | 12.9% | 11.3% | 16.1% |
+| Inferred weight MAPE (group B) | 13.5% | 11.9% | 16.7% |
 | Source correctness | 100% | 100% | 100% |
 | Honesty on no-info products | 100% | 100% | 100% |
-| Fragile recall / precision | 100% / 100% | 100% / 100% | 100% / 100% |
+| Fragile recall / precision | 100% / 90.9% | 100% / 87.5% | 100% / 100% |
 | Liquid accuracy | 100% | 100% | 100% |
-| Avg latency / tokens | 1363 ms / 631 | 1425 ms / 628 | 1239 ms / 636 |
-| Cost per product | $0.000449 | $0.000444 | $0.000458 |
+| Avg latency / tokens | 1795 ms / 632 | 1976 ms / 632 | 1433 ms / 633 |
+| Cost per product | $0.000452 | $0.000453 | $0.000450 |
 
 **Prompt iteration:** none. Tuning-set failures were limited to estimate error on inferred products (no extraction failures), so the prompt stays `v1` and there is no before/after row.
 
-**Margin decision:** inferred dim MAPE over all 12 inferred products is 14.3%, rounded up to 15%, so `MARGIN_INFERRED` stays 0.15. The holdout MAPE (18.2%, 4 products) is above 15%. With so few inferred products this is noisy, and the instructions already say "check the fit". A real-merchant pilot should re-measure it before the margin is trusted or raised.
+**Margin decision:** inferred dim MAPE over all 12 inferred products is 12.9%, rounded up to 15%, so `MARGIN_INFERRED` stays 0.15. The holdout MAPE (16.1%, 4 products) is above 15%. With so few inferred products this is noisy, and the instructions already say "check the fit". A real-merchant pilot should re-measure it before the margin is trusted or raised.
 
 **Model:** `gemini-3.5-flash-lite` ($0.30 in / $2.50 out per 1M tokens, 2026-10-21). The faster-tier models had a free quota of 20 requests/day, too low for a 30-call eval.
 
@@ -134,6 +138,8 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 - **Investigation (real):** the packing eval and its fixture trace led to the scoring fix above. A regression test guards it.
 - **Live demo:** a simulated Gemini outage (demo toggle) turns uncached products into "needs measurement" while cached ones still pack. M6 crosses 10% → critical banner "(عطل تجريبي)". The run trace shows `simulated_outage`. The alert resolves after clean runs.
 - ⏳ Add any live-dashboard finding from the deployed app.
+
+![Monitoring dashboard on the deployed app](screens/04-monitoring.png)
 
 ## 10. Tools and AI usage
 
