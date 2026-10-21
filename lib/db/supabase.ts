@@ -289,11 +289,8 @@ export class SupabaseRepo implements Repo {
       const items = (r.order_items as Array<{ product_id: string; qty: number }>) ?? [];
       return {
         id: r.id as string,
-        demo: (r.demo as string) ?? null,
-        expect: (r.expect as string) ?? null,
         customerName: customerOf(r),
         createdAt: (r.created_at as string) ?? null,
-        lineCount: items.length,
         unitCount: items.reduce((s, i) => s + i.qty, 0),
         productIds: [...new Set(items.map((i) => i.product_id))],
       };
@@ -310,7 +307,6 @@ export class SupabaseRepo implements Repo {
     const items = (r.order_items as Array<{ product_id: string; qty: number }>) ?? [];
     return {
       id: r.id as string,
-      demo: (r.demo as string) ?? null,
       customerName: customerOf(r),
       lines: items.map((i) => ({ productId: i.product_id, qty: i.qty })).sort((a, b) => a.productId.localeCompare(b.productId)),
     };

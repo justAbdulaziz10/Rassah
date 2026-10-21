@@ -23,12 +23,9 @@ export { STORE_FIRST_ORDER_ID } from "@/lib/ids";
 
 export interface OrderSummary {
   id: string;
-  demo: string | null;
-  expect: string | null;
   /** Set for orders placed in the built-in store. */
   customerName: string | null;
   createdAt: string | null;
-  lineCount: number;
   unitCount: number;
   /** Distinct products in the order. */
   productIds: string[];
@@ -36,7 +33,6 @@ export interface OrderSummary {
 
 export interface OrderWithLines {
   id: string;
-  demo: string | null;
   customerName: string | null;
   lines: Array<{ productId: string; qty: number }>;
 }

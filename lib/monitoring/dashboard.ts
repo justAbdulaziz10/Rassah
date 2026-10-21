@@ -22,7 +22,7 @@ export interface DashboardData {
   /** Runs per result in the window, so the page can say what happened, not only rates. */
   outcomes: Record<RunStatus, number>;
   /** Order numbers whose latest run in the window was not packable, newest first (for direct links). */
-  problemOrders: Array<{ orderId: string; status: RunStatus; at: string | null }>;
+  problemOrders: Array<{ orderId: string; status: RunStatus }>;
   /** The alert limits, shown next to each number so "is this good?" has an answer on screen. */
   targets: {
     correctionRate: number;
@@ -77,7 +77,7 @@ function latestProblems(runs: OrderRun[]): DashboardData["problemOrders"] {
   for (const r of runs) {
     if (seen.has(r.orderId)) continue;
     seen.add(r.orderId);
-    if (NOT_PACKABLE.includes(r.status)) out.push({ orderId: r.orderId, status: r.status, at: r.createdAt ?? null });
+    if (NOT_PACKABLE.includes(r.status)) out.push({ orderId: r.orderId, status: r.status });
   }
   return out.slice(0, 12);
 }
@@ -120,8 +120,9 @@ export async function loadDashboard(repo: Repo, window: MetricWindow, nowMs: num
     window,
     generatedAt: new Date(nowMs).toISOString(),
     metrics: computeMetrics({ extractions, runs, corrections }),
-    latency: latencySeries(runs).slice(-200),
-    reviews: reviewSeries(runs, corrections).slice(-200),
+    // The charts show the last 40 orders.
+    latency: latencySeries(runs).slice(-40),
+    reviews: reviewSeries(runs, corrections).slice(-40),
     recentRuns: newest.slice(0, 25),
     alerts,
     totals: { runs: live.length, extractions: extractions.filter((e) => e.trigger !== "eval").length, corrections: corrections.length },

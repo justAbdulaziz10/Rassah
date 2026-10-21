@@ -90,7 +90,6 @@ export async function updateProductFacts(params: {
   }
   if ("weightG" in changes) next.weightSource = "manual";
   next.origin = base.origin === "ai" || base.origin === "ai_corrected" ? "ai_corrected" : "manual";
-  if (!prior) next.origin = "manual";
   next.sourceHash = product.sourceHash;
 
   const corrections: Correction[] = [];

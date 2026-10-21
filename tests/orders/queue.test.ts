@@ -3,7 +3,7 @@ import type { OrderRun, OrderSummary, StoredFacts } from "@/lib/db/types";
 import { buildQueue, countQueue, needsMeasuring, sortQueue } from "@/lib/orders/queue";
 
 function order(id: string, productIds: string[] = ["p-01"]): OrderSummary {
-  return { id, demo: null, expect: null, customerName: null, createdAt: null, lineCount: productIds.length, unitCount: productIds.length, productIds };
+  return { id, customerName: null, createdAt: null, unitCount: productIds.length, productIds };
 }
 
 function run(orderId: string, at: string, over: Partial<OrderRun> = {}): OrderRun {

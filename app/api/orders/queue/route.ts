@@ -14,7 +14,6 @@ export async function GET() {
         counts,
         alertsOpen: alerts.length,
         newOrderIds: entries.filter((e) => e.state === "new").map((e) => e.order.id),
-        attentionOrderIds: entries.filter((e) => e.state === "attention").map((e) => e.order.id),
         // Already in work order (problems, new, waiting), so the first one is what to open next.
         remainingOrderIds: entries.filter((e) => e.state !== "done").map((e) => e.order.id),
         done: entries.filter((e) => e.state === "done").map((e) => ({ id: e.order.id, at: e.confirmedAt })),

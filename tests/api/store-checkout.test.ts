@@ -39,7 +39,8 @@ describe("POST /api/store/checkout", () => {
     expect(await res.json()).toEqual({ orderId: "5001" });
 
     const order = await repo.getOrder("5001");
-    expect(order).toEqual({ id: "5001", demo: "store", customerName: "سارة", lines: [{ productId: "p-01", qty: 2 }, { productId: "p-02", qty: 2 }] });
+    expect(order).toEqual({ id: "5001", customerName: "سارة", lines: [{ productId: "p-01", qty: 2 }, { productId: "p-02", qty: 2 }] });
+    expect(repo.orders.get("5001")?.demo).toBe("store"); // stored with the store tag
     expect((await repo.getOrder("1001"))?.customerName).toBeNull(); // seeded orders are not store orders
 
     const queue = buildQueue(await repo.listOrders(), [], new Map());

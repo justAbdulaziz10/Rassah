@@ -53,18 +53,15 @@ export class MemoryRepo implements Repo {
   async listOrders() {
     return [...this.orders.values()].map((o) => ({
       id: o.id,
-      demo: o.demo,
-      expect: o.expect,
       customerName: customerOf(o),
       createdAt: o.createdAt ?? null,
-      lineCount: o.lines.length,
       unitCount: o.lines.reduce((s, l) => s + l.qty, 0),
       productIds: [...new Set(o.lines.map((l) => l.productId))],
     }));
   }
   async getOrder(id: string) {
     const o = this.orders.get(id);
-    return o ? { id: o.id, demo: o.demo, customerName: customerOf(o), lines: o.lines } : null;
+    return o ? { id: o.id, customerName: customerOf(o), lines: o.lines } : null;
   }
   async createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>) {
     this.guard("createStoreOrder");

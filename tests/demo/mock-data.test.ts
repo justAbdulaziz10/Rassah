@@ -45,11 +45,8 @@ describe("mock demo history", () => {
   it("puts orders in every queue state", () => {
     const summaries = data.orders.map((o) => ({
       id: o.id,
-      demo: "mock",
-      expect: o.expect,
       customerName: null,
       createdAt: o.createdAt,
-      lineCount: o.lines.length,
       unitCount: o.lines.reduce((s, l) => s + l.qty, 0),
       productIds: [...new Set(o.lines.map((l) => l.productId))],
     }));

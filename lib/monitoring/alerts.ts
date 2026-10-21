@@ -14,7 +14,6 @@ export interface RuleEvaluation {
   value: number;
   threshold: number;
   sampleSize: number;
-  minSample: number;
   message: string;
   simulated: boolean;
 }
@@ -65,7 +64,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: rejections,
     threshold: 0,
     sampleSize: lastDay.length,
-    minSample: 1,
     message: `رفض المدقّق ${fmtCount(rejections, { one: "ترتيباً واحداً", two: "ترتيبين", few: "ترتيبات", many: "ترتيباً" })} اقترحتها رصّة خلال آخر 24 ساعة، والمفترض ألا يُرفض أي ترتيب. أبلغ الفريق التقني.`,
     simulated: false,
   });
@@ -84,7 +82,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: failRate,
     threshold: t.m6FailureRate,
     sampleSize: recentEx.length,
-    minSample: t.m6MinSample,
     message: `فشلت ${pct(failRate)} من آخر ${fmtCount(recentEx.length, { one: "محاولة قراءة واحدة", two: "محاولتي قراءة", few: "محاولات قراءة", many: "محاولة قراءة" })} لبيانات المنتجات${simulated ? " (عطل تجريبي)" : ""}. قد تحتاج المنتجات الجديدة إلى قياس يدوي.`,
     simulated,
   });
@@ -106,7 +103,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: corrRate,
     threshold: t.m1CorrectionRate,
     sampleSize: reviewedSet.size,
-    minSample: t.m1MinSample,
     message: `صحّح الموظفون بيانات ${pct(corrRate)} من المنتجات التي قرأتها رصّة وراجعوها. قد تحتاج القراءة إلى تحسين، فأبلغ الفريق التقني.`,
     simulated: false,
   });
@@ -126,7 +122,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: slowCached ? cachedP95 ?? 0 : uncachedP95 ?? 0,
     threshold: slowCached ? t.m5CachedP95Ms : t.m5UncachedP95Ms,
     sampleSize: recentRuns.length,
-    minSample: t.m5MinSample,
     message: `تجهيز الطلب أبطأ من المعتاد. 95% من الطلبات ذات المنتجات المعروفة تنتهي خلال ${fmtMs(cachedP95)}، وذات المنتجات الجديدة خلال ${fmtMs(uncachedP95)}.`,
     simulated: false,
   });
@@ -141,7 +136,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: noBoxRate,
     threshold: t.m4NoBoxRate,
     sampleSize: packedRuns.length,
-    minSample: t.m4MinSample,
     message: `${pct(noBoxRate)} من الطلبات الأخيرة لم يُوجد لها كرتون مناسب. راجع قائمة الكراتين المتوفرة أو هامش الأمان.`,
     simulated: false,
   });
@@ -161,7 +155,6 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     value: unknownShare,
     threshold: t.m2UnknownShare,
     sampleSize: units,
-    minSample: t.m2MinUnits,
     message: `${pct(unknownShare)} من القطع بلا مقاسات معروفة. صفحات المنتجات في المتجر تنقصها المقاسات.`,
     simulated: false,
   });
