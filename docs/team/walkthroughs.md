@@ -1,6 +1,6 @@
 # Cross-lane walkthroughs (P11.44 to P11.49)
 
-> One section per file group. The presenter is **not** the author: that is the point of the checklist items. Line numbers refer to the code as of 2026-10-21; if a file changes, re-check them. Numbers come from `docs/report/results.md`. Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring (`docs/PLAN.md`).
+> One section per file group. The presenter is **not** the author: that is the point of the checklist items. Line numbers refer to the code as of 2026-10-22; if a file changes, re-check them. Numbers come from `docs/report/results.md`. Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring (`docs/PLAN.md`).
 
 ---
 
@@ -18,7 +18,7 @@
 **3 key points to say**
 - *Independence:* "validator.ts imports nothing from the packer or geometry code" (`validator.ts:3-7`).
 - *Rules:* completeness (`:39-53`), rotation-only size (`:61`), liquid stays upright (`:70`), inside inner dims (`:79-84`), no overlap on all three axes (`:88-99`), weight including carton tare (`:101-109`), at least `minSupport` of the base supported and nothing on a fragile item (`:112-133`).
-- *Where it is used:* `packer.ts:450` runs it on every layout; on failure the layout is dropped and `validatorRejections` goes up, which feeds M3 and the critical alert in `alerts.ts:58-71`.
+- *Where it is used:* `packer.ts:450` runs it on every layout; on failure the layout is dropped and `validatorRejections` goes up, which feeds M3 and the critical alert in `alerts.ts:57-69`.
 
 **Likely judge questions**
 - *Why a second checker?* The LLM understands, the engine computes, the validator proves. Independent code means a geometry bug in the packer cannot also be in the checker.
@@ -33,15 +33,15 @@
 
 **Summary**
 1. `extractFacts` turns one product's name and description into structured shipping facts.
-2. The network call is injected (`generate`, `extractor.ts:10-24`), so tests use recorded responses and the file never imports the Gemini SDK.
+2. The network call is injected (`generate`, `extractor.ts:12-26`), so tests use recorded responses and the file never imports the Gemini SDK.
 3. The prompt (`prompt.ts:7-33`) asks for outer-package size in cm and g, a source for dims and weight (`page` / `inferred` / `unknown`), and fragile / liquid / sensitive flags.
 4. Output goes through JSON parse, a Zod schema and `sanitize`, so bad answers become `unknown` or an error status, never a guess.
 5. Every call returns an event (status, latency, tokens, cost, model, prompt version) for monitoring.
 
 **3 key points to say**
 - *Honesty rules in the prompt:* "unknown: ... NEVER invent a number" (`prompt.ts:22`); fragile when unsure (`prompt.ts:25-26`); product text is data, not instructions (`prompt.ts:33`). `PROMPT_VERSION` is stamped into events (`prompt.ts:5`).
-- *`sanitize` (`extractor.ts:77-113`):* out-of-range values (over 150 cm or 30 000 g) become unknown, an `unknown` source never carries a value, and `page` with `low` confidence is downgraded to `inferred`.
-- *Failure handling in `extractFacts` (`extractor.ts:136-234`):* up to 3 attempts with backoff only for retryable errors (`:156-169`), 20 s timeout (`:144`), distinct statuses (`timeout`, `blocked`, `empty`, `parse_error`, `simulated_outage`), and `simulateOutage` skips the call for the demo (`:148-153`).
+- *`sanitize` (`extractor.ts:81-117`):* out-of-range values (over 150 cm or 30 000 g) become unknown, an `unknown` source never carries a value, and `page` with `low` confidence is downgraded to `inferred`.
+- *Failure handling in `extractFacts` (`extractor.ts:140-250`):* up to 3 attempts with backoff only for retryable errors (`:169-188`), 20 s timeout (`:148`), distinct statuses (`timeout`, `blocked`, `empty`, `parse_error`, `simulated_outage`), and `simulateOutage` skips the call for the demo (`:152-157`).
 
 **Likely judge questions**
 - *What if Gemini is wrong?* Estimated sizes are tagged `inferred`, padded by 15% in the engine, shown as "تقديري", and packer corrections are tracked (M1). Measured inferred-dimension error is 12.9% (holdout 16.1%).
@@ -62,7 +62,7 @@
 5. Among valid layouts it returns the cheapest estimated total (carton plus shipping), or `no_box` with an honest reason. When no single carton fits, `lib/engine/split.ts` (engine-0.3) proposes a split into several cartons, each validated the same way.
 
 **3 key points to say**
-- *Honest inputs (`prepare.ts:31-44`):* a missing or `unknown` size or weight returns `needs_measurement`; the engine never runs on guesses. Inferred dims get `(1 + marginInferred)` and fragile or sensitive items get padding on every side (`prepare.ts:51-56`). `marginInferred` is 0.15 and `paddingCm` is 1.5 (`config.ts`).
+- *Honest inputs (`prepare.ts:28-41`):* a missing or `unknown` size or weight returns `needs_measurement`; the engine never runs on guesses. Inferred dims get `(1 + marginInferred)` and fragile or sensitive items get padding on every side (`prepare.ts:49-53`). `marginInferred` is 0.15 and `paddingCm` is 1.5 (`config.ts`).
 - *Search (`packer.ts:49-59`, `:419-`):* cartons sorted by cost (`:432`), phase 1 fixed strategies and seeded restarts (`:470`), phase 2 backtracking anchor search only for cartons that could beat the current best (`:514`), all inside a 1500 ms budget (`config.ts`: `maxSearchMs`).
 - *Validator gate and honest failure:* each layout goes through `validateLayout` (`:450`); with no valid layout it returns "No valid carton found within the search budget" (`:550`). Final choice is the cheapest total, ties to the smaller carton (`:555-`).
 
@@ -78,21 +78,21 @@
 **Presents: M1. Author: M3.**
 
 **Summary**
-1. `computeMetrics` is a pure function over event arrays and returns seven metrics, M1 to M7; each carries its sample size `n` and a minimum `minN` (`metrics.ts:16-25`).
-2. Evaluation traffic (`trigger = "eval"`) is always excluded (`metrics.ts:55-56`).
+1. `computeMetrics` is a pure function over event arrays and returns seven metrics, M1 to M7; each carries its sample size `n` and a minimum `minN` (`metrics.ts:17-26`).
+2. Evaluation traffic (`trigger = "eval"`) is always excluded (`metrics.ts:48-49`).
 3. `evaluateRules` in `alerts.ts` checks six rules (M3, M6, M1, M5, M4, M2) on rolling windows of recent events, with minimum samples.
-4. `syncAlerts` opens one alert per breached rule and resolves it when it recovers; it can POST to a webhook for non-simulated alerts (`alerts.ts:193-243`).
+4. `syncAlerts` opens one alert per breached rule and resolves it when it recovers; it can POST to a webhook for non-simulated alerts (`alerts.ts:185-236`).
 5. Each metric is tied to a failure it reveals; under the minimum the dashboard marks the metric "بيانات قليلة" instead of judging it.
 
 **3 key points to say**
-- *M1 correction rate* (`metrics.ts:58-70`): corrected AI products over reviewed AI products. This is the main AI-quality signal. Alert at above 20% over the last 30 products, warning (`alerts.ts:33-35`, `:92-112`).
-- *M3 and M6 are critical* (`alerts.ts:58-90`): any validator rejection in 24 h (threshold 0); Gemini failure rate above 10% over the last 20 calls, minimum 5 (`alerts.ts:30-32`).
-- *Simulated outage* (`alerts.ts:77-79`): marked `simulated`, resolves on the first successful call, and never sends the webhook (`alerts.ts:225`).
+- *M1 correction rate* (`metrics.ts:51-63`): corrected AI products over reviewed AI products. This is the main AI-quality signal. Alert at above 20% over the last 30 products, warning (`alerts.ts:32-34`, `:89-108`).
+- *M3 and M6 are critical* (`alerts.ts:57-87`): any validator rejection in 24 h (threshold 0); Gemini failure rate above 10% over the last 20 calls, minimum 5 (`alerts.ts:29-31`).
+- *Simulated outage* (`alerts.ts:75-77`): marked `simulated`, resolves on the first successful call, and never sends the webhook (`alerts.ts:218`).
 
 **Likely judge questions**
 - *Why a minimum sample?* One failed call out of two would be a 50% "failure rate"; minimums (for example `m6MinSample: 5`) avoid false alarms, and the dashboard marks the metric "بيانات قليلة".
 - *Walk through an investigation.* The slow cached orders: M5 showed 358-1896 ms; the response header showed functions in `iad1` while the database is in Frankfurt; moving functions to `fra1` gave 119-234 ms (`results.md`, investigation story).
-- *Are thresholds tuned on real traffic?* No. They are starting values chosen by the team (`THRESHOLDS`, `alerts.ts:29-45`) and the data is synthetic.
+- *Are thresholds tuned on real traffic?* No. They are starting values chosen by the team (`THRESHOLDS`, `alerts.ts:28-44`) and the data is synthetic.
 
 ---
 
@@ -101,21 +101,21 @@
 **Presents: M2. Author: M3.**
 
 **Summary**
-1. The route validates the order number (digits only) and the body, rate-limits, and builds a `runId` (`route.ts:15-31`).
-2. It calls `runPack`, which loads the order, products, cartons and rates, then `getOrExtractFacts` (cache first, Gemini for misses), then `packOrder` (`pack.ts:159-254`).
+1. The route validates the order number (digits only) and the body, rate-limits, and builds a `runId` (`route.ts:16-32`).
+2. It calls `runPack`, which loads the order, products, cartons and rates, then `getOrExtractFacts` (cache first, Gemini for misses), then `packOrder` (`pack.ts:174-275`).
 3. `runPack` fills one `OrderRun` record as it goes: cache hits and misses, source mix, timings, tokens, cost, attempts, validator rejections, status.
-4. At the end it writes the run and the extraction events (`pack.ts:317-322`), then refreshes alerts (`pack.ts:325-329`).
+4. At the end it writes the run and the extraction events (`pack.ts:351-353`), then refreshes alerts (`pack.ts:355-361`).
 5. Monitoring writes never break the product: on failure the packer still gets the result, with `monitoring.saved = false`.
 
 **3 key points to say**
-- *Events with `run_id`:* one `runId` (`route.ts:31`) links the order run and its extraction events; `insertOrderRun` then `insertExtractionEvents` (`pack.ts:318-319`).
-- *Failure isolation:* the write is in try / catch (`pack.ts:317-322`) and alert evaluation is best effort (`pack.ts:325-329`); the result is returned either way. `refreshAlerts` re-evaluates the last 7 days (`pack.ts:335-343`).
-- *Demo fault injection:* `simulateOutage` is honored only when `DEMO_MODE` is true (`route.ts:29-30`); status codes are 404 not found, 500 error, else 200 (`route.ts:48`).
+- *Events with `run_id`:* one `runId` (`route.ts:32`) links the order run and its extraction events; `insertOrderRun` and `insertExtractionEvents` run in parallel via `Promise.allSettled` (`pack.ts:352`).
+- *Failure isolation:* the writes go through `Promise.allSettled`, so a rejected write sets `monitoring.saved = false` instead of throwing (`pack.ts:351-353`), and alert evaluation is best effort (`pack.ts:355-361`); the result is returned either way. `refreshAlerts` re-evaluates the last 7 days (`pack.ts:366-373`).
+- *Demo fault injection:* `simulateOutage` is honored only when `DEMO_MODE` is true (`route.ts:30-31`); status codes are 404 not found, 200 for a finished pack (including `no_box` and `needs_measurement`), 422 for `product_not_in_catalog` or `invalid_input`, 502 for `store_unreachable`, else 500 (`route.ts:61-67`).
 
 **Likely judge questions**
-- *What happens if the database is down?* The order lookup fails inside the try block and the response status is `error` (`pack.ts:304-309`). If only the event writes fail, the pack result is still returned and `monitoring.saved` is false.
-- *What stops abuse of the route?* A rate limiter (`route.ts:17`), digits-only ids and a strict body schema. There is no authentication; that is out of scope (`PLAN.md` section 4.2).
-- *How long can it take?* `maxDuration = 60` (`route.ts:11`). Measured on production: cached 119-234 ms, uncached 1589 ms (`demo-script.md`).
+- *What happens if the database is down?* The order lookup fails inside the try block and the response status is `error` (`pack.ts:338-343`). If only the event writes fail, the pack result is still returned and `monitoring.saved` is false.
+- *What stops abuse of the route?* A rate limiter (`route.ts:18`), digits-only ids and a strict body schema. There is no authentication; that is out of scope (`PLAN.md` section 4.2).
+- *How long can it take?* `maxDuration = 60` (`route.ts:12`). Measured on production: cached 119-234 ms, uncached 1589 ms (`demo-script.md`).
 
 ---
 
@@ -128,7 +128,7 @@
 2. `score` (`extraction-score.ts:22`) compares results with hand-labeled ground truth, separately for tuning (20) and holdout (10) products.
 3. Group A (dims on the page) is scored by dims within 1 cm (after sorting) and weight within 10% (`:27-40`); group B (inferred) by mean absolute percentage error (`:42-55`); group C (no info) by honesty, meaning `unknown` returned (`:59`).
 4. It also scores source correctness, fragile recall and precision, liquid and sensitive accuracy, latency, tokens and cost.
-5. Results go to `eval/results/extraction-<date>-<prompt>.json` and to Supabase `eval_runs` (`eval-extraction.ts:67-90`), and appear on `/evaluation`.
+5. Results go to `eval/results/extraction-<date>-<prompt>.json` and to Supabase `eval_runs` (`eval-extraction.ts:67-89`), and appear on `/evaluation`.
 
 **3 key points to say**
 - *Dataset design:* 30 products in groups A (explicit), B (inferable, 12 products) and C (no basis, 3 products); the 10-product holdout is reported separately.
