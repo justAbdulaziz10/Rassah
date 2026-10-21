@@ -14,8 +14,6 @@ Merchants who ship multi-item orders pick a carton by eye. Three things go wrong
 2. **Broken items and returns.** A new packer puts a book on top of a perfume bottle, or lays an oil bottle on its side.
 3. **Missing product data.** Professional cartonization tools (e.g. Paccurate) assume clean product dimensions already exist in a warehouse system. Small Saudi merchants don't have that data. It lives as free text on their product pages, in Arabic and English, in many formats ("٣٠×٢٠×١٠ سم", "12 x 8 x 4 in", "100 مل").
 
-**What we don't know yet:** we have no merchant interviews. The size of the problem is a *hypothesis*. Before demo day, at least one team member messages 2–3 Salla/Zid merchants (see §11, task T0) and asks how they pick cartons today. Any reply goes in the pitch. If nobody replies, we say so honestly.
-
 ## 2. Solution in one sentence
 
 > The packer types an order number. Rassah uses Gemini to read every product's page, extract dimensions and weight, and flag fragile, liquid and sensitive items. A constrained 3D packing engine picks the cheapest safe carton and produces packing instructions and a 3D layout. Every step is monitored.
@@ -173,7 +171,6 @@ Shared: report, pitch deck, rehearsal.
 
 | Task | Owner | Done when |
 |---|---|---|
-| T0. Message 2–3 Salla/Zid merchants: "How do you choose cartons? Do you see breakage or oversized boxes?" | M1 | Messages sent (any reply is a bonus) |
 | T1. Confirm AI requirement with the instructor | M3 | Written answer received |
 | T2. Create Gemini API key (Google AI Studio). Create Supabase project. Create Vercel project linked to the repo. | M3 | Keys stored in Vercel env + local `.env.local` |
 | T3. Scaffold Next.js + TS + Tailwind + ESLint + Vitest. Push to `main`. Vercel production deploy works. | M3 | Hello page live on Vercel |

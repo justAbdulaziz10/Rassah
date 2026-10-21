@@ -46,3 +46,6 @@ next-env.d.ts
 
 # verification evidence
 /artifacts/
+
+# benchmark: cached vendor API responses (may be subject to vendor terms)
+/eval/bench-cache/

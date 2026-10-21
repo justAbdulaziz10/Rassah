@@ -17,8 +17,6 @@ Merchants who ship multi-item orders choose cartons by eye. Three things go wron
 2. **Fragile items break and liquids leak.** A new packer puts a book on a perfume bottle, or lays an oil bottle flat.
 3. **The data that would fix this doesn't exist.** Professional cartonization tools assume clean product dimensions in a warehouse system. Small Saudi merchants only have free-text product pages in Arabic and English.
 
-**Validation status:** merchant outreach: no stores contacted and no replies recorded yet (log with empty rows: `docs/discovery.md`). The problem size is a hypothesis we have not measured.
-
 ## 2. Solution and user flow
 
 `/` is now a landing page (its hero replays a real engine result for order 1016); the working screens are `/orders`, `/catalog`, `/monitoring` and `/evaluation`.

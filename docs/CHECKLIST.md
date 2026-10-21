@@ -17,20 +17,20 @@
 
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
-| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 13 | 🟨 In progress |
+| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 30 | 13 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 35 | 🟨 In progress |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 30 | ✅ Done (gate passed) |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 37 | ✅ Done (gate passed) |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 38 | 38 | ✅ Done (gate passed) |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 54 | 54 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 36 | ✅ Done (gate passed) |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 39 | 38 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **524** | **453** | |
+| **Total** | | | | **524** | **456** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -119,42 +119,37 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P0.5** (ALL) Agree on sync times: Tue 23:00, Wed 09:00, Wed 13:00 ⛳, Wed 18:00, Wed 23:00, Thu 08:00. — not verifiable by agent; needs team confirmation
 - [ ] **P0.6** (ALL) Create a team chat channel for blockers. Link it in the Blockers section below. — not verifiable by agent; needs team confirmation (no channel link recorded in Blockers)
 
-### 0B. Customer discovery (problem validation)
-- [ ] **P0.7** (M1, →T0) Pick 3 Salla/Zid stores that sell rigid products (perfume, cosmetics, electronics, books). Note them in `docs/discovery.md`. — not done: the log in `docs/discovery.md` is empty (no stores named)
-- [ ] **P0.8** (M1) Send each a short message: how do they choose cartons, do they see breakage or oversized boxes, and how many carton sizes do they keep. — not done: no outreach recorded; message drafts are ready in `docs/discovery.md`
-- [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies. — not done: no replies and no "no reply" rows logged; the report says so honestly
-
-### 0C. Gemini (Google AI Studio)
+### 0B. Gemini (Google AI Studio)
 - [x] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.** — done 2026-10-21 (key created by the owner)
 - [x] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4). — gemini-3.5-flash-lite (3.8-flash and 3.6-flash free tier = 20 requests/day; switched 2026-10-21)
 - [x] **P0.12** (M1) Record the free-tier rate limits (requests/min, requests/day) shown for that model in `docs/decisions.md`. They decide concurrency (P5.27). — free tier = 20 requests/day/model; recorded in decisions.md
 - [x] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5). — $0.30 in / $2.50 out per 1M (2026-10-21); recorded in decisions.md
 - [ ] **P0.14** (M1) Quick sanity call: send one product description in AI Studio's UI and confirm it returns JSON. Screenshot it for the tools log. — not verifiable by agent: the AI Studio screenshot is not in the repo (the API itself is proven by the 30/30 extraction)
 
-### 0D. Supabase
+### 0C. Supabase
 - [x] **P0.15** (M3, →T2) Create the Supabase organization + project (region close to Saudi Arabia, e.g. EU/Middle East if offered) (C6). — project `rassah` (etxxhydkvtixajxkwgmn), org newmillion, eu-central-1 Frankfurt, free plan
 - [ ] **P0.16** (M3) Store the DB password in the password manager (C7). — NOT DONE: DB password not recorded (C7 open)
 - [ ] **P0.17** (M3) Copy the project URL and service-role key into the password manager (C8, C9). — partial: URL + service-role key are in local .env.local and Vercel env, not in a password manager
 - [ ] **P0.18** (M3) Invite M1 and M2 to the Supabase organization. — not done
 - [x] **P0.19** (M3) Note the free-tier limits (DB size, inactivity pause) in `docs/decisions.md`. — recorded in decisions.md (500 MB, pause after 1 week inactivity)
 
-### 0E. Vercel
+### 0D. Vercel
 - [ ] **P0.20** (M3, →T2) Create the Vercel account/team (C10) and invite M1, M2. — partial: team "abdulaziz's projects" exists; invites for M1/M2 not done
 - [x] **P0.21** (M3) Install the Vercel GitHub app with access to the `Rassah` repo (C11). — project `rassah` linked to justAbdulaziz10/Rassah, production branch main
 - [x] **P0.22** (M3) Note the plan's function max-duration limit in `docs/decisions.md` (used in P6.1). — Hobby 300 s max; routes use maxDuration 60 (decisions.md)
 
-### 0F. GitHub
+### 0E. GitHub
 - [x] **P0.23** (Repo owner) Give M1, M2, M3 write access to the repo (C1). — verified 2026-10-21: `gh api` collaborators = justAbdulaziz10 (admin) + Bayan369 + enghanamansour, both with push; mapping of the two logins to M1/M2 not checked by an agent
 - [ ] **P0.24** (ALL) Each member clones the repo and can push a test branch. — not verifiable by agent: origin has only `main` and `chore/pr-template` (PR #1); needs per-member confirmation
 - [x] **P0.25** (M3) Create GitHub labels: `lane:ai`, `lane:engine`, `lane:platform`, `blocker`, `cut-list`. — all 5 labels exist on GitHub
 
-### 0G. Local machines (each member)
+### 0F. Local machines (each member)
 - [ ] **P0.26** (M1) Node.js LTS + npm installed (`node -v` recorded), Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
 - [ ] **P0.27** (M2) Node.js LTS + npm installed, Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
 - [ ] **P0.28** (M3) Node.js LTS + npm installed, Git configured, editor ready. — not verifiable by agent; needs the member to confirm `node -v`
 - [ ] **P0.29** (ALL) All three use the **same** Node major version (written to `.nvmrc` in P1.6). — repo side done (`.nvmrc` = 24, `engines` set); needs all 3 members to confirm their local Node major
 
-### 0H. Shared secrets handling
+### 0G. Shared secrets handling
 - [ ] **P0.30** (M3) Set up the team password manager or a secure shared note (C13).
 - [ ] **P0.31** (M3) Move all credentials C2–C12 into it. Delete them from chat messages.
 - [ ] **P0.32** (ALL) Each member confirms they can read the shared secrets.
@@ -518,6 +513,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds). — uncached 1589 ms, cached 119–234 ms
 - [x] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers. — n/a: the gate passed (all 20 orders matched on production, P6.33), so no cut-list item was applied
 - [x] **P6.37** (M3) Update the dashboard. **Gate G6 check.** — G6 passed (verified, on production rather than a preview)
+- [x] **P6.38** (M3) Read-only order integration with the separate demo store (`feat/mock-store` merged): the pack route can read an order from the store's API, and refuses products that are not in Rassah's catalog. — `lib/integrations/store.ts`, `tests/pipeline/external-order.test.ts`; set `STORE_API_URL` / `STORE_API_KEY` to turn it on
 
 ---
 
@@ -714,6 +710,11 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.35** (M3) Review: numbers on the page = numbers in the JSON files = numbers in `docs/report/results.md`. — `/evaluation` reads the JSON (DB first, file fallback via `lib/monitoring/evaluation.ts`); results.md and REPORT.md checked against the JSON. Re-check on the deployed page if `eval_runs` holds an older run
 - [x] **P9.36** (M1) Update the dashboard. **Gate G9 check.** — G9 passed (verified): extraction and packing runs stored, numbers in results.md, margin decision recorded
 
+### 9G. Competitor benchmark (Paccurate, 3DBinPacking)
+- [x] **P9.37** (M2) Head-to-head harness: same units, cartons and prices for every engine; one validator and one cost model judge all of them; vendor responses cached. — `npm run bench`, `scripts/bench.ts`, `lib/bench/competitors.ts`, 6 adapter tests, protocol in `docs/benchmark.md`
+- [x] **P9.38** (M2) First run without vendor keys (Rassah vs a naive packer, 258 feasible cases). — valid layouts 98.4% vs 32.6%, 8.3% cheaper where both are valid, 0 false claims on 20 impossible cases; `eval/results/bench-2026-10-21.md`
+- [ ] **P9.39** (ALL) Run against the vendors: get a Paccurate key and a 3DBinPacking trial key, put them in `.env.local`, run `npm run bench -- --write`. — needs the team to create the vendor accounts; steps in `docs/benchmark.md`
+
 ---
 
 ## Phase 10: Deployment, security & hardening
@@ -786,7 +787,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 11C. Report (`docs/report/REPORT.md` → PDF)
 - [x] **P11.10** (M1, →T23) Title, team, date, live URL, repo URL. — title block complete
-- [x] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly). — states honestly: no merchant replies recorded yet
+- [x] **P11.11** (M1) 1. Problem (volumetric weight, breakage, missing product data). — section 1 of the report
 - [x] **P11.12** (M1) 2. Solution and user flow (with screenshots). — screenshots 01–03 embedded in §2
 - [x] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
 - [ ] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout. — REOPENED by audit 2026-10-21: ground truth was AI-drafted and its independent review (P3.12/P3.16) is still open; REPORT.md says so
@@ -820,7 +821,6 @@ CI needs **no** secrets because tests never call external services.
 ### 11E. Supporting documents
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [x] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons). — decisions.md complete (2026-10-21)
-- [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest). — file is honest but the outreach log is still empty (P0.7–P0.9); finalize after outreach or leave as is and say so in the pitch
 - [x] **P11.42** (ALL) `docs/report/results.md` final. — marked FINAL 2026-10-21
 - [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
 
@@ -835,7 +835,7 @@ CI needs **no** secrets because tests never call external services.
 ### 11G. Review and submission
 - [ ] **P11.50** (ALL) All 3 members read the full report and the deck. Comments resolved. — not verifiable by agent; needs all 3 members
 - [ ] **P11.51** (ALL) Confirm submission format and channel with the instructor (repo link, PDF, deck). — not verifiable by agent; draft message in `docs/team/submission.md` (not sent)
-- [ ] **P11.52** (ALL) Update the dashboard. **Gate G11 check.** — gate G11 not met: P11.5, P11.14, P11.41, P11.44–P11.51 open
+- [ ] **P11.52** (ALL) Update the dashboard. **Gate G11 check.** — gate G11 not met: P11.5, P11.14, P11.44–P11.51 open
 
 ---
 

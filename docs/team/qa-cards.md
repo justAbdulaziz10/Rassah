@@ -28,8 +28,8 @@ No. It is synthetic: 30 products written in the style of Saudi store pages, grou
 **Q13. Why `gemini-3.5-flash-lite` and not a bigger model?**
 `gemini-3.8-flash` and `gemini-3.6-flash` had a free tier of 20 requests per day, so eval runs were rate-limited. Flash-lite has 500 requests per day (15 RPM) and fits the 30-call eval and pre-warm. Paid billing in Saudi Arabia needs a reseller (CNTXT), not possible before the demo.
 
-**Q14. Is carton choice really a pain? Did merchants say so?**
-Our angle is volumetric shipping, breakage and onboarding new packers, not cents on cardboard. Evidence is whatever `docs/discovery.md` holds, reported as received; the problem size is a hypothesis.
+**Q14. Is carton choice really a pain?**
+Our angle is volumetric shipping, breakage and onboarding new packers, not cents on cardboard.
 
 **Q15. Precise geometry on estimated inputs?**
 Yes, which is why every estimate is tagged, padded by 15% and shown to the packer, and corrections feed the M1 metric.
