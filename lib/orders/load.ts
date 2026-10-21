@@ -12,13 +12,16 @@ export interface QueueSnapshot {
   alerts: Alert[];
 }
 
-/** Everything the orders page, the header badges and the notifications page need, in one round of reads. */
-export async function loadQueue(repo: Repo): Promise<QueueSnapshot> {
+/**
+ * Everything the orders page, the header badges and the notifications page need, in one round of reads.
+ * The badge poll skips the product list (names and descriptions it never shows).
+ */
+export async function loadQueue(repo: Repo, { withProducts = true } = {}): Promise<QueueSnapshot> {
   const [orders, runs, facts, products, alerts] = await Promise.all([
     repo.listOrders(),
-    repo.listOrderRuns(null),
+    repo.listQueueRuns(),
     repo.listFacts(),
-    repo.listProducts(),
+    withProducts ? repo.listProducts() : [],
     repo.listOpenAlerts(),
   ]);
   const factsById = new Map(facts.map((f) => [f.productId, f]));

@@ -4,7 +4,7 @@ import "server-only";
 
 import type { Repo } from "@/lib/db/repo";
 import type { Alert, Correction, OrderRun, RunStatus } from "@/lib/db/types";
-import { refreshAlerts } from "@/lib/pipeline/pack";
+import { alertsSince, refreshAlerts } from "@/lib/pipeline/pack";
 import { THRESHOLDS } from "./alerts";
 import { computeMetrics, latencySeries, windowSince, type LatencyPoint, type Metrics, type MetricWindow } from "./metrics";
 
@@ -82,17 +82,33 @@ function latestProblems(runs: OrderRun[]): DashboardData["problemOrders"] {
   return out.slice(0, 12);
 }
 
+const from = <T extends { createdAt?: string }>(rows: T[], sinceIso: string | null): T[] => {
+  if (sinceIso === null) return rows;
+  const min = Date.parse(sinceIso);
+  return rows.filter((r) => Date.parse(r.createdAt ?? "") >= min);
+};
+
 export async function loadDashboard(repo: Repo, window: MetricWindow, nowMs: number, webhookUrl?: string): Promise<DashboardData> {
   const since = windowSince(window, nowMs);
-  const [extractions, runs, corrections] = await Promise.all([
-    repo.listExtractionEvents(since),
-    repo.listOrderRuns(since),
-    repo.listCorrections(since),
+  const alertSince = alertsSince(nowMs);
+  // One read covers both the selected window and the alert rules' 7 days, whichever reaches further back.
+  const readSince = since === null || Date.parse(since) < Date.parse(alertSince) ? since : alertSince;
+  const [allExtractions, allRuns, allCorrections] = await Promise.all([
+    repo.listExtractionEvents(readSince),
+    repo.listOrderRuns(readSince),
+    repo.listCorrections(readSince),
   ]);
+  const extractions = from(allExtractions, since);
+  const runs = from(allRuns, since);
+  const corrections = from(allCorrections, since);
   let alerts: Alert[] = [];
   let alertsError = false;
   try {
-    alerts = await refreshAlerts(repo, nowMs, webhookUrl);
+    alerts = await refreshAlerts(repo, nowMs, webhookUrl, {
+      extractions: from(allExtractions, alertSince),
+      runs: from(allRuns, alertSince),
+      corrections: from(allCorrections, alertSince),
+    });
   } catch {
     alertsError = true;
   }

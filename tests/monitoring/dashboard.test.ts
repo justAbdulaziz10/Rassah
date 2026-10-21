@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { THRESHOLDS } from "@/lib/monitoring/alerts";
 import { loadDashboard, reviewSeries } from "@/lib/monitoring/dashboard";
 import { MemoryRepo } from "@/lib/db/memory";
-import { NOW, run } from "./fixtures";
+import { extraction, NOW, run } from "./fixtures";
 
 describe("loadDashboard", () => {
   it("counts outcomes, lists only orders whose latest run is a problem, and sends the limits", async () => {
@@ -24,6 +24,19 @@ describe("loadDashboard", () => {
     ]);
     expect(d.targets).toMatchObject({ failureRate: THRESHOLDS.m6FailureRate, cachedP95Ms: THRESHOLDS.m5CachedP95Ms });
     expect(d.recentRuns.map((r) => r.orderId)).toEqual(["1020", "1001", "1006", "1001"]);
+  });
+
+  it("scopes the numbers to the window but checks alerts over 7 days, from one read", async () => {
+    const repo = new MemoryRepo();
+    const twoDays = 2 * 24 * 60;
+    for (let i = 0; i < 6; i++) repo.extractionEvents.push(extraction({ status: "api_error", minutesAgo: twoDays + i }));
+    repo.extractionEvents.push(extraction({ minutesAgo: 30 }), extraction({ minutesAgo: 9 * 24 * 60 }));
+    repo.orderRuns.push(run({ minutesAgo: 30 }), run({ minutesAgo: twoDays }));
+    const d = await loadDashboard(repo, "1h", NOW);
+    expect(d.totals).toMatchObject({ runs: 1, extractions: 1 });
+    expect(d.alerts.map((a) => a.rule)).toContain("M6_gemini_failure_rate"); // the failures two days ago count
+    const all = await loadDashboard(repo, "all", NOW);
+    expect(all.totals).toMatchObject({ runs: 2, extractions: 8 });
   });
 
   it("gives one point per reviewed order with the AI-read products it corrected", () => {

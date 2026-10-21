@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
 import { fmtApiError, fmtCartons, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
+import { useQueue } from "@/lib/ui/queue-store";
 import { FlagChips, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
 import FactsForm, { type FactsFormValues } from "./FactsForm";
@@ -19,20 +20,6 @@ const PackingView3D = dynamic(() => import("./PackingView3D"), {
 
 type State = { kind: "loading" } | { kind: "done"; data: PackResponse } | { kind: "failed"; message: string };
 
-/** What the order list knows: the next order to open, and whether this one was already packed. */
-interface QueueInfo {
-  remainingOrderIds: string[];
-  done: Array<{ id: string; at: string | null }>;
-}
-
-async function fetchQueue(): Promise<QueueInfo | null> {
-  try {
-    const res = await fetch("/api/orders/queue", { cache: "no-store" });
-    return res.ok ? ((await res.json()) as QueueInfo) : null;
-  } catch {
-    return null;
-  }
-}
 
 async function postJson(url: string, body: unknown, method = "POST") {
   const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -44,17 +31,10 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
   const [state, setState] = useState<State>({ kind: "loading" });
   const [confirmed, setConfirmed] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
-  const [queue, setQueue] = useState<QueueInfo | null>(null);
+  // The header already polls the queue: the next order to open, and whether this one was packed before.
+  const queue = useQueue();
   const [confirmError, setConfirmError] = useState<string | null>(null);
   const started = useRef(false);
-
-  useEffect(() => {
-    let live = true;
-    void fetchQueue().then((q) => live && setQueue(q));
-    return () => {
-      live = false;
-    };
-  }, [orderId]);
 
   const pack = useCallback(async () => {
     setState({ kind: "loading" });
@@ -127,7 +107,6 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
     }
     setConfirmed(true);
     window.dispatchEvent(new Event(QUEUE_CHANGED));
-    setQueue(await fetchQueue());
   }
 
   const split = d.status === "no_box" ? d.split : null;

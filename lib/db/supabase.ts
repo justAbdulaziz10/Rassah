@@ -14,6 +14,7 @@ import type {
   OrderSummary,
   OrderWithLines,
   Product,
+  QueueRun,
   StoredFacts,
 } from "./types";
 import { STORE_FIRST_ORDER_ID, STORE_ORDER_TAG } from "./types";
@@ -452,6 +453,28 @@ export class SupabaseRepo implements Repo {
       return sinceIso ? q.gte("created_at", sinceIso) : q;
     });
     return rows.map(toRun);
+  }
+
+  async listQueueRuns(): Promise<QueueRun[]> {
+    // The queue polls every 20 s: skip evaluation runs and the large attempts/violations columns.
+    const rows = await readPages("listQueueRuns", () =>
+      this.db
+        .from("order_runs")
+        .select("id,created_at,trigger,order_id,status,strategy,employee_action,action_at")
+        .eq("trigger", "order")
+        .order("created_at", { ascending: false })
+        .order("id"),
+    );
+    return rows.map((r) => ({
+      id: r.id as string,
+      createdAt: r.created_at as string,
+      trigger: r.trigger as OrderRun["trigger"],
+      orderId: r.order_id as string,
+      status: r.status as OrderRun["status"],
+      strategy: (r.strategy as string) ?? null,
+      employeeAction: r.employee_action as OrderRun["employeeAction"],
+      actionAt: (r.action_at as string) ?? null,
+    }));
   }
 
   async listCorrections(sinceIso: string | null) {

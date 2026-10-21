@@ -131,6 +131,9 @@ export interface OrderRun {
   actionAt: string | null;
 }
 
+/** The few run fields the order queue reads (see lib/orders/queue.ts). */
+export type QueueRun = Pick<OrderRun, "id" | "createdAt" | "trigger" | "orderId" | "status" | "strategy" | "employeeAction" | "actionAt">;
+
 export interface Correction {
   id?: string;
   createdAt?: string;

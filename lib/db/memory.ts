@@ -143,6 +143,9 @@ export class MemoryRepo implements Repo {
   async listOrderRuns(sinceIso: string | null) {
     return this.since(this.orderRuns, sinceIso);
   }
+  async listQueueRuns() {
+    return this.orderRuns.filter((r) => r.trigger === "order");
+  }
   async listCorrections(sinceIso: string | null) {
     return this.since(this.corrections, sinceIso);
   }

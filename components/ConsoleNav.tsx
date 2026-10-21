@@ -4,13 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fmtCount } from "@/lib/ui/format";
+import { publishQueue, type QueueSummary } from "@/lib/ui/queue-store";
 import { BagIcon, BellIcon, CrossIcon } from "./Icons";
-
-interface QueueSummary {
-  counts: { new: number; ready: number; attention: number; done: number; remaining: number; total: number };
-  alertsOpen: number;
-  remainingOrderIds: string[];
-}
 
 /** Fired by pages that change an order's state (e.g. confirming packing) so the badges update at once. */
 export const QUEUE_CHANGED = "rassah:queue-changed";
@@ -62,6 +57,7 @@ export default function ConsoleNav() {
       }
       known.current = new Set([...(known.current ?? []), ...data.remainingOrderIds]);
       setSummary(data);
+      publishQueue(data);
       setFailures(0);
     } catch {
       // Offline or the server is restarting: keep the last numbers, flag them after repeated failures, retry next tick.
@@ -71,16 +67,20 @@ export default function ConsoleNav() {
 
   useEffect(() => {
     // Refresh on every page change too, so the numbers follow what the employee just did.
+    // A tab in the background does not poll; it catches up as soon as it is shown again.
     const first = window.setTimeout(refresh, 0);
-    const id = window.setInterval(refresh, POLL_MS);
+    const id = window.setInterval(() => document.visibilityState === "visible" && void refresh(), POLL_MS);
     const onFocus = () => void refresh();
+    const onVisible = () => document.visibilityState === "visible" && void refresh();
     window.addEventListener("focus", onFocus);
     window.addEventListener(QUEUE_CHANGED, onFocus);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       window.clearTimeout(first);
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener(QUEUE_CHANGED, onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [refresh, pathname]);
 

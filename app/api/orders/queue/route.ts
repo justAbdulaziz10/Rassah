@@ -8,7 +8,7 @@ export async function GET() {
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
   try {
-    const { entries, counts, alerts } = await loadQueue(repo);
+    const { entries, counts, alerts } = await loadQueue(repo, { withProducts: false });
     return Response.json(
       {
         counts,

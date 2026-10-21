@@ -1,12 +1,45 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import Safe3D from "../Safe3D";
 import TopView2D from "../TopView2D";
 import type { HeroItem } from "./HeroCanvas";
 
-const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
+const loadHeroCanvas = () => import("./HeroCanvas");
+const HeroCanvas = dynamic(loadHeroCanvas, { ssr: false });
+
+/**
+ * three.js is most of the landing page's script. It loads only once the hero is near the screen (on
+ * phones it sits below the fold) and never on a data-saver connection. Until it has loaded the same
+ * packing plays in 2D, so there is no empty frame.
+ */
+function use3DReady(ref: RefObject<HTMLElement | null>): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (!el || saveData) return;
+    let live = true;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        loadHeroCanvas().then(
+          () => live && setReady(true),
+          () => {}, // the chunk failed to load: the 2D view stays
+        );
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => {
+      live = false;
+      io.disconnect();
+    };
+  }, [ref]);
+  return ready;
+}
 
 interface Props {
   orderId: string;
@@ -33,6 +66,8 @@ export default function HeroPacking({ orderId, cartonName, inner, items, steps }
   );
   const [step, setStep] = useState(0);
   const [run, setRun] = useState(0);
+  const stage = useRef<HTMLDivElement>(null);
+  const ready3D = use3DReady(stage);
   const last = steps.length - 1;
   const current = reducedMotion ? last : step;
 
@@ -53,13 +88,18 @@ export default function HeroPacking({ orderId, cartonName, inner, items, steps }
   // Step 0 picks the carton; steps 1..n each put one item in.
   const placed = Math.min(current, items.length);
   const done = current >= last;
+  const flat = <TopView2D inner={inner} items={items.slice(0, placed)} tone="deep" />;
 
   return (
     <figure className="relative">
-      <div className="aspect-[5/4] w-full">
-        <Safe3D fallback={<TopView2D inner={inner} items={items.slice(0, placed)} tone="deep" />}>
-          <HeroCanvas key={run} inner={inner} items={items} placed={placed} reducedMotion={reducedMotion} />
-        </Safe3D>
+      <div ref={stage} className="aspect-[5/4] w-full">
+        {ready3D ? (
+          <Safe3D fallback={flat}>
+            <HeroCanvas key={run} inner={inner} items={items} placed={placed} reducedMotion={reducedMotion} />
+          </Safe3D>
+        ) : (
+          flat
+        )}
       </div>
 
       <figcaption className="mt-2 rounded-xl border border-white/15 bg-[var(--deep-2)]/80 p-4 text-sm text-[var(--on-deep)] backdrop-blur-sm">

@@ -4,7 +4,7 @@
 import { getOrExtractFacts } from "@/lib/ai/catalog";
 import type { ExtractDeps } from "@/lib/ai/extractor";
 import type { Repo } from "@/lib/db/repo";
-import type { OrderRun, StoredFacts } from "@/lib/db/types";
+import type { Correction, ExtractionEvent, OrderRun, StoredFacts } from "@/lib/db/types";
 import { ENGINE_CONFIG, packOrder, type EngineConfig, type InstructionStep } from "@/lib/engine";
 import type { CartonAttempt, CostEstimate, DataSource, Placement, ProductFacts, Unit } from "@/lib/engine/types";
 import { evaluateRules, syncAlerts } from "@/lib/monitoring/alerts";
@@ -363,13 +363,27 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
   return response;
 }
 
+/** Alert rules look at the last 7 days of events. */
+export const alertsSince = (nowMs: number) => new Date(nowMs - 7 * 24 * 3600_000).toISOString();
+
 /** Re-evaluates every alert rule against recent events and opens/resolves alerts. */
-export async function refreshAlerts(repo: Repo, nowMs: number, webhookUrl?: string) {
-  const since = new Date(nowMs - 7 * 24 * 3600_000).toISOString();
+export async function refreshAlerts(repo: Repo, nowMs: number, webhookUrl?: string, loaded?: AlertInput) {
+  const input = loaded ?? (await readAlertInput(repo, alertsSince(nowMs)));
+  return syncAlerts(repo, evaluateRules({ ...input, nowMs }), { webhookUrl });
+}
+
+async function readAlertInput(repo: Repo, since: string): Promise<AlertInput> {
   const [extractions, runs, corrections] = await Promise.all([
     repo.listExtractionEvents(since),
     repo.listOrderRuns(since),
     repo.listCorrections(since),
   ]);
-  return syncAlerts(repo, evaluateRules({ extractions, runs, corrections, nowMs }), { webhookUrl });
+  return { extractions, runs, corrections };
+}
+
+/** The last 7 days of events, when the caller already read them. */
+interface AlertInput {
+  extractions: ExtractionEvent[];
+  runs: OrderRun[];
+  corrections: Correction[];
 }

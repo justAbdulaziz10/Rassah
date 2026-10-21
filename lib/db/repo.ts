@@ -15,6 +15,7 @@ import type {
   OrderSummary,
   OrderWithLines,
   Product,
+  QueueRun,
   StoredFacts,
 } from "./types";
 
@@ -50,6 +51,8 @@ export interface Repo {
   insertCorrections(rows: Correction[]): Promise<void>;
   listExtractionEvents(sinceIso: string | null): Promise<ExtractionEvent[]>;
   listOrderRuns(sinceIso: string | null): Promise<OrderRun[]>;
+  /** Packing runs only (trigger "order"), with just the fields the order queue reads. */
+  listQueueRuns(): Promise<QueueRun[]>;
   listCorrections(sinceIso: string | null): Promise<Correction[]>;
   getRunTrace(runId: string): Promise<{ run: OrderRun | null; extractions: ExtractionEvent[]; corrections: Correction[] }>;
 

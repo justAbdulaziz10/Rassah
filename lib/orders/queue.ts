@@ -2,7 +2,7 @@
 // the order runs (each time Rassah prepared an order) and the saved product facts.
 // Pure, so it is unit-tested and shared by the orders page, the header badges and the notifications page.
 
-import type { OrderRun, OrderSummary, RunStatus, StoredFacts } from "@/lib/db/types";
+import type { OrderSummary, QueueRun, RunStatus, StoredFacts } from "@/lib/db/types";
 
 /**
  * new: nobody has prepared it yet.
@@ -47,8 +47,8 @@ function time(iso: string | null | undefined): number {
   return iso ? Date.parse(iso) || 0 : 0;
 }
 
-export function buildQueue(orders: OrderSummary[], runs: OrderRun[], facts: Map<string, StoredFacts>): QueueEntry[] {
-  const byOrder = new Map<string, OrderRun[]>();
+export function buildQueue(orders: OrderSummary[], runs: QueueRun[], facts: Map<string, StoredFacts>): QueueEntry[] {
+  const byOrder = new Map<string, QueueRun[]>();
   for (const r of runs) {
     if (r.trigger !== "order") continue; // evaluation runs are not real packing work
     const list = byOrder.get(r.orderId);

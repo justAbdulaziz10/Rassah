@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Correction, ExtractionEvent, OrderRun } from "@/lib/db/types";
 import type { DashboardData } from "@/lib/monitoring/dashboard";
 import {
@@ -49,7 +49,9 @@ const WINDOWS: Array<[Win, string]> = [
   ["all", "الكل"],
 ];
 
-const AXIS = { stroke: "var(--chart-axis)", fontSize: 12, tickLine: false } as const;
+// recharts is a large library: the charts load on their own while the first metrics are fetched.
+const LatencyChart = dynamic(() => import("./MonitoringCharts").then((m) => m.LatencyChart), { ssr: false });
+const CorrectionsChart = dynamic(() => import("./MonitoringCharts").then((m) => m.CorrectionsChart), { ssr: false });
 
 interface Trace {
   run: OrderRun;
@@ -87,12 +89,16 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
   }, []);
 
   useEffect(() => {
-    // Poll the metrics endpoint: first load right away, then every 15 seconds.
+    // Poll the metrics endpoint: first load right away, then every 15 seconds while the tab is shown.
+    // A hidden tab does not poll (each poll is several queries); it catches up when shown again.
     const first = setTimeout(() => void load(win), 0);
-    const t = setInterval(() => void load(win), REFRESH_SECONDS * 1000);
+    const t = setInterval(() => document.visibilityState === "visible" && void load(win), REFRESH_SECONDS * 1000);
+    const onVisible = () => document.visibilityState === "visible" && void load(win);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearTimeout(first);
       clearInterval(t);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [win, load]);
 
@@ -634,20 +640,7 @@ function LatencyCard({ data }: { data: DashboardData }) {
         <>
           <p className="mb-1 text-xs text-muted">المدة {unit}</p>
           <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={points} margin={{ top: 8, right: 4, bottom: 0, left: 4 }} barCategoryGap={2}>
-                <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                <XAxis dataKey="i" reversed hide />
-                <YAxis orientation="right" {...AXIS} width={40} tickFormatter={(v: number) => (top >= 1000 ? (v / 1000).toFixed(1) : String(Math.round(v)))} domain={[0, showLimit ? top * 1.1 : "auto"]} />
-                <Tooltip cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} content={<LatencyTip />} />
-                {showLimit && <ReferenceLine y={limit} stroke="var(--critical)" strokeDasharray="4 4" />}
-                <Bar dataKey="ms" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false}>
-                  {points.map((p) => (
-                    <Cell key={p.i} fill={p.cached ? "var(--series-1)" : "var(--series-2)"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            <LatencyChart points={points} top={top} limit={limit} showLimit={showLimit} tip={<LatencyTip />} />
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
             <span className="flex items-center gap-1.5">
@@ -709,20 +702,7 @@ function CorrectionsCard({ data }: { data: DashboardData }) {
         <>
           <p className="mb-1 text-xs text-muted">عدد المنتجات في الطلب</p>
           <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={points} margin={{ top: 8, right: 4, bottom: 0, left: 4 }} barCategoryGap={2}>
-                <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
-                <XAxis dataKey="i" reversed hide />
-                <YAxis orientation="right" {...AXIS} width={40} allowDecimals={false} />
-                <Tooltip cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} content={<CorrectionTip />} />
-                <Bar dataKey="ok" stackId="m1" fill="var(--series-1)" maxBarSize={18} isAnimationActive={false}>
-                  {points.map((p) => (
-                    <Cell key={p.i} radius={p.fixed ? 0 : 3} />
-                  ))}
-                </Bar>
-                <Bar dataKey="fixed" stackId="m1" fill="var(--series-2)" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false} />
-              </BarChart>
-            </ResponsiveContainer>
+            <CorrectionsChart points={points} tip={<CorrectionTip />} />
           </div>
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
             <span className="flex items-center gap-1.5">
