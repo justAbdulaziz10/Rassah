@@ -17,20 +17,20 @@
 
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
-| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 2 | 🟨 In progress |
+| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 8 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 30 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 21 | 🟨 In progress |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 23 | 🟨 In progress |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 30 | 🟨 In progress |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 38 | 🟨 In progress |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 31 | 🟨 In progress |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 39 | 🟨 In progress |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 41 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 28 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 9 | 🟨 In progress |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 11 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 26 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **331** | |
+| **Total** | | | | **517** | **357** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -73,16 +73,16 @@ In parallel and also blocking: `P2 schema` → `P2 seed`, and `P4 validator` →
 | # | Service / credential | Purpose | Created by | Stored in | Shared with | Done |
 |---|---|---|---|---|---|---|
 | C1 | GitHub repo `justAbdulaziz10/Rassah`: write access | Code, PRs, CI | Repo owner | GitHub | M1, M2, M3 | ⬜ |
-| C2 | Google account / project for AI Studio | Owns the Gemini key | M3 | Team password manager | ALL | ⬜ |
-| C3 | `GEMINI_API_KEY` | Gemini API auth | M3 | Vercel env (Preview + Prod) + each `.env.local` | ALL | ⬜ |
-| C4 | Gemini model id (`GEMINI_MODEL`) | Which Flash-tier model | M1 | Vercel env + `.env.example` (name only) | ALL | ⬜ |
-| C5 | Gemini prices (`GEMINI_PRICE_INPUT_PER_M`, `GEMINI_PRICE_OUTPUT_PER_M`) + date copied | Cost metric | M1 | Vercel env + report | ALL | ⬜ |
-| C6 | Supabase account + organization | Database hosting | M3 | Password manager | ALL (invited to org) | ⬜ |
-| C7 | Supabase project database password | Direct DB / CLI access | M3 | Password manager | ALL | ⬜ |
-| C8 | `SUPABASE_URL` | DB endpoint | M3 | Vercel env + `.env.local` | ALL | ⬜ |
-| C9 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side DB access (bypasses RLS) | M3 | Vercel env + `.env.local` **only** | ALL | ⬜ |
-| C10 | Vercel account / team | Hosting | M3 | Password manager | ALL (team members) | ⬜ |
-| C11 | Vercel ↔ GitHub integration | Auto preview + prod deploys | M3 | Vercel | — | ⬜ |
+| C2 | Google account / project for AI Studio | Owns the Gemini key | M3 | Team password manager | ALL | ✅ |
+| C3 | `GEMINI_API_KEY` | Gemini API auth | M3 | Vercel env (Preview + Prod) + each `.env.local` | ALL | ✅ |
+| C4 | Gemini model id (`GEMINI_MODEL`) | Which Flash-tier model | M1 | Vercel env + `.env.example` (name only) | ALL | ✅ |
+| C5 | Gemini prices (`GEMINI_PRICE_INPUT_PER_M`, `GEMINI_PRICE_OUTPUT_PER_M`) + date copied | Cost metric | M1 | Vercel env + report | ALL | ✅ |
+| C6 | Supabase account + organization | Database hosting | M3 | Password manager | ALL (invited to org) | ✅ |
+| C7 | Supabase project database password | Direct DB / CLI access | M3 | Password manager | ALL | ⬜ (DB password not recorded) |
+| C8 | `SUPABASE_URL` | DB endpoint | M3 | Vercel env + `.env.local` | ALL | ✅ |
+| C9 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side DB access (bypasses RLS) | M3 | Vercel env + `.env.local` **only** | ALL | ✅ |
+| C10 | Vercel account / team | Hosting | M3 | Password manager | ALL (team members) | ✅ |
+| C11 | Vercel ↔ GitHub integration | Auto preview + prod deploys | M3 | Vercel | — | ✅ |
 | C12 | `ALERT_WEBHOOK_URL` (optional, Discord/Slack) | Alert delivery | M3 | Vercel env | ALL | ⬜ |
 | C13 | Team password manager / secure shared note | Hold C2–C12 | M3 | (e.g. Bitwarden shared collection) | ALL | ⬜ |
 
@@ -123,22 +123,22 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies.
 
 ### 0C. Gemini (Google AI Studio)
-- [ ] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.**
-- [ ] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4).
-- [ ] **P0.12** (M1) Record the free-tier rate limits (requests/min, requests/day) shown for that model in `docs/decisions.md`. They decide concurrency (P5.27).
-- [ ] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5).
+- [x] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.** — done 2026-10-21 (key created by the owner)
+- [x] **P0.11** (M1) Choose the model: a current Flash-tier model listed in AI Studio. Record the exact id (C4). — gemini-3.6-flash (3.8-flash free quota was exhausted)
+- [x] **P0.12** (M1) Record the free-tier rate limits (requests/min, requests/day) shown for that model in `docs/decisions.md`. They decide concurrency (P5.27). — free tier = 20 requests/day/model; recorded in decisions.md
+- [x] **P0.13** (M1) Copy input/output prices per 1M tokens from Google's official pricing page with today's date (C5). — $0.75 in / $3.75 out per 1M (2026-10-21); recorded in decisions.md
 - [ ] **P0.14** (M1) Quick sanity call: send one product description in AI Studio's UI and confirm it returns JSON. Screenshot it for the tools log.
 
 ### 0D. Supabase
-- [ ] **P0.15** (M3, →T2) Create the Supabase organization + project (region close to Saudi Arabia, e.g. EU/Middle East if offered) (C6).
-- [ ] **P0.16** (M3) Store the DB password in the password manager (C7).
-- [ ] **P0.17** (M3) Copy the project URL and service-role key into the password manager (C8, C9).
-- [ ] **P0.18** (M3) Invite M1 and M2 to the Supabase organization.
+- [x] **P0.15** (M3, →T2) Create the Supabase organization + project (region close to Saudi Arabia, e.g. EU/Middle East if offered) (C6). — project `rassah` (etxxhydkvtixajxkwgmn), org newmillion, eu-central-1 Frankfurt, free plan
+- [ ] **P0.16** (M3) Store the DB password in the password manager (C7). — NOT DONE: DB password not recorded (C7 open)
+- [ ] **P0.17** (M3) Copy the project URL and service-role key into the password manager (C8, C9). — partial: URL + service-role key are in local .env.local and Vercel env, not in a password manager
+- [ ] **P0.18** (M3) Invite M1 and M2 to the Supabase organization. — not done
 - [ ] **P0.19** (M3) Note the free-tier limits (DB size, inactivity pause) in `docs/decisions.md`.
 
 ### 0E. Vercel
-- [ ] **P0.20** (M3, →T2) Create the Vercel account/team (C10) and invite M1, M2.
-- [ ] **P0.21** (M3) Install the Vercel GitHub app with access to the `Rassah` repo (C11).
+- [ ] **P0.20** (M3, →T2) Create the Vercel account/team (C10) and invite M1, M2. — partial: team "abdulaziz's projects" exists; invites for M1/M2 not done
+- [x] **P0.21** (M3) Install the Vercel GitHub app with access to the `Rassah` repo (C11). — project `rassah` linked to justAbdulaziz10/Rassah, production branch main
 - [ ] **P0.22** (M3) Note the plan's function max-duration limit in `docs/decisions.md` (used in P6.1).
 
 ### 0F. GitHub
@@ -232,7 +232,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P2.4** (M3) Add index `extraction_events(run_id)` and `corrections(run_id)` for the run trace.
 - [ ] **P2.5** (M3) `gen_random_uuid()` available (the `pgcrypto` extension is enabled by default on Supabase. Verify).
 - [x] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies.
-- [ ] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README.
+- [ ] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README. — partial: applied via Supabase MCP apply_migration; README note not written
 - [ ] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06.
 
 ### 2B. Access layer
@@ -254,7 +254,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P2.22** (M3) Seed **never** writes `product_facts` or ground truth.
 - [x] **P2.23** (M3) `scripts/reset-events.ts`: deletes rows from `extraction_events`, `order_runs`, `corrections`, `alerts` (not eval tables, not facts). Asks for `--yes`.
 - [x] **P2.24** (M3) `scripts/clear-facts.ts --product p-07` for demoing a cache miss (and `--all` with `--yes`).
-- [ ] **P2.25** (M3) Run the seed against Supabase. Verify counts: 30 / 5 / 20.
+- [x] **P2.25** (M3) Run the seed against Supabase. Verify counts: 30 / 5 / 20. — seed run: products 30, cartons 5, orders 20, order_items 51
 
 ### 2D. Investigation queries
 - [x] **P2.26** (M3) `docs/queries.sql` with the investigation queries from stack/04 (failed extractions, most-corrected products, run trace).
@@ -262,7 +262,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 2E. Verification
 - [ ] **P2.28** (M3) `/api/health` reports `supabase: "ok"` locally and on the Vercel preview.
-- [ ] **P2.29** (M3) Verify the anon key **cannot** read any table (quick REST call with the anon key returns nothing or 401).
+- [x] **P2.29** (M3) Verify the anon key **cannot** read any table (quick REST call with the anon key returns nothing or 401). — anon REST read of products returned [] (RLS blocks anon)
 - [ ] **P2.30** (M3) Update the dashboard. **Gate G2 check.**
 
 ---
@@ -672,15 +672,15 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P9.12** (M1) Holdout metrics reported separately.
 - [x] **P9.13** (M1) Writes `eval_runs` (summary) + `eval_results` (per product) + `eval/results/extraction-<date>-<prompt>.json`.
 - [x] **P9.14** (M1) Prints a summary table to the console.
-- [ ] **P9.15** (M1) Run v1 on all 30 products. Results committed.
+- [ ] **P9.15** (M1) Run v1 on all 30 products. Results committed. — NOT DONE: two runs were mostly rate_limited and discarded; blocked on Gemini billing
 
 ### 9B. Prompt iteration (→T20)
-- [ ] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none.
-- [ ] **P9.17** (M1) If changed: bump `PROMPT_VERSION`, re-run, and commit before/after numbers.
-- [ ] **P9.18** (M1) Record the decision and the numbers in `docs/decisions.md`.
+- [ ] **P9.16** (M1) Look at failures on the **non-holdout** set only. Decide on one prompt change, or none. — blocked on P9.15
+- [ ] **P9.17** (M1) If changed: bump `PROMPT_VERSION`, re-run, and commit before/after numbers. — blocked on P9.15
+- [ ] **P9.18** (M1) Record the decision and the numbers in `docs/decisions.md`. — blocked on P9.15
 
 ### 9C. Margin decision
-- [ ] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%.
+- [ ] **P9.19** (M1+M2) Set `MARGIN_INFERRED` from the inferred MAPE (rounded up). Update `config.ts` and the docs if it changes from 15%. — blocked on P9.15
 - [ ] **P9.20** (M2) Re-run engine tests after any config change.
 
 ### 9D. Packing eval (`scripts/eval-packing.ts`)
@@ -716,7 +716,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.2** (M3) No `NEXT_PUBLIC_` variable holds a secret.
 - [x] **P10.3** (M3) `lib/ai`, `lib/db`, `lib/monitoring` all start with `import "server-only"`.
 - [ ] **P10.4** (M3) Browser network tab on the main flow: no Gemini or Supabase calls from the client, no keys in responses.
-- [ ] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production).
+- [ ] **P10.5** (M3) RLS on for every table. The anon key can't read (P2.29 re-checked on production). — partial: anon read verified on Supabase (P2.29); not re-checked via production
 - [x] **P10.6** (M3) Admin/demo endpoints (`extract`, clear facts, fault injection) are disabled when `DEMO_MODE` is not `true`.
 - [x] **P10.7** (M3) Input validation on every route (Zod). Order size cap (≤ 12 units). Numeric ranges.
 - [x] **P10.8** (M3) Error responses never include stack traces, prompts or keys.
@@ -725,12 +725,12 @@ CI needs **no** secrets because tests never call external services.
 
 ### 10B. Abuse and cost protection on the public URL
 - [x] **P10.11** (M3) Simple per-IP rate limit on the pack route (in-DB counter or a small token bucket), or documented acceptance of the risk for a 2-day demo.
-- [ ] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert).
+- [ ] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert). — partial: free tier is 20 req/day/model; owner is enabling billing (Paid Tier)
 - [x] **P10.13** (M3) Extraction is only triggered for products in the seeded store (no arbitrary text input on the public URL).
 
 ### 10C. Production deployment
-- [ ] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README.
-- [ ] **P10.15** (M3) Production env vars double-checked against the matrix.
+- [ ] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README. — partial: production live at https://rassah.vercel.app and URL in README, but work is on `integration`, not yet merged to `main`
+- [ ] **P10.15** (M3) Production env vars double-checked against the matrix. — partial: env vars set for production+preview (see register); not yet double-checked against the matrix
 - [ ] **P10.16** (M3) `/api/health` all green on production.
 - [ ] **P10.17** (M3) Supabase project not paused. Note the inactivity rule.
 - [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs.
@@ -898,7 +898,8 @@ Never cut: **validator, event logging, tests, honesty about data.**
 
 | Date/time | ID | Blocker | Owner | Impact | Action | Resolved |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| 2026-10-21 | B1 | Gemini free tier allows only 20 requests/day/model (429 QuotaFailure); extraction eval runs were mostly rate_limited and discarded | Owner | P9.15-P9.19 (extraction eval, margin decision) cannot complete | Owner enabling billing (Paid Tier), then re-run the eval | No |
+| 2026-10-21 | B2 | Supabase DB password not recorded (C7); Supabase and Vercel team invites for M1/M2 not done (P0.16, P0.18, P0.20) | M3 | No direct DB/CLI access; teammates lack dashboard access | Reset/record password in the password manager; send invites | No |
 
 ## Sync log
 
