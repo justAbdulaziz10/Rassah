@@ -22,10 +22,21 @@ describe("evaluateRules", () => {
   it("M6 respects the minimum sample and flags simulated outages", () => {
     const few = [extraction({ status: "simulated_outage" }), extraction({ status: "simulated_outage" })];
     expect(rule(evaluateRules({ ...base, extractions: few }), "M6_gemini_failure_rate").breached).toBe(false);
-    const enough = [...Array(4).fill(0).map(() => extraction()), extraction({ status: "simulated_outage" })];
+    const enough = [...Array(4).fill(0).map(() => extraction()), extraction({ status: "simulated_outage", minutesAgo: 1 })];
     const ev = rule(evaluateRules({ ...base, extractions: enough }), "M6_gemini_failure_rate");
     expect(ev.breached).toBe(true);
     expect(ev.simulated).toBe(true);
+  });
+
+  it("M6 clears a simulated outage on the first successful call, but real failures must age out", () => {
+    const outage = Array.from({ length: 5 }, (_, i) => extraction({ status: "simulated_outage", minutesAgo: 10 + i }));
+    const older = Array.from({ length: 10 }, () => extraction({ minutesAgo: 30 }));
+    const recovered = [extraction({ minutesAgo: 1 }), ...outage, ...older];
+    expect(rule(evaluateRules({ ...base, extractions: recovered }), "M6_gemini_failure_rate").breached).toBe(false);
+
+    const real = Array.from({ length: 5 }, (_, i) => extraction({ status: "api_error", minutesAgo: 10 + i }));
+    const stillFailing = [extraction({ minutesAgo: 1 }), ...real, ...older];
+    expect(rule(evaluateRules({ ...base, extractions: stillFailing }), "M6_gemini_failure_rate").breached).toBe(true);
   });
 
   it("M1 fires when more than 20% of reviewed AI products were corrected", () => {
@@ -72,7 +83,7 @@ describe("syncAlerts", () => {
   it("posts to the webhook for real alerts but not for simulated ones", async () => {
     const repo = new MemoryRepo();
     const fetchFn = vi.fn(async () => new Response("ok"));
-    const simulated = [...Array(4).fill(0).map(() => extraction()), extraction({ status: "simulated_outage" })];
+    const simulated = [...Array(4).fill(0).map(() => extraction()), extraction({ status: "simulated_outage", minutesAgo: 1 })];
     await syncAlerts(repo, evaluateRules({ ...base, extractions: simulated }), { webhookUrl: "https://hook.example", fetchFn });
     expect(fetchFn).not.toHaveBeenCalled();
 

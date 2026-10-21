@@ -17,20 +17,20 @@
 
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
-| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 8 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 30 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 24 | 🟨 In progress |
-| 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 27 | 🟨 In progress |
+| 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 11 | 🟨 In progress |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 33 | 🟨 In progress |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 29 | 🟨 In progress |
+| 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 52 | 🟨 In progress |
-| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 33 | 🟨 In progress |
+| 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 44 | 🟨 In progress |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 34 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 42 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 44 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 46 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 21 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 38 | 🟨 In progress |
-| 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **395** | |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 29 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
+| 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 1 | ⬜ Not started |
+| **Total** | | | | **517** | **424** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -112,7 +112,7 @@ CI needs **no** secrets because tests never call external services.
 ### 0A. Decisions and confirmations
 - [x] **P0.1** (M3, →T1) Message the instructor: "Our product uses an LLM (Gemini) to extract product dimensions and handling flags from product-page text, and a search-based engine to pack items into the cheapest safe carton. Does this satisfy *AI-powered product*?" Done when: written reply received and pasted into `docs/decisions.md`. ✅ 20 Oct: **APIs are allowed. No fine-tuning needed.** Recorded in [decisions.md](decisions.md).
 - [x] **P0.2** (ALL) If P0.1 is negative, hold an emergency call within 1 hour and record the decision. ✅ Not needed (P0.1 positive).
-- [ ] **P0.3** (ALL) Re-confirm the stack decision: TypeScript on Vercel (team is stronger in Python). Record it in `docs/decisions.md`.
+- [x] **P0.3** (ALL) Re-confirm the stack decision: TypeScript on Vercel (team is stronger in Python). Record it in `docs/decisions.md`. — TypeScript on Vercel recorded in decisions.md
 - [ ] **P0.4** (ALL) Confirm lane ownership (M1/M2/M3) and review pairs from PLAN §10.
 - [ ] **P0.5** (ALL) Agree on sync times: Tue 23:00, Wed 09:00, Wed 13:00 ⛳, Wed 18:00, Wed 23:00, Thu 08:00.
 - [ ] **P0.6** (ALL) Create a team chat channel for blockers. Link it in the Blockers section below.
@@ -134,12 +134,12 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P0.16** (M3) Store the DB password in the password manager (C7). — NOT DONE: DB password not recorded (C7 open)
 - [ ] **P0.17** (M3) Copy the project URL and service-role key into the password manager (C8, C9). — partial: URL + service-role key are in local .env.local and Vercel env, not in a password manager
 - [ ] **P0.18** (M3) Invite M1 and M2 to the Supabase organization. — not done
-- [ ] **P0.19** (M3) Note the free-tier limits (DB size, inactivity pause) in `docs/decisions.md`.
+- [x] **P0.19** (M3) Note the free-tier limits (DB size, inactivity pause) in `docs/decisions.md`. — recorded in decisions.md (500 MB, pause after 1 week inactivity)
 
 ### 0E. Vercel
 - [ ] **P0.20** (M3, →T2) Create the Vercel account/team (C10) and invite M1, M2. — partial: team "abdulaziz's projects" exists; invites for M1/M2 not done
 - [x] **P0.21** (M3) Install the Vercel GitHub app with access to the `Rassah` repo (C11). — project `rassah` linked to justAbdulaziz10/Rassah, production branch main
-- [ ] **P0.22** (M3) Note the plan's function max-duration limit in `docs/decisions.md` (used in P6.1).
+- [x] **P0.22** (M3) Note the plan's function max-duration limit in `docs/decisions.md` (used in P6.1). — Hobby 300 s max; routes use maxDuration 60 (decisions.md)
 
 ### 0F. GitHub
 - [ ] **P0.23** (Repo owner) Give M1, M2, M3 write access to the repo (C1).
@@ -207,9 +207,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P1.30** (M3) Open a test PR. CI runs and passes.
 
 ### 1G. Vercel
-- [ ] **P1.31** (M3) Import the repo into Vercel. Framework detected as Next.js. Node version matches `.nvmrc`.
-- [ ] **P1.32** (M3) Add all env vars to Vercel **Preview** and **Production** (per the matrix).
-- [ ] **P1.33** (M3) Production deploy of the scaffold succeeds. URL recorded at the top of README.
+- [x] **P1.31** (M3) Import the repo into Vercel. Framework detected as Next.js. Node version matches `.nvmrc`. — project rassah linked to GitHub, Next.js, Node 24.x
+- [x] **P1.32** (M3) Add all env vars to Vercel **Preview** and **Production** (per the matrix). — production + preview env vars set (credentials register)
+- [x] **P1.33** (M3) Production deploy of the scaffold succeeds. URL recorded at the top of README. — https://rassah.vercel.app, URL in README
 - [ ] **P1.34** (M3) The test PR from P1.30 gets a Vercel **preview URL** comment.
 
 ### 1H. Branch protection and onboarding
@@ -230,10 +230,10 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P2.2** (M3) Check constraints present: sources, statuses, triggers, severities, employee actions, `qty` 1–12.
 - [x] **P2.3** (M3) Indexes on `extraction_events(created_at desc)` and `order_runs(created_at desc)`.
 - [x] **P2.4** (M3) Add index `extraction_events(run_id)` and `corrections(run_id)` for the run trace.
-- [ ] **P2.5** (M3) `gen_random_uuid()` available (the `pgcrypto` extension is enabled by default on Supabase. Verify).
+- [x] **P2.5** (M3) `gen_random_uuid()` available (the `pgcrypto` extension is enabled by default on Supabase. Verify). — verified on production: select gen_random_uuid() works
 - [x] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies.
-- [ ] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README. — partial: applied via Supabase MCP apply_migration; README note not written
-- [ ] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06.
+- [x] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README. — applied via Supabase MCP apply_migration; README "Database setup"
+- [x] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06. — no schema mismatches; stale docs fixed (stack/01, stack/04)
 
 ### 2B. Access layer
 - [x] **P2.9** (M3) `lib/db/server.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
@@ -250,7 +250,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 2C. Seed and reset
 - [x] **P2.20** (M3, →T5) `scripts/seed.ts`: upsert products (computing `source_hash`), cartons, orders, order_items from `data/*.json`.
-- [ ] **P2.21** (M3) Seed is idempotent: running it twice causes no duplicates and no errors.
+- [x] **P2.21** (M3) Seed is idempotent: running it twice causes no duplicates and no errors. — seed run twice: counts stay 30/5/20/51, product_facts untouched
 - [x] **P2.22** (M3) Seed **never** writes `product_facts` or ground truth.
 - [x] **P2.23** (M3) `scripts/reset-events.ts`: deletes rows from `extraction_events`, `order_runs`, `corrections`, `alerts` (not eval tables, not facts). Asks for `--yes`.
 - [x] **P2.24** (M3) `scripts/clear-facts.ts --product p-07` for demoing a cache miss (and `--all` with `--yes`).
@@ -258,7 +258,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 2D. Investigation queries
 - [x] **P2.26** (M3) `docs/queries.sql` with the investigation queries from stack/04 (failed extractions, most-corrected products, run trace).
-- [ ] **P2.27** (M3) Each query tested in the SQL editor.
+- [x] **P2.27** (M3) Each query tested in the SQL editor. — all queries in docs/queries.sql run on production; 0 validator rejections
 
 ### 2E. Verification
 - [x] **P2.28** (M3) `/api/health` reports `supabase: "ok"` locally and on the Vercel preview. — production health reports database ok
@@ -313,7 +313,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P3.29** (M2) Re-running the generator produces a byte-identical file.
 
 ### 3G. Verification
-- [ ] **P3.30** (M1) `scripts/validate-data.ts` passes. The seed (P2.25) succeeds with the final data.
+- [x] **P3.30** (M1) `scripts/validate-data.ts` passes. The seed (P2.25) succeeds with the final data. — validate-data passes; seed succeeds
 - [ ] **P3.31** (M1) Update the dashboard. **Gate G3 check.**
 
 ---
@@ -445,9 +445,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P5.34** (M1) Returns cache hit/miss counts for the order event.
 
 ### 5G. Tests (no network)
-- [ ] **P5.35** (M1) Record 6+ real Gemini responses (from AI Studio or a one-off script) into `tests/fixtures/gemini/`.
+- [x] **P5.35** (M1) Record 6+ real Gemini responses (from AI Studio or a one-off script) into `tests/fixtures/gemini/`. — 7 recorded responses in tests/fixtures/gemini/recorded.json
 - [x] **P5.36** (M1) Test: explicit-dims fixture parses correctly.
-- [ ] **P5.37** (M1) Test: inches/lb conversion, Arabic-Indic digits (fixture-based).
+- [x] **P5.37** (M1) Test: inches/lb conversion, Arabic-Indic digits (fixture-based). — tests/ai/recorded.test.ts (real inch/lb + Arabic-Indic fixtures)
 - [x] **P5.38** (M1) Test: malformed JSON → `parse_error` + unknown.
 - [x] **P5.39** (M1) Test: out-of-range values → unknown.
 - [x] **P5.40** (M1) Test: `page` + `low` → `inferred`.
@@ -456,7 +456,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P5.43** (M1) Test: simulated outage produces the right event and no network call.
 
 ### 5H. Real-model check and review
-- [ ] **P5.44** (M1) One-off local run over all 30 products (`trigger='admin'`): zero crashes, every attempt has an event.
+- [x] **P5.44** (M1) One-off local run over all 30 products (`trigger='admin'`): zero crashes, every attempt has an event. — done on production via admin extract: 30/30 ok, every attempt has an event
 - [ ] **P5.45** (M3) Review PR: M3 can explain the fallback chain, the sanity checks and why we validate with Zod.
 - [ ] **P5.46** (M1) Update the dashboard. **Gate G5 check.**
 
@@ -512,7 +512,7 @@ CI needs **no** secrets because tests never call external services.
 ### 6G. Checkpoint ⛳ (Wed 13:00)
 - [ ] **P6.32** (M3) Deploy to a Vercel preview.
 - [x] **P6.33** (M1) Call the pack API for **all 20 orders** on the preview. Statuses match expectations (incl. `needs_measurement` and `no_box`). — done on production instead of a preview (2026-10-21)
-- [ ] **P6.34** (M3) Rows appear in `order_runs` and `extraction_events` with correct `run_id` links.
+- [x] **P6.34** (M3) Rows appear in `order_runs` and `extraction_events` with correct `run_id` links. — verified: every extraction_event with run_id links to an order_run, 0 orphans
 - [x] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds). — uncached 1589 ms, cached 119–234 ms
 - [ ] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers.
 - [ ] **P6.37** (M3) Update the dashboard. **Gate G6 check.**
@@ -610,7 +610,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.15** (M3, →T16) Rule `M3_validator_rejection`: any in 24 h → critical.
 - [x] **P8.16** (M3) Rule `M6_gemini_failure_rate`: > 10% of the last 20 extraction events → critical.
 - [x] **P8.17** (M3) Rule `M1_correction_rate`: > 20% over the last 30 AI products → warning.
-- [ ] **P8.18** (M3) Rule `M5_latency_p95`: uncached > 8 s or cached > 2 s over the last 20 runs → warning. **Re-tune the thresholds with the real numbers from P6.35** and record them in `docs/decisions.md`.
+- [x] **P8.18** (M3) Rule `M5_latency_p95`: uncached > 8 s or cached > 2 s over the last 20 runs → warning. **Re-tune the thresholds with the real numbers from P6.35** and record them in `docs/decisions.md`. — kept 8 s / 2 s: measured uncached 1.6 s, cached 0.12–0.23 s
 - [x] **P8.19** (M3) Rule `M4_no_box_rate`: > 15% of the last 20 runs → warning.
 - [x] **P8.20** (M3) Rule `M2_unknown_share`: > 30% unknown units in 24 h → info.
 - [x] **P8.21** (M3) Min-sample guard per rule.
@@ -638,7 +638,7 @@ CI needs **no** secrets because tests never call external services.
 ### 8D. Fault injection demo
 - [x] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written.
 - [x] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
-- [ ] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo).
+- [x] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo). — production: order 1002 with simulateOutage and all facts cached → box_found L (374 ms)
 - [ ] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves.
 - [x] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
 
@@ -725,22 +725,22 @@ CI needs **no** secrets because tests never call external services.
 
 ### 10B. Abuse and cost protection on the public URL
 - [x] **P10.11** (M3) Simple per-IP rate limit on the pack route (in-DB counter or a small token bucket), or documented acceptance of the risk for a 2-day demo.
-- [ ] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert). — partial: free tier is 20 req/day/model; owner is enabling billing (Paid Tier)
+- [x] **P10.12** (M3) Gemini spend cap / quota check in Google AI Studio or Cloud console (free tier or a budget alert). — free tier only, no billing account linked, so spend is impossible; 500 RPD cap on flash-lite
 - [x] **P10.13** (M3) Extraction is only triggered for products in the seeded store (no arbitrary text input on the public URL).
 
 ### 10C. Production deployment
-- [ ] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README. — partial: production live at https://rassah.vercel.app and URL in README, but work is on `integration`, not yet merged to `main`
+- [x] **P10.14** (M3) `main` green. Production deployment succeeded. URL in README. — GitHub Actions CI green on every main push; production live
 - [x] **P10.15** (M3) Production env vars double-checked against the matrix. — checked 2026-10-21 against the matrix: Supabase, Gemini (model/prices/key), DEMO_MODE, ENGINE_VERSION, PROMPT_VERSION set for production + preview
 - [x] **P10.16** (M3) `/api/health` all green on production. — done 2026-10-21: status ok, database ok, gemini key present, engine-0.2
-- [ ] **P10.17** (M3) Supabase project not paused. Note the inactivity rule.
+- [x] **P10.17** (M3) Supabase project not paused. Note the inactivity rule. — project active; free projects pause after 1 week of inactivity (open it on demo morning, P12.6)
 - [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs.
 - [x] **P10.19** (M1, →T21) Pre-warm: extract all 30 products on production (`trigger='admin'`). Facts present for groups A and B. — done 2026-10-21: 30/30 extracted (15 page, 12 inferred, 3 unknown)
 - [x] **P10.20** (M3, →T22) Smoke test **all 20 orders** on the production URL. Statuses as expected. Record results in `docs/demo-script.md`. — done 2026-10-21: 17 box_found, 2 needs_measurement, 1 no_box; see demo-script.md
-- [ ] **P10.21** (M3) Check Vercel function logs for errors during the smoke test.
+- [x] **P10.21** (M3) Check Vercel function logs for errors during the smoke test. — Vercel runtime errors (24 h): none
 
 ### 10D. Resilience
 - [x] **P10.22** (M3) Rollback rehearsal: know how to *Promote to Production* the previous deployment. Steps in `docs/demo-script.md`. — steps in demo-script.md (Promote to Production)
-- [ ] **P10.23** (M3) Local fallback: `npm run dev` on the demo laptop against production Supabase works.
+- [x] **P10.23** (M3) Local fallback: `npm run dev` on the demo laptop against production Supabase works. — local next dev against production Supabase: health ok, order 1001 box_found
 - [ ] **P10.24** (M3) Recorded 60-second backup video of the full flow (order → result → 3D → dashboard → outage → resolve).
 - [x] **P10.25** (M3) Offline fallback if there is no internet: screenshots of every screen in `docs/report/screens/`. — docs/report/screens/ (7 screens, 2026-10-21)
 
@@ -748,11 +748,11 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.26** (M3) Cached order total time measured on production (target: well under 2 s). — cached 119–234 ms server-side (fra1)
 - [x] **P10.27** (M3) Uncached order total time measured on production. Within the function limit with margin. — uncached 1589 ms (Gemini 1205 ms), far below the function limit
 - [ ] **P10.28** (M2) 3D view loads in under ~2 s on the demo laptop.
-- [ ] **P10.29** (M3) Final M5 alert thresholds set from these numbers (P8.18).
+- [x] **P10.29** (M3) Final M5 alert thresholds set from these numbers (P8.18). — thresholds kept (see P8.18)
 
 ### 10F. Repository final state
-- [ ] **P10.30** (M3) README complete: description, live URL, screenshots, getting started, scripts, env vars, architecture link, limitations, team.
-- [ ] **P10.31** (M3) All docs links work (no 404s in the GitHub UI).
+- [x] **P10.30** (M3) README complete: description, live URL, screenshots, getting started, scripts, env vars, architecture link, limitations, team. — README complete (2026-10-21)
+- [x] **P10.31** (M3) All docs links work (no 404s in the GitHub UI). — all relative links/anchors checked, none broken
 - [x] **P10.32** (M3) No stray TODOs in critical paths (engine, validator, extractor, pack route).
 - [ ] **P10.33** (M3) Update the dashboard. **Gate G10 check.**
 
@@ -763,7 +763,7 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** ALL (M1 leads report, M2 leads deck, M3 leads diagrams) · **Target:** Wed night · **Gate:** G11
 
 ### 11A. Diagrams
-- [ ] **P11.1** (M3, →T24) Development flow diagram matches the actual workflow (branches, CI, previews, review, prod, monitoring loop). _CI steps corrected to match `.github/workflows/ci.yml` (incl. validate-data). Still open: confirm Vercel previews per PR and the review rule are what the team actually does._
+- [x] **P11.1** (M3, →T24) Development flow diagram matches the actual workflow (branches, CI, previews, review, prod, monitoring loop). — diagram updated to the real flow (agents → local CI gate → main → Actions → Vercel); PNG re-rendered
 - [x] **P11.2** (M3) Monitoring flow diagram matches the actual tables, events and alert rules.
 - [x] **P11.3** (M3) Architecture diagram matches the actual modules. _Added `lib/pipeline` and the eval scripts / `lib/eval`._
 - [x] **P11.4** (M3) All three exported as PNG (mermaid.live) into `docs/report/`. _Rendered with mermaid-cli: `diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`._
@@ -810,7 +810,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 11E. Supporting documents
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
-- [ ] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons).
+- [x] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons). — decisions.md complete (2026-10-21)
 - [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest).
 - [ ] **P11.42** (ALL) `docs/report/results.md` final.
 - [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
@@ -863,7 +863,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P12.20** (ALL) Repo is public (or shared with the judges) and `main` is the final version.
 - [ ] **P12.21** (ALL) Report PDF submitted / linked.
 - [ ] **P12.22** (ALL) Deck submitted / linked.
-- [ ] **P12.23** (ALL) Live URL + repo URL on the last slide and in the README.
+- [x] **P12.23** (ALL) Live URL + repo URL on the last slide and in the README. — live URL + repo URL on the last slide and in README
 
 ### 12E. During the presentation
 - [ ] **P12.24** (ALL) Pitch delivered under 3:00 with all 3 speaking.

@@ -74,10 +74,12 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
   const failures = recentEx.filter((e) => e.status !== "ok");
   const failRate = recentEx.length ? failures.length / recentEx.length : 0;
   const simulated = failures.length > 0 && failures.every((e) => e.status === "simulated_outage");
+  // A simulated outage ends as soon as Gemini answers again; real failures must age out of the window.
+  const simulatedRecovered = simulated && recentEx[0]?.status === "ok";
   out.push({
     rule: "M6_gemini_failure_rate",
     severity: "critical",
-    breached: recentEx.length >= t.m6MinSample && failRate > t.m6FailureRate,
+    breached: recentEx.length >= t.m6MinSample && failRate > t.m6FailureRate && !simulatedRecovered,
     value: failRate,
     threshold: t.m6FailureRate,
     sampleSize: recentEx.length,

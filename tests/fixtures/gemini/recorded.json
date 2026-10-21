@@ -1,0 +1,93 @@
+[
+  {
+    "productId": "p-02",
+    "name": "كتاب فن التفكير الهادئ",
+    "description": "كتاب في تطوير الذات، طبعة عربية جديدة بغلاف ورقي. المقاس: 21 x 14 x 2 سم | الوزن: 350 غ. عدد الصفحات 256.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"21 x 14 x 2 سم | الوزن: 350 غ\",\n  \"dimsSource\": \"page\",\n  \"lengthCm\": 14.0,\n  \"widthCm\": 2.0,\n  \"heightCm\": 21.0,\n  \"weightSource\": \"page\",\n  \"weightG\": 350.0,\n  \"fragile\": false,\n  \"liquid\": false,\n  \"sensitive\": false,\n  \"confidence\": \"high\"\n}",
+    "inputTokens": 518,
+    "outputTokens": 124,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-03",
+    "name": "مبخرة خزف مزخرفة",
+    "description": "مبخرة من الخزف المزخرف بنقوش نجدية تقليدية، تضيف لمسة فخامة لمجلسك. الطول ١٨ سم، العرض ١٢ سم، الارتفاع ٢٢ سم. الوزن ١٫٢ كجم شامل العلبة.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"الطول ١٨ سم، العرض ١٢ سم، الارتفاع ٢٢ سم. الوزن ١٫٢ كجم شامل العلبة.\",\n  \"dimsSource\": \"page\",\n  \"lengthCm\": 18.0,\n  \"widthCm\": 12.0,\n  \"heightCm\": 22.0,\n  \"weightSource\": \"page\",\n  \"weightG\": 1200.0,\n  \"fragile\": true,\n  \"liquid\": false,\n  \"sensitive\": false,\n  \"confidence\": \"high\"\n}",
+    "inputTokens": 531,
+    "outputTokens": 137,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-05",
+    "name": "شمعة معطرة في كوب زجاجي",
+    "description": "Scented soy candle in a thick glass tumbler, hand-poured. Box size: 4 x 4 x 5 in, weight 1.1 lb. رائحة العود والفانيلا، مدة الاشتعال ٤٠ ساعة.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"Box size: 4 x 4 x 5 in, weight 1.1 lb\",\n  \"dimsSource\": \"page\",\n  \"lengthCm\": 10.16,\n  \"widthCm\": 10.16,\n  \"heightCm\": 12.7,\n  \"weightSource\": \"page\",\n  \"weightG\": 498.96,\n  \"fragile\": true,\n  \"liquid\": false,\n  \"sensitive\": false,\n  \"confidence\": \"high\"\n}",
+    "inputTokens": 526,
+    "outputTokens": 129,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-07",
+    "name": "عسل سدر جبلي 500 جرام",
+    "description": "عسل سدر جبلي أصلي من جبال الجنوب، معبأ في برطمان زجاجي محكم الإغلاق. أبعاد العبوة ٩ × ٩ × ١٣ سم والوزن الإجمالي ٨٥٠ جرام.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"أبعاد العبوة ٩ × ٩ × ١٣ سم والوزن الإجمالي ٨٥٠ جرام معبأ في برطمان زجاجي\",\n  \"dimsSource\": \"page\",\n  \"lengthCm\": 9.0,\n  \"widthCm\": 9.0,\n  \"heightCm\": 13.0,\n  \"weightSource\": \"page\",\n  \"weightG\": 850.0,\n  \"fragile\": true,\n  \"liquid\": true,\n  \"sensitive\": false,\n  \"confidence\": \"high\"\n}",
+    "inputTokens": 527,
+    "outputTokens": 139,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-10",
+    "name": "زيت زيتون بكر ممتاز 1 لتر",
+    "description": "Extra virgin olive oil, cold pressed, in a dark glass bottle. Bottle box: 3.5 x 3.5 x 12 in, 3.3 lb. زيت زيتون من مزارع الجوف.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"3.5 x 3.5 x 12 in, 3.3 lb\",\n  \"dimsSource\": \"page\",\n  \"lengthCm\": 8.89,\n  \"widthCm\": 8.89,\n  \"heightCm\": 30.48,\n  \"weightSource\": \"page\",\n  \"weightG\": 1496.88,\n  \"fragile\": true,\n  \"liquid\": true,\n  \"sensitive\": false,\n  \"confidence\": \"high\"\n}",
+    "inputTokens": 521,
+    "outputTokens": 129,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-16",
+    "name": "عطر أو دو بارفان 50 مل",
+    "description": "عطر أو دو بارفان 50 مل بنفحات الورد الطائفي والمسك الأبيض، في زجاجة أنيقة داخل علبة كرتونية.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"inferred from 50 ml perfume bottle in a carton box\",\n  \"dimsSource\": \"inferred\",\n  \"lengthCm\": 8.0,\n  \"widthCm\": 6.0,\n  \"heightCm\": 12.0,\n  \"weightSource\": \"inferred\",\n  \"weightG\": 250.0,\n  \"fragile\": true,\n  \"liquid\": true,\n  \"sensitive\": false,\n  \"confidence\": \"medium\"\n}",
+    "inputTokens": 510,
+    "outputTokens": 120,
+    "thinkingTokens": 0,
+    "blocked": false
+  },
+  {
+    "productId": "p-29",
+    "name": "منتج مختار",
+    "description": "منتج أصلي بجودة عالية، شحن سريع لجميع مناطق المملكة.",
+    "model": "gemini-3.5-flash-lite",
+    "promptVersion": "v1",
+    "recordedAt": "2026-10-21",
+    "responseText": "{\n  \"evidence\": \"no dimensions or weight provided\",\n  \"dimsSource\": \"unknown\",\n  \"lengthCm\": null,\n  \"widthCm\": null,\n  \"heightCm\": null,\n  \"weightSource\": \"unknown\",\n  \"weightG\": null,\n  \"fragile\": true,\n  \"liquid\": false,\n  \"sensitive\": false,\n  \"confidence\": \"low\"\n}",
+    "inputTokens": 482,
+    "outputTokens": 95,
+    "thinkingTokens": 0,
+    "blocked": false
+  }
+]

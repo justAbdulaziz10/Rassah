@@ -27,7 +27,7 @@ export const db = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_S
 
 ## Schema: `supabase/migrations/0001_init.sql`
 
-> **The migration file is the source of truth.** The SQL below was the planning draft. The implemented file adds: a single-row `shipping_rates` table; `orders.demo` / `orders.expect`; `order_runs.strategy`, `unit_sources`, `attempts`; `alerts.simulated`; indexes on `run_id`; and `order_runs.id` supplied by the app (the request's `run_id`).
+> **The migration file is the source of truth.** The SQL below was the planning draft. The implemented file adds: a single-row `shipping_rates` table; `orders.demo` / `orders.expect`; `order_runs.strategy`, `unit_sources`, `ai_products` (product ids whose facts were AI-extracted at pack time, the M1 denominator), `attempts`; `alerts.simulated`; indexes on `run_id`; and `order_runs.id` supplied by the app (the request's `run_id`).
 >
 > Code: `lib/db/repo.ts` (interface), `lib/db/supabase.ts` (server-only adapter), `tests/fakes/memory-repo.ts` (in-memory fake for tests). Scripts: `scripts/seed.ts`, `scripts/reset-events.ts --yes`, `scripts/clear-facts.ts --product <id>`.
 

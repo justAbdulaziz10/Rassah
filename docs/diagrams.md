@@ -1,6 +1,6 @@
 # Rassah: Technical Diagrams
 
-The brief requires two diagrams: **Development Flow** and **Monitoring Flow**. Both must reflect the real implementation. If the implementation changes, update these diagrams in the same PR.
+The brief requires two diagrams: **Development Flow** and **Monitoring Flow**. Both must reflect the real implementation. If the implementation changes, update these diagrams in the same commit.
 
 The diagrams are written in Mermaid, which GitHub renders natively. PNG exports live in `docs/report/` (`diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`), rendered with `@mermaid-js/mermaid-cli` (mmdc). Re-export them whenever a block changes.
 
@@ -12,24 +12,20 @@ How a change goes from idea to production, and how problems found in production 
 
 ```mermaid
 flowchart LR
-    A[Task from PLAN.md] --> B[Create branch<br/>feat/... or fix/...]
-    B --> C[Code locally<br/>npm run dev]
-    C --> D[Local checks<br/>npm run check]
-    D -->|fail| C
-    D -->|pass| E[Push branch +<br/>open Pull Request]
-    E --> F[GitHub Actions CI<br/>lint · typecheck ·<br/>validate-data · vitest]
-    E --> G[Vercel Preview<br/>deployment per PR]
-    F -->|fail| C
-    G --> H[Teammate review<br/>+ test on preview URL]
-    H -->|changes requested| C
-    F -->|pass| I{Merge to main}
-    H -->|approved| I
-    I --> J[Vercel Production<br/>deployment]
-    J --> K[Smoke test<br/>seeded orders]
+    A[Task from PLAN.md /<br/>CHECKLIST.md] --> B[Agents work in<br/>separate git worktrees]
+    B --> C[Code + tests locally<br/>npm run dev / npm test]
+    C --> D[Merge worktrees<br/>into main locally]
+    D --> E[Local CI gate: agent-ship ci<br/>secret scan · floor guard · lint ·<br/>typecheck · tests · build]
+    E -->|fail| C
+    E -->|pass| F[Push to main]
+    F --> G[GitHub Actions CI<br/>lint · typecheck · validate-data ·<br/>vitest · build · eval:packing]
+    F --> H[Vercel Production<br/>deployment from main]
+    G -->|fail| C
+    H --> K[Smoke test<br/>seeded orders]
     K --> L[Monitoring dashboard<br/>+ alert rules]
     L -->|alert or bad metric| M[Investigate<br/>events by run_id]
     M --> N[Open issue / task]
-    N --> B
+    N --> A
 
     O[Evaluation scripts<br/>eval-extraction · eval-packing] --> P[(eval_runs<br/>in Supabase)]
     C -.prompt or engine change.-> O
@@ -37,9 +33,10 @@ flowchart LR
 ```
 
 **Explaining it in Q&A:**
-- No change reaches `main` without passing CI and a teammate's review on a live preview URL.
+- No change reaches `main` without passing the local gate (`agent-ship ci`: secret scan, floor guard that blocks new lint suppressions or skipped tests, lint, typecheck, tests, build). GitHub Actions then re-runs CI on the pushed commit, and Vercel deploys production from `main`.
+- We did not use per-PR branches, Vercel preview deployments or a PR review step: one integrator merged the worktrees locally and pushed to `main`.
 - Prompt and engine changes are re-scored with the evaluation scripts before merging, so we can show *before/after* numbers.
-- Production problems enter the same loop through the dashboard. They become issues, then branches.
+- Production problems enter the same loop through the dashboard. They become issues, then tasks.
 
 ---
 

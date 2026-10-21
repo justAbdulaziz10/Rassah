@@ -90,6 +90,9 @@ Other statuses:
 - `no_box`: no carton passes within the search budget. `carton` is null and `reason` is set.
 - `needs_measurement`: at least one product has unknown dimensions or weight. The response lists `productIds` to measure.
 - `error`: unexpected failure. Returns a `runId` so the event can be found.
+- `not_found`: the order id does not exist. It exists only in the API response (`PackResponse.status`); the run row is stored with `order_runs.status = 'error'` and `error_code = 'order_not_found'`, because the DB check constraint allows only `box_found | no_box | needs_measurement | error`.
+
+The example above is abridged. The full `PackResponse` also carries `orderId`, `reason`, `attempts`, `productsToMeasure`, `lines`, `cache` (`hits`/`misses`) and `errorMessage`. `cost.volumetricKg` / `chargeableKg` are derived and not stored; `order_runs` keeps `carton_cost_sar`, `shipping_sar`, `total_sar`.
 
 ### `POST /api/runs/{runId}/action`
 
