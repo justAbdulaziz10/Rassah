@@ -87,7 +87,7 @@ page value ──► inferred estimate ──► manual measurement by packer
 | Concern | Handling |
 |---|---|
 | Rate limits (free tier) | Max **2** concurrent Gemini calls per request. On HTTP 429 (`rate_limited`) or 500/502/503/504 (`api_error`), retry up to 2 times (3 attempts in total) after about 1 s, then 3 s, plus jitter. |
-| Timeouts | Abort an attempt after 20 s and record `status = "timeout"` (not retried). |
+| Timeouts | Abort an attempt after 20 s and record `status = "timeout"` (not retried). All calls in one request also share a 40 s budget: attempts are shortened to fit it, no retry starts after it, and a call that never started because it ran out is recorded as `timeout` with `error_code = "budget_exhausted"`. This keeps a pack inside the route's 60 s limit. |
 | Missing or rejected key | `status = "config_error"`, no retry. The health endpoint reports whether a key is present. |
 | Safety block / empty response | `status = "blocked"` or `"empty"`. Treated as `unknown`. |
 | Demo fault injection | If `DEMO_MODE=true` and the request asks for it (`?outage=1`), the extractor returns before calling Gemini with `status` and `error_code` `simulated_outage` (Stack 06). |

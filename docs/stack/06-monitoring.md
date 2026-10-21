@@ -37,7 +37,7 @@ Why these and not others: **request count** alone, **CPU**, or **"AI accuracy"**
 
 ## 3. Alert rules (`lib/monitoring/alerts.ts`)
 
-Rules use rolling "last N" windows over the last 7 days of events, independent of the dashboard's time filter. They are re-evaluated **after every pack**, **after every packer action** (`/api/runs/[runId]/action`) and **on every dashboard load** (Vercel Hobby cron is too infrequent for live monitoring, so evaluation is event-driven). A rule fires only when its minimum sample is met, and opens at most one unresolved alert per rule. The limits live in `THRESHOLDS`; the dashboard reads the same values.
+Rules use rolling "last N" windows over the last 7 days of events, independent of the dashboard's time filter. They are re-evaluated **after every pack**, **after every packer action** (`/api/runs/[runId]/action`; both run after the response is sent, via `after()`) and **on every dashboard load** (Vercel Hobby cron is too infrequent for live monitoring, so evaluation is event-driven). A rule fires only when its minimum sample is met, and opens at most one unresolved alert per rule. The limits live in `THRESHOLDS`; the dashboard reads the same values.
 
 | Rule | Condition (rolling window) | Min sample | Severity | Why this threshold |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ Alert delivery:
 
 ## 4. Dashboard (`/monitoring`)
 
-The page (nav label "الأداء") fetches `GET /api/monitoring/metrics?window=…` and refreshes every 15 s. Aggregation is server-side, so the browser never receives keys or full tables. Sections:
+The page (nav label "الأداء") fetches `GET /api/monitoring/metrics?window=…` and refreshes every 15 s while the tab is visible (a hidden tab catches up when shown again). Aggregation is server-side, so the browser never receives keys or full tables. Sections:
 
 - **Status list "الحالة":** open alerts, then one row per signal (Gemini reads M6, reading accuracy M1, speed M5, single-carton fit M4, validator M3, measurements M2) with the result in words, the limit and a verdict: "سليم", "فوق الحدّ" or "بيانات قليلة". Rows over the limit link to the page where the fix happens (for example `/catalog`).
 - **Number tiles:** M1, M6, M5 (cached and with a new product) and M7 (per order, per 1000 orders, total for the window), each with its sample size and limit.

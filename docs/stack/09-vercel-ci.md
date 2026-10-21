@@ -23,7 +23,7 @@
 ## Serverless constraints that shape the design
 
 - Functions are short-lived. **No in-memory cache across requests**, which is why the catalog cache lives in Supabase. (The per-IP rate limiter is in memory, so it is per instance; see the README limitations.)
-- Functions have a maximum duration that depends on the plan. Each pack request is kept short: cache, parallel extraction (limit 2), ≤ 12 units, engine budget 1.5 s. The pack and extract routes set `export const maxDuration = 60`.
+- Functions have a maximum duration that depends on the plan. Each pack request is kept short: cache, parallel extraction (limit 2) inside one 40 s budget, ≤ 12 units, engine budget 1.5 s, alert checks after the response. The pack and extract routes set `export const maxDuration = 60`.
 - Route handlers run on the default **Node.js runtime**. Under Cache Components, do not export `runtime` (Edge is deprecated anyway).
 - No writable persistent filesystem, so evaluation scripts run **locally** (or in CI manually), not on Vercel.
 
