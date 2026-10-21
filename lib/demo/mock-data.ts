@@ -12,13 +12,14 @@
 //   from that data (critical, warning and info).
 
 import type { Correction, ExtractionEvent, OrderRun, RunStatus } from "@/lib/db/types";
+import { prng } from "@/lib/engine/packer";
 import type { CartonAttempt, DataSource } from "@/lib/engine/types";
 
 export const MOCK_ORDER_TAG = "mock";
 export const MOCK_ID_PREFIX = "00d3e000-0000-4000-8000-";
 export const MOCK_ID_RANGE = { min: `${MOCK_ID_PREFIX}000000000000`, max: `${MOCK_ID_PREFIX}ffffffffffff` };
 
-export interface MockOrder {
+interface MockOrder {
   id: string;
   expect: string;
   lines: Array<{ productId: string; qty: number }>;
@@ -100,20 +101,8 @@ const FAILURES: Array<{ status: ExtractionEvent["status"]; code: string; message
   { status: "simulated_outage", code: "simulated", message: "simulated outage (demo fault injection)", ms: 150 },
 ];
 
-/** Small seeded generator (mulberry32), so the mock story is identical on every run. */
-function rng(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 export function buildMockData(nowMs: number, opts: { promptVersion: string; engineVersion: string; model?: string }): MockData {
-  const rand = rng(20261021);
+  const rand = prng(20261021); // seeded, so the mock story is identical on every run
   const between = (lo: number, hi: number) => lo + rand() * (hi - lo);
   const int = (lo: number, hi: number) => Math.round(between(lo, hi));
   let seq = 0;
