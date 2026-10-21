@@ -1,3 +1,4 @@
+import "server-only";
 // One field list → both the Zod validator and the Gemini response schema, so they can't drift apart.
 
 import { Type, type Schema } from "@google/genai";

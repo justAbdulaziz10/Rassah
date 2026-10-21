@@ -2,13 +2,16 @@ import { connection } from "next/server";
 import { getOrExtractFacts, serverExtractDeps } from "@/lib/ai";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, repoOrError } from "@/lib/http";
+import { extractLimiter, rateLimitOrNull } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
 /** Demo/admin control: force re-extraction of one product (never overwrites manual facts). */
-export async function POST(_request: Request, ctx: RouteContext<"/api/products/[id]/extract">) {
+export async function POST(request: Request, ctx: RouteContext<"/api/products/[id]/extract">) {
   await connection();
   if (!appEnv().DEMO_MODE) return jsonError(404, "Not available");
+  const limited = rateLimitOrNull(extractLimiter, request);
+  if (limited) return limited;
   const { id } = await ctx.params;
   if (!/^p-\d{2,4}$/.test(id)) return jsonError(400, "Invalid product id");
   const repo = repoOrError();

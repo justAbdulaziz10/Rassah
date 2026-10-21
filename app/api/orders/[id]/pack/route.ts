@@ -4,6 +4,7 @@ import { serverExtractDeps } from "@/lib/ai";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, readJson, repoOrError } from "@/lib/http";
 import { runPack } from "@/lib/pipeline/pack";
+import { packLimiter, rateLimitOrNull } from "@/lib/rate-limit";
 
 // Uncached orders call Gemini (bounded concurrency + per-call timeout). Keep within the Vercel plan limit.
 export const maxDuration = 60;
@@ -12,6 +13,8 @@ const BodySchema = z.object({ simulateOutage: z.boolean().optional() }).strict()
 
 export async function POST(request: Request, ctx: RouteContext<"/api/orders/[id]/pack">) {
   await connection();
+  const limited = rateLimitOrNull(packLimiter, request);
+  if (limited) return limited;
   const { id } = await ctx.params;
   if (!/^\d{1,10}$/.test(id)) return jsonError(400, "Order number must be digits only");
 

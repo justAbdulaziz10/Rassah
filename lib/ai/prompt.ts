@@ -1,3 +1,4 @@
+import "server-only";
 // Extraction prompt. Every change must bump PROMPT_VERSION (stamped into every event and eval run)
 // and be re-scored with `npm run eval:extraction` before merging.
 

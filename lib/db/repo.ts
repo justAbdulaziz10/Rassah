@@ -1,3 +1,4 @@
+import "server-only";
 // The data-access interface the app depends on. Two implementations:
 // - lib/db/supabase.ts (production)
 // - tests/fakes/memory-repo.ts (unit tests; no network)
