@@ -17,7 +17,7 @@ export const ENGINE_CONFIG = {
   minSupport: 0.7,
   /** Search time budget per order. */
   maxSearchMs: 1500,
-  /** Seeded random orderings tried per carton after the 7 fixed strategies fail. */
+  /** Seeded random orderings tried per carton after the 9 fixed strategies fail. */
   restarts: 40,
   /** Node limit per carton for the backtracking anchor search tried after the restarts. */
   anchorNodes: 10000,

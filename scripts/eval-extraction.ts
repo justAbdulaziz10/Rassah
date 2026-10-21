@@ -73,7 +73,7 @@ async function main() {
   console.log(`\nExtraction evaluation (${model}, prompt ${PROMPT_VERSION})`);
   console.table({ all: summary.all, tuning: summary.tuning, holdout: summary.holdout });
   console.log(`Wrote ${path.relative(process.cwd(), file)}`);
-  console.log("Safety-margin check: MARGIN_INFERRED should be ≥ the inferred dim MAPE above (rounded up).");
+  console.log("Safety-margin check: ENGINE_CONFIG.marginInferred should be ≥ the inferred dim MAPE above (rounded up).");
 
   if (hasSupabaseEnv()) {
     const db = scriptSupabase();
@@ -85,7 +85,6 @@ async function main() {
       "eval_results",
       await db.from("eval_results").insert(results.map((r) => ({ eval_run_id: run[0].id, case_id: r.caseId, passed: r.passed, details: r.details }))),
     );
-    // Also record the attempts as eval-tagged extraction events (excluded from live metrics).
     console.log(`Stored eval run ${run[0].id} in Supabase.`);
   }
 }

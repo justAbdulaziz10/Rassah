@@ -21,5 +21,5 @@ jobs:
       - run: npm test
       # Builds without secrets: pages read data at request time, and env is validated lazily.
       - run: npm run build
-      # Offline (no network, no secrets). Writes a JSON report into the throwaway CI checkout only.
+      # Offline (no network, no secrets). Read-only: prints the summary; the step fails only if the run crashes.
       - run: npm run eval:packing
