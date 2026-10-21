@@ -41,6 +41,7 @@ npm run dev                    # http://localhost:3000
 | `npm run seed` | Loads the mock store into Supabase (needs `.env.local`) |
 | `npm run gen-fixtures` | Regenerates the packing evaluation fixtures in `data/` |
 | `npm run eval:packing` | Packing evaluation (engine vs naive baseline, no network). `-- --write` saves the results JSON |
+| `npm run demo:morning` | Demo-morning readiness check against production: health, DB counts, 4 sample packs, open alerts. `-- --reset` first clears events (keeps eval runs and facts). `BASE_URL` overrides the target |
 | `npm run eval:extraction` | Extraction evaluation against ground truth (calls Gemini, costs tokens) |
 
 `GET /api/health` reports whether the Gemini key and the database are available. It never returns secret values.

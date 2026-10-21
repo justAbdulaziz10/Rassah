@@ -56,3 +56,10 @@ Timings (server `totalMs`): cached orders 119–234 ms after moving functions to
 
 ### Rollback (if a deploy breaks the demo)
 Vercel → project `rassah` → Deployments → pick the last good production deployment → ⋯ → **Promote to Production**. Or CLI: `vercel promote <deployment-url> --scope abdulazizs-projects-cb679bdc`.
+
+## Demo morning
+
+Run `npm run demo:morning` (needs `.env.local` with the Supabase service-role key). Add `-- --reset` to clear events first (keeps eval runs and product facts).
+It checks `/api/health`, the Supabase counts (30 products, 5 cartons, 20 orders, 27+ facts), packs orders 1001, 1002, 1003 and 1020 (expects `no_box`), and confirms 0 open alerts.
+Each step prints a check or cross with timing; exit code 1 on any failure. `BASE_URL` overrides the default `https://rassah.vercel.app`.
+It never clears facts or calls the admin extract endpoint. Packing writes a few `order_runs`, so run `--reset` last if you want a clean dashboard.

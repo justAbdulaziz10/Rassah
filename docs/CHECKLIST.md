@@ -741,7 +741,7 @@ CI needs **no** secrets because tests never call external services.
 ### 10D. Resilience
 - [x] **P10.22** (M3) Rollback rehearsal: know how to *Promote to Production* the previous deployment. Steps in `docs/demo-script.md`. — steps in demo-script.md (Promote to Production)
 - [x] **P10.23** (M3) Local fallback: `npm run dev` on the demo laptop against production Supabase works. — local next dev against production Supabase: health ok, order 1001 box_found
-- [ ] **P10.24** (M3) Recorded 60-second backup video of the full flow (order → result → 3D → dashboard → outage → resolve).
+- [x] **P10.24** (M3) Recorded 60-second backup video of the full flow (order → result → 3D → dashboard → outage → resolve). — docs/report/demo.mp4 (43 s, production)
 - [x] **P10.25** (M3) Offline fallback if there is no internet: screenshots of every screen in `docs/report/screens/`. — docs/report/screens/ (7 screens, 2026-10-21)
 
 ### 10E. Performance
