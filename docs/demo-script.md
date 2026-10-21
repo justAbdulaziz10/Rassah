@@ -63,3 +63,11 @@ Run `npm run demo:morning` (needs `.env.local` with the Supabase service-role ke
 It checks `/api/health`, the Supabase counts (30 products, 5 cartons, 20 orders, 27+ facts), packs orders 1001, 1002, 1003 and 1020 (expects `no_box`), and confirms 0 open alerts.
 Each step prints a check or cross with timing; exit code 1 on any failure. `BASE_URL` overrides the default `https://rassah.vercel.app`.
 It never clears facts or calls the admin extract endpoint. Packing writes a few `order_runs`, so run `--reset` last if you want a clean dashboard.
+
+## Offline fallback
+
+1. `cd` into the repo; `.env.local` needs no Supabase or Gemini key.
+2. `DATA_BACKEND=memory DEMO_MODE=true GEMINI_API_KEY= npm run build`
+3. `DATA_BACKEND=memory DEMO_MODE=true GEMINI_API_KEY= npx next start -H 127.0.0.1 -p 3000`
+4. Open `http://127.0.0.1:3000/orders`, pack **1001** and **1002** (facts are seeded from `data/ground_truth.json`, labelled "بيانات تجريبية"); `/api/health` shows `status: degraded, offline: true`.
+5. Stop with Ctrl+C; verified 2026-10-21 (result, 3D and `/monitoring` render; Gemini is never called).

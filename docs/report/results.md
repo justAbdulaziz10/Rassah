@@ -1,6 +1,6 @@
 # Evaluation & Monitoring Results
 
-> Filled from `eval/results/*.json` and the dashboard. Do not type numbers by hand that don't come from those sources.
+> **Status: FINAL, 2026-10-21.** Filled from `eval/results/*.json` (extraction `extraction-2026-10-21-v1.json`, packing `packing-2026-10-21-engine-0.2.json`) and the dashboard. Do not type numbers by hand that don't come from those sources. Checked against those files in the P11.42 consistency sweep.
 
 ## Extraction evaluation
 

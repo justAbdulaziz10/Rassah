@@ -1,6 +1,6 @@
 # Q&A flashcards
 
-> Short versions of `docs/qa.md` (≤ 3 lines each), grouped by lane. Numbers come from `docs/report/results.md`. Where `docs/qa.md` still carries older engine numbers (35/35 layouts, recall 15/20, 5/20 misses, 27/35 baseline failures, 200/200 property test, 107 tests), these cards use the current ones (40/40, 20/20, 0 misses, 20/28) and leave out what is not in `results.md`; fix `qa.md` before the drill. Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring.
+> Short versions of `docs/qa.md` (≤ 3 lines each), grouped by lane. Numbers come from `docs/report/results.md`. `docs/qa.md` was brought in line with these numbers in the P11.42 sweep (40/40 layouts, recall 20/20, baseline failing 20/28, 152 tests). Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring.
 
 ## Drill (P12.3)
 

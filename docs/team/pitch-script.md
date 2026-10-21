@@ -61,4 +61,4 @@ Run the checklist in `demo-script.md` ("Before going on stage"): `/api/health` s
 - `docs/report/demo.mp4` exists (about 43 s, production, full flow incl. outage); it is not the pitch's two-order run, so narrate from the script and practice the switch within 10 s (CHECKLIST P12.5).
 - The deck's speaker notes allot 50 s to the demo (slide 6) while `demo-script.md` says about 90 s for the full flow; this script follows the deck.
 - Slide 11 notes say to replace the URL with the Vercel production URL; the slide text already shows https://rassah.vercel.app, so just confirm it is the final production URL.
-- Deck slide 9 still lists "5 / 20 exact fills missed" (now 20 / 20 found, results.md). Say the current number; fix the deck before Thursday.
+- Deck slide 9 was fixed in the P11.42 sweep (now "finds 20 / 20 exact fills, but time-bounded", matching results.md).

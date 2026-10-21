@@ -17,7 +17,7 @@ Merchants who ship multi-item orders choose cartons by eye. Three things go wron
 2. **Fragile items break and liquids leak.** A new packer puts a book on a perfume bottle, or lays an oil bottle flat.
 3. **The data that would fix this doesn't exist.** Professional cartonization tools assume clean product dimensions in a warehouse system. Small Saudi merchants only have free-text product pages in Arabic and English.
 
-**Validation status:** merchant outreach: no replies recorded yet (`docs/discovery.md` does not exist yet). The problem size is a hypothesis we have not measured.
+**Validation status:** merchant outreach: no stores contacted and no replies recorded yet (log with empty rows: `docs/discovery.md`). The problem size is a hypothesis we have not measured.
 
 ## 2. Solution and user flow
 
@@ -73,7 +73,7 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 140 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 152 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
 *Figure 2. Development flow: branch → CI + Vercel preview → review → main → production → monitoring → issue.*
@@ -154,7 +154,7 @@ Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI fe
 
 ## 11. Limitations
 
-Synthetic data. Rigid box-shaped products only (no clothing). One carton per order. Illustrative costs. No live Salla/Zid integration. Time-bounded heuristic (not globally optimal; 5/20 exact-fill misses). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
+Synthetic data. Rigid box-shaped products only (no clothing). One carton per order. Illustrative costs. No live Salla/Zid integration. Time-bounded heuristic (not globally optimal, although all 20/20 exact-fill fixtures are found). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
 
 ## 12. Next steps
 
