@@ -50,7 +50,7 @@ export default function EvaluationPage() {
         <h1 className="text-2xl font-bold">التقييم</h1>
         <p className="mt-1 text-muted">
           قياس على بيانات ثابتة بإجابات معروفة، منفصل عن المراقبة الحية. <strong>البيانات اصطناعية</strong> كتبها الفريق بأسلوب صفحات المتاجر
-          السعودية، والإجابات الصحيحة كتبها عضو غير اللي كتب الأوصاف.
+          السعودية. الإجابات الصحيحة صاغها الذكاء الاصطناعي من الأوصاف، ومراجعتها المستقلة من عضو آخر في الفريق لم تكتمل بعد.
         </p>
       </header>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-border/50" />}>

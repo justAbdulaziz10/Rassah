@@ -1,0 +1,88 @@
+{
+ "_source": "POST /api/orders/1016/pack, engine output, DATA_BACKEND=memory, 2026-10-21",
+ "orderId": "1016",
+ "carton": {
+  "id": "L",
+  "name": "كبير L",
+  "innerCm": [
+   40,
+   30,
+   25
+  ]
+ },
+ "items": [
+  {
+   "unitId": "p-13#1",
+   "name": "علبة تمر خلاص فاخر 1 كجم",
+   "fragile": false,
+   "liquid": false,
+   "sensitive": false,
+   "estimated": false,
+   "placement": {
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "dx": 28,
+    "dy": 20,
+    "dz": 6
+   }
+  },
+  {
+   "unitId": "p-20#1",
+   "name": "قهوة مختصة إثيوبية 250 جرام",
+   "fragile": false,
+   "liquid": false,
+   "sensitive": false,
+   "estimated": true,
+   "placement": {
+    "x": 28,
+    "y": 0,
+    "z": 0,
+    "dx": 11.5,
+    "dy": 17.25,
+    "dz": 8.05
+   }
+  },
+  {
+   "unitId": "p-03#1",
+   "name": "مبخرة خزف مزخرفة",
+   "fragile": true,
+   "liquid": false,
+   "sensitive": false,
+   "estimated": false,
+   "placement": {
+    "x": 0,
+    "y": 0,
+    "z": 6,
+    "dx": 25,
+    "dy": 21,
+    "dz": 15
+   }
+  },
+  {
+   "unitId": "p-07#1",
+   "name": "عسل سدر جبلي 500 جرام",
+   "fragile": true,
+   "liquid": true,
+   "sensitive": false,
+   "estimated": false,
+   "placement": {
+    "x": 28,
+    "y": 17.25,
+    "z": 0,
+    "dx": 12,
+    "dy": 12,
+    "dz": 16
+   }
+  }
+ ],
+ "steps": [
+  "استخدم كرتون «كبير L» (40 × 30 × 25 سم من الداخل).",
+  "ضع «علبة تمر خلاص فاخر 1 كجم» في قاع الكرتون.",
+  "ضع «قهوة مختصة إثيوبية 250 جرام» في قاع الكرتون.",
+  "ضع «عسل سدر جبلي 500 جرام» في قاع الكرتون.",
+  "ضع «مبخرة خزف مزخرفة» فوق القطع اللي تحته.",
+  "املأ الفراغات بمواد حشو حتى لا تتحرك القطع، ثم أغلق الكرتون.",
+  "اكتب على الكرتون: «هذا الجانب للأعلى ↑»."
+ ]
+}

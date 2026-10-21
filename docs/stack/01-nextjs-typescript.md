@@ -26,13 +26,14 @@ npm i -D vitest @vitest/coverage-v8 tsx @types/three
 
 ```
 app/
-├── layout.tsx                 <html lang="ar" dir="rtl">, Arabic font via next/font, nav
-├── page.tsx                   redirects to /orders
-├── orders/page.tsx            order list + "enter order number" form
-├── orders/[id]/page.tsx       result: carton, instructions, products, 3D, Confirm/Edit
-├── catalog/page.tsx           product_facts table: source, confidence, flags, edit
-├── monitoring/page.tsx        dashboard (Stack 06)
-├── evaluation/page.tsx        latest eval runs (Stack 07)
+├── layout.tsx                 <html lang="ar" dir="rtl">, Arabic + Kufi display fonts via next/font
+├── page.tsx                   landing page (hero = real engine output for order 1016, lib/landing/hero-order.json)
+├── (console)/layout.tsx       nav header shared by the working screens (route group, not in the URL)
+├── (console)/orders/page.tsx            order list + "enter order number" form
+├── (console)/orders/[id]/page.tsx       result: carton, instructions, products, 3D, Confirm/Edit
+├── (console)/catalog/page.tsx           product_facts table: source, confidence, flags, edit
+├── (console)/monitoring/page.tsx        dashboard (Stack 06)
+├── (console)/evaluation/page.tsx        latest eval runs (Stack 07)
 └── api/
     ├── orders/[id]/pack/route.ts          POST: run the full pipeline
     ├── runs/[runId]/action/route.ts       POST: confirm | edit

@@ -82,6 +82,7 @@
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
   --font-sans: var(--font-arabic);
+  --font-display: var(--font-kufi);
 }
 
 body {
@@ -94,4 +95,27 @@ body {
   direction: ltr;
   unicode-bidi: isolate;
   font-variant-numeric: tabular-nums;
+}
+
+/* Landing page palette (app/page.tsx). Deep teal from the brand, kraft for the carton, tape yellow for the one primary action. */
+.landing {
+  --ink: #12211e;
+  --paper: #f3f6f4;
+  --deep: #0b3b36;
+  --deep-2: #0e4a43;
+  --kraft: #b98a55;
+  --tape: #f2c14e;
+  --on-deep: #e6efec;
+  --on-deep-muted: #a9c3bd;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

@@ -8,7 +8,7 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
   }, [error]);
 
   return (
-    <section className="py-16 text-center">
+    <section className="mx-auto max-w-6xl px-4 py-16 text-center">
       <h1 className="text-2xl font-bold">حدث خطأ غير متوقع</h1>
       <p className="mt-2 text-muted">جرّب مرة ثانية. إذا تكرر الخطأ، راجع صفحة المراقبة.</p>
       <button

@@ -67,6 +67,7 @@ if [ "$MODE" = local ]; then
   expect_status health GET /api/health 200
   # Memory backend is offline by design, so health reports "degraded" (offline_memory_backend); app/database must be ok.
   expect_json "health app ok, memory backend, database ok" health 'j.app==="ok"&&j.backend==="memory"&&j.database==="ok"&&["ok","degraded"].includes(j.status)'
+  expect_status landing GET / 200
   expect_status orders GET /orders 200
   expect_status order-1001 GET /orders/1001 200
   expect_status order-9999-unknown GET /orders/9999 404
@@ -81,6 +82,7 @@ else
   echo "== production read-only smoke against $BASE (GET only, no packs)"
   expect_status health GET /api/health 200
   expect_json "health status ok" health 'j.status==="ok"'
+  expect_status landing GET / 200
   expect_status orders GET /orders 200
   expect_status order-1001 GET /orders/1001 200
   expect_status order-9999-unknown GET /orders/9999 404

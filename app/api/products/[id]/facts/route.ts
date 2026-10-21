@@ -3,6 +3,7 @@ import { z } from "zod";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, readJson, repoOrError } from "@/lib/http";
 import { FactChangesSchema, FactsError, updateProductFacts } from "@/lib/pipeline/facts";
+import { extractLimiter, rateLimitOrNull } from "@/lib/rate-limit";
 
 const PRODUCT_ID = /^p-\d{2,4}$/;
 const BodySchema = z.object({ changes: FactChangesSchema, runId: z.uuid().nullable().optional() }).strict();
@@ -27,10 +28,13 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/products/[
   }
 }
 
-/** Demo control: clear a product's cached facts so the next order re-extracts it. */
-export async function DELETE(_request: Request, ctx: RouteContext<"/api/products/[id]/facts">) {
+/** Demo control: clear a product's cached facts so the next order re-extracts it.
+ * Shares the extract limiter: every clear leads to a Gemini call on the next order. */
+export async function DELETE(request: Request, ctx: RouteContext<"/api/products/[id]/facts">) {
   await connection();
   if (!appEnv().DEMO_MODE) return jsonError(404, "Not available");
+  const limited = rateLimitOrNull(extractLimiter, request);
+  if (limited) return limited;
   const { id } = await ctx.params;
   if (!PRODUCT_ID.test(id)) return jsonError(400, "Invalid product id");
   const repo = repoOrError();
