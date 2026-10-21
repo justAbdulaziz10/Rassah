@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { THRESHOLDS } from "@/lib/monitoring/alerts";
 import { loadDashboard, reviewSeries } from "@/lib/monitoring/dashboard";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 import { NOW, run } from "./fixtures";
 
 describe("loadDashboard", () => {

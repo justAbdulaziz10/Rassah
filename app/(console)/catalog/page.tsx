@@ -48,7 +48,6 @@ async function Catalog() {
             fragile: f.fragile,
             liquid: f.liquid,
             sensitive: f.sensitive,
-            confidence: f.confidence,
             evidence: f.evidence,
             origin: f.origin,
             extractedAt: f.extractedAt,

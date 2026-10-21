@@ -94,9 +94,3 @@ export function countQueue(entries: QueueEntry[]): QueueCounts {
   c.remaining = c.total - c.done;
   return c;
 }
-
-/** The next order the employee should open after finishing `currentId`, or null when nothing is left. */
-export function nextOrder(entries: QueueEntry[], currentId: string): string | null {
-  const next = sortQueue(entries).find((e) => e.state !== "done" && e.order.id !== currentId);
-  return next?.order.id ?? null;
-}

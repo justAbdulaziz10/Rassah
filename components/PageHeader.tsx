@@ -46,7 +46,7 @@ export function Notice({ tone, children }: { tone: "warn" | "critical" | "info";
 }
 
 /** Loading placeholder with the same radius and border as the cards it stands in for. */
-function CardSkeleton({ className = "h-96" }: { className?: string }) {
+function CardSkeleton({ className }: { className: string }) {
   return <div className={`animate-pulse rounded-xl border border-border bg-surface ${className}`} aria-hidden />;
 }
 
@@ -86,13 +86,13 @@ export function QueueSkeleton() {
 }
 
 /** Skeleton for row lists (notifications). */
-export function ListSkeleton({ rows = 4 }: { rows?: number }) {
+export function ListSkeleton() {
   return (
     <div className="animate-pulse space-y-6" role="status" aria-label="جارٍ التحميل">
       <div>
         <Bar className="h-5 w-40" />
         <div className="mt-3 space-y-2">
-          {Array.from({ length: rows }, (_, i) => (
+          {Array.from({ length: 4 }, (_, i) => (
             <div key={i} className="panel flex items-center gap-4 px-4 py-4">
               <Bar className="h-5 w-16" />
               <Bar className="h-4 flex-1" />

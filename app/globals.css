@@ -17,7 +17,6 @@
   --liquid-soft: #dbeafe;
   --sensitive: #7c3aed;
   --sensitive-soft: #ede9fe;
-  --neutral-item: #5f8f8a;
 
   --ok: #15803d;
   --ok-soft: #dcfce7;
@@ -181,7 +180,7 @@ body {
   border-radius: 8px;
 }
 
-/* Landing page palette (app/page.tsx). Deep teal from the brand, kraft for the carton, tape yellow for the one primary action. */
+/* Landing page palette (app/page.tsx). Deep teal from the brand, tape yellow for the one primary action. */
 .landing {
   --ink: #12211e;
   --ink-2: #3d4e4a;
@@ -191,13 +190,10 @@ body {
   --rule: color-mix(in oklab, var(--ink) 14%, transparent);
   --deep: #0b3b36;
   --deep-2: #0e4a43;
-  --kraft: #b98a55;
   --tape: #f2c14e;
   --on-deep: #e6efec;
   --on-deep-muted: #a9c3bd;
-  --ok-ink: #166534;
   --bad-ink: #9f1d1d;
-  --warn-ink: #8a4b06;
   background: var(--paper);
   color: var(--ink);
 }
@@ -211,9 +207,7 @@ body {
     --panel: #121b1a;
     --deep: #0b3b36;
     --deep-2: #0e4a43;
-    --ok-ink: #4ade80;
     --bad-ink: #f87171;
-    --warn-ink: #fbbf24;
   }
 }
 

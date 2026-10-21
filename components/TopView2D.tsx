@@ -14,13 +14,12 @@ interface Props {
   }>;
   /** "deep" sits on the landing page's dark teal; "light" on the console surface. */
   tone?: "light" | "deep";
-  className?: string;
 }
 
 const INSET = 0.15;
 
 /** Top-down view of the carton, drawn when the browser can't run the 3D view. */
-export default function TopView2D({ inner, items, tone = "light", className }: Props) {
+export default function TopView2D({ inner, items, tone = "light" }: Props) {
   const [L, W] = inner;
   const pad = Math.max(L, W) * 0.06;
   const deep = tone === "deep";
@@ -33,7 +32,6 @@ export default function TopView2D({ inner, items, tone = "light", className }: P
       preserveAspectRatio="xMidYMid meet"
       width="100%"
       height="100%"
-      className={className}
     >
       <rect
         x={0}

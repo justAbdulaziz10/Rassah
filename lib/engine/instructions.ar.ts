@@ -12,7 +12,6 @@ export const AR = {
     `استخدم كرتون «${name}»، أبعاده من الداخل ${ltr(inner.map(fmt).join(" × "))} سم (الطول × العرض × الارتفاع).`,
   placeBottom: (name: string) => `ضع «${name}» في قاع الكرتون.`,
   placeOnTop: (name: string) => `ضع «${name}» فوق القطع التي وُضعت قبله.`,
-  placeNext: (name: string) => `ضع «${name}» بجانب القطع التي وُضعت قبله.`,
   fragile: (paddingCm: number) =>
     `قابل للكسر: لُفّه بغلاف فقاعي لا تقل سماكته عن ${ltr(fmt(paddingCm))} سم، ولا تضع فوقه أي شيء.`,
   liquid: "سائل: أبقِه واقفاً ولا تقلبه على جنبه، ويكون غطاؤه إلى الأعلى.",

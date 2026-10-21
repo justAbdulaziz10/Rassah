@@ -21,7 +21,7 @@ import { baselinePack } from "../lib/engine/baseline";
 import { ENGINE_CONFIG, ENGINE_VERSION } from "../lib/engine/config";
 import { estimateCost } from "../lib/engine/cost";
 import { volume } from "../lib/engine/geometry";
-import { packUnits } from "../lib/engine/packer";
+import { packUnits, prng } from "../lib/engine/packer";
 import { prepareUnits } from "../lib/engine/prepare";
 import { splitPack } from "../lib/engine/split";
 import type { Carton, OrderLine, ProductFacts, Unit, ViolationCode } from "../lib/engine/types";
@@ -51,17 +51,6 @@ interface Case {
   cartons: Carton[];
   /** Fixture cases built so that no single carton can hold them. */
   impossible: boolean;
-}
-
-function rng(seed: number) {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
 }
 
 /** True sizes for every product (as if measured), so every engine packs the same real items. */
@@ -123,7 +112,7 @@ function buildCases(): Case[] {
     if (units) cases.push({ id: `order-${o.id}`, set: "orders", impossible: false, cartons: CARTONS, units });
   }
 
-  const rand = rng(SEED);
+  const rand = prng(SEED);
   const ids = [...facts.keys()];
   while (cases.filter((c) => c.set === "random").length < RANDOM_N) {
     const lines = new Map<string, number>();

@@ -22,7 +22,6 @@ export interface CatalogRow {
     fragile: boolean;
     liquid: boolean;
     sensitive: boolean;
-    confidence: string | null;
     evidence: string | null;
     origin: string;
     extractedAt: string | null;

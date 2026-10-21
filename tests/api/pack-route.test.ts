@@ -2,7 +2,7 @@
 // and the per-IP rate limit (P10.11). Real pipeline + real serverExtractDeps; only the request
 // scope (`connection`) and the repo lookup are stubbed.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
 

@@ -9,8 +9,6 @@ import { BagIcon, BellIcon, CrossIcon } from "./Icons";
 interface QueueSummary {
   counts: { new: number; ready: number; attention: number; done: number; remaining: number; total: number };
   alertsOpen: number;
-  newOrderIds: string[];
-  attentionOrderIds: string[];
   remainingOrderIds: string[];
 }
 

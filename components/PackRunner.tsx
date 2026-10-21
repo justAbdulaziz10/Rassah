@@ -354,7 +354,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
                         <SourceBadge source={l.dimsSource} />
                       </td>
                       <td>
-                        {f && d.status === "box_found" && (
+                        {f && (
                           <button onClick={() => setEditing(editing === l.productId ? null : l.productId)} className="text-xs text-brand underline">
                             تصحيح
                           </button>

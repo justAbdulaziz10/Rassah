@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { OrderRun, OrderSummary, StoredFacts } from "@/lib/db/types";
-import { buildQueue, countQueue, needsMeasuring, nextOrder, sortQueue } from "@/lib/orders/queue";
+import { buildQueue, countQueue, needsMeasuring, sortQueue } from "@/lib/orders/queue";
 
 function order(id: string, productIds: string[] = ["p-01"]): OrderSummary {
   return { id, demo: null, expect: null, customerName: null, createdAt: null, lineCount: productIds.length, unitCount: productIds.length, productIds };
@@ -131,8 +131,6 @@ describe("order queue", () => {
     );
     expect(sortQueue(entries).map((e) => e.order.id)).toEqual(["1010", "1003", "1002", "1001"]);
     expect(countQueue(entries)).toEqual({ new: 1, ready: 1, attention: 1, done: 1, remaining: 3, total: 4 });
-    expect(nextOrder(entries, "1010")).toBe("1003");
-    expect(nextOrder(entries.filter((e) => e.state === "done"), "1001")).toBeNull();
   });
 });
 

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { getOrExtractFacts, mapLimit } from "@/lib/ai/catalog";
 import type { ExtractDeps, GenerateFn } from "@/lib/ai/extractor";
 import type { StoredFacts } from "@/lib/db/types";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 import { RESPONSES } from "../fixtures/gemini/responses";
 
 function setup() {

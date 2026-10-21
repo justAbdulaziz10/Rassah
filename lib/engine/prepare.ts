@@ -1,17 +1,13 @@
 // Turns product facts + order lines into placeable units.
 
 import type { EngineConfig } from "./config";
-import { sortDesc } from "./geometry";
+import { round2, sortDesc } from "./geometry";
 import type { OrderLine, ProductFacts, Unit } from "./types";
 
 export type PrepareResult =
   | { ok: true; units: Unit[] }
   | { ok: false; kind: "needs_measurement"; productIds: string[] }
   | { ok: false; kind: "invalid_input"; message: string };
-
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
 
 export function prepareUnits(
   lines: OrderLine[],

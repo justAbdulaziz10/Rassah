@@ -1,7 +1,7 @@
 // Built-in store checkout: the order lands in Rassah's orders table (numbered from 5001) with the
 // customer's name, appears in the packer's queue, and the customer name is required.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
 

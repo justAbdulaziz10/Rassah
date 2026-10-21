@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { evaluateRules, syncAlerts, THRESHOLDS } from "@/lib/monitoring/alerts";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 import { correction, extraction, NOW, run } from "./fixtures";
 
 const rule = (evals: ReturnType<typeof evaluateRules>, name: string) => evals.find((e) => e.rule === name)!;

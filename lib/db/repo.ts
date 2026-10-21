@@ -1,7 +1,7 @@
 import "server-only";
 // The data-access interface the app depends on. Two implementations:
 // - lib/db/supabase.ts (production)
-// - tests/fakes/memory-repo.ts (unit tests; no network)
+// - lib/db/memory.ts (unit tests and DATA_BACKEND=memory; no network)
 
 import type { Carton, ShippingRates } from "@/lib/engine/types";
 import type {

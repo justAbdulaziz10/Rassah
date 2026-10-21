@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ExtractDeps, GenerateFn } from "@/lib/ai/extractor";
 import { applyRunAction, updateProductFacts } from "@/lib/pipeline/facts";
 import { runPack } from "@/lib/pipeline/pack";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 import { RESPONSES } from "../fixtures/gemini/responses";
 
 const CARTONS = [

@@ -1,7 +1,7 @@
 // Route-level test for DELETE /api/products/[id]/facts (demo control): it is public while DEMO_MODE
 // is on, so it shares the extract limiter (each clear causes a Gemini call on the next order).
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRepo } from "../fakes/memory-repo";
+import { MemoryRepo } from "@/lib/db/memory";
 
 vi.mock("next/server", () => ({ connection: async () => {} }));
 
