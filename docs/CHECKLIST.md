@@ -144,7 +144,7 @@ CI needs **no** secrets because tests never call external services.
 ### 0F. GitHub
 - [ ] **P0.23** (Repo owner) Give M1, M2, M3 write access to the repo (C1).
 - [ ] **P0.24** (ALL) Each member clones the repo and can push a test branch.
-- [ ] **P0.25** (M3) Create GitHub labels: `lane:ai`, `lane:engine`, `lane:platform`, `blocker`, `cut-list`.
+- [x] **P0.25** (M3) Create GitHub labels: `lane:ai`, `lane:engine`, `lane:platform`, `blocker`, `cut-list`. — all 5 labels exist on GitHub
 
 ### 0G. Local machines (each member)
 - [ ] **P0.26** (M1) Node.js LTS + npm installed (`node -v` recorded), Git configured, editor ready.
@@ -210,13 +210,13 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P1.31** (M3) Import the repo into Vercel. Framework detected as Next.js. Node version matches `.nvmrc`. — project rassah linked to GitHub, Next.js, Node 24.x
 - [x] **P1.32** (M3) Add all env vars to Vercel **Preview** and **Production** (per the matrix). — production + preview env vars set (credentials register)
 - [x] **P1.33** (M3) Production deploy of the scaffold succeeds. URL recorded at the top of README. — https://rassah.vercel.app, URL in README
-- [ ] **P1.34** (M3) The test PR from P1.30 gets a Vercel **preview URL** comment.
+- [x] **P1.34** (M3) The test PR from P1.30 gets a Vercel **preview URL** comment. — PR #1 got the Vercel preview comment (rassah-git-chore-pr-template-….vercel.app)
 
 ### 1H. Branch protection and onboarding
 - [ ] **P1.35** (M3) Enable branch protection on `main`: require `CI / check` + 1 approving review, no direct pushes.
 - [ ] **P1.36** (M1) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
 - [ ] **P1.37** (M2) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
-- [ ] **P1.38** (M3) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works.
+- [x] **P1.38** (M3) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — fresh clone 2026-10-21: npm ci → check 152/152 → dev /orders 200
 - [ ] **P1.39** (M3) Update the progress dashboard. **Gate G1 check.**
 
 ---
@@ -510,7 +510,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P6.31** (M3) Action route: confirm and edit write the correct rows.
 
 ### 6G. Checkpoint ⛳ (Wed 13:00)
-- [ ] **P6.32** (M3) Deploy to a Vercel preview.
+- [x] **P6.32** (M3) Deploy to a Vercel preview. — PR #1 preview deployment completed (Vercel check pass; protected, 302 to login)
 - [x] **P6.33** (M1) Call the pack API for **all 20 orders** on the preview. Statuses match expectations (incl. `needs_measurement` and `no_box`). — done on production instead of a preview (2026-10-21)
 - [x] **P6.34** (M3) Rows appear in `order_runs` and `extraction_events` with correct `run_id` links. — verified: every extraction_event with run_id links to an order_run, 0 orphans
 - [x] **P6.35** (M3) Uncached order total time recorded (input for the M5 thresholds). — uncached 1589 ms, cached 119–234 ms

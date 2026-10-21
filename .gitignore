@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Agent worktrees (separate checkouts)
 .claude/worktrees/
+
+# verification evidence
+/artifacts/
