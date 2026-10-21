@@ -4,6 +4,7 @@ import "server-only";
 
 import type { Repo } from "@/lib/db/repo";
 import type { Alert, Correction, ExtractionEvent, OrderRun, Severity } from "@/lib/db/types";
+import { fmtCount, fmtMs } from "@/lib/ui/format";
 import { percentile } from "./metrics";
 
 export interface RuleEvaluation {
@@ -65,7 +66,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: 0,
     sampleSize: lastDay.length,
     minSample: 1,
-    message: `المحرك أنتج ${rejections} ترتيب رفضه الـ Validator خلال 24 ساعة (يجب أن يكون صفراً)`,
+    message: `رفض المدقّق ${fmtCount(rejections, { one: "ترتيباً واحداً", two: "ترتيبين", few: "ترتيبات", many: "ترتيباً" })} اقترحتها رصّة خلال آخر 24 ساعة، والمفترض ألا يُرفض أي ترتيب. أبلغ الفريق التقني.`,
     simulated: false,
   });
 
@@ -84,7 +85,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: t.m6FailureRate,
     sampleSize: recentEx.length,
     minSample: t.m6MinSample,
-    message: `فشل ${pct(failRate)} من آخر ${recentEx.length} طلب لـ Gemini${simulated ? " (عطل تجريبي)" : ""}`,
+    message: `فشلت ${pct(failRate)} من آخر ${fmtCount(recentEx.length, { one: "محاولة قراءة واحدة", two: "محاولتي قراءة", few: "محاولات قراءة", many: "محاولة قراءة" })} لبيانات المنتجات${simulated ? " (عطل تجريبي)" : ""}. قد تحتاج المنتجات الجديدة إلى قياس يدوي.`,
     simulated,
   });
 
@@ -106,7 +107,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: t.m1CorrectionRate,
     sampleSize: reviewedSet.size,
     minSample: t.m1MinSample,
-    message: `الموظفون صححوا ${pct(corrRate)} من منتجات الـ AI المراجَعة: راجع الـ prompt بالتقييم`,
+    message: `صحّح الموظفون بيانات ${pct(corrRate)} من المنتجات التي قرأتها رصّة وراجعوها. قد تحتاج القراءة إلى تحسين، فأبلغ الفريق التقني.`,
     simulated: false,
   });
 
@@ -126,7 +127,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: slowCached ? t.m5CachedP95Ms : t.m5UncachedP95Ms,
     sampleSize: recentRuns.length,
     minSample: t.m5MinSample,
-    message: `زمن التجهيز p95: مع الكاش ${cachedP95 ?? "-"} ms، بدون كاش ${uncachedP95 ?? "-"} ms`,
+    message: `تجهيز الطلب أبطأ من المعتاد. 95% من الطلبات ذات المنتجات المعروفة تنتهي خلال ${fmtMs(cachedP95)}، وذات المنتجات الجديدة خلال ${fmtMs(uncachedP95)}.`,
     simulated: false,
   });
 
@@ -141,7 +142,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: t.m4NoBoxRate,
     sampleSize: packedRuns.length,
     minSample: t.m4MinSample,
-    message: `${pct(noBoxRate)} من الطلبات ما لقت كرتون مناسب: راجع قائمة الكراتين أو هامش الأمان`,
+    message: `${pct(noBoxRate)} من الطلبات الأخيرة لم يُوجد لها كرتون مناسب. راجع قائمة الكراتين المتوفرة أو هامش الأمان.`,
     simulated: false,
   });
 
@@ -161,7 +162,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
     threshold: t.m2UnknownShare,
     sampleSize: units,
     minSample: t.m2MinUnits,
-    message: `${pct(unknownShare)} من القطع بدون أبعاد معروفة: صفحات المتجر ناقصة البيانات`,
+    message: `${pct(unknownShare)} من القطع بلا مقاسات معروفة. صفحات المنتجات في المتجر تنقصها المقاسات.`,
     simulated: false,
   });
 

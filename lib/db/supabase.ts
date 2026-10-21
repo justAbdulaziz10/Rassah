@@ -248,15 +248,16 @@ export class SupabaseRepo implements Repo {
   }
 
   async listOrders(): Promise<OrderSummary[]> {
-    const rows = check("listOrders", await this.db.from("orders").select("id, demo, expect, order_items(qty)").order("id")) as Row[];
+    const rows = check("listOrders", await this.db.from("orders").select("id, demo, expect, order_items(product_id, qty)").order("id")) as Row[];
     return rows.map((r) => {
-      const items = (r.order_items as Array<{ qty: number }>) ?? [];
+      const items = (r.order_items as Array<{ product_id: string; qty: number }>) ?? [];
       return {
         id: r.id as string,
         demo: (r.demo as string) ?? null,
         expect: (r.expect as string) ?? null,
         lineCount: items.length,
         unitCount: items.reduce((s, i) => s + i.qty, 0),
+        productIds: [...new Set(items.map((i) => i.product_id))],
       };
     });
   }

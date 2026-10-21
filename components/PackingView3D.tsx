@@ -30,7 +30,7 @@ export default function PackingView3D({ inner, items }: Props) {
   return (
     <div className="rounded-lg border border-border bg-surface">
       <div className="h-80 w-full sm:h-96" dir="ltr">
-        <Canvas camera={{ position: [maxSide * 1.1, maxSide * 0.95, maxSide * 1.25], fov: 45 }}>
+        <Canvas camera={{ position: [maxSide * 1.25, size[1] / 2 + maxSide * 1.05, maxSide * 1.4], fov: 45 }}>
           <ambientLight intensity={0.7} />
           <directionalLight position={[maxSide, maxSide * 2, maxSide]} intensity={0.8} />
           {/* Carton: wireframe edges only, so items stay visible. */}
@@ -70,7 +70,8 @@ export default function PackingView3D({ inner, items }: Props) {
               </mesh>
             );
           })}
-          <OrbitControls makeDefault enablePan={false} />
+          {/* Aim at the carton's centre, not its floor, so tall cartons stay in frame. */}
+          <OrbitControls makeDefault enablePan={false} target={[0, size[1] / 2, 0]} />
         </Canvas>
       </div>
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 text-sm">
@@ -95,7 +96,7 @@ export default function PackingView3D({ inner, items }: Props) {
           <Legend color={KIND_COLOR.liquid} label="سائل" />
           <Legend color={KIND_COLOR.sensitive} label="حساس" />
           <Legend color={KIND_COLOR.plain} label="عادي" />
-          <span>الشفاف = مقاس تقديري</span>
+          <span>الشفاف: مقاس تقديري</span>
         </span>
       </div>
     </div>

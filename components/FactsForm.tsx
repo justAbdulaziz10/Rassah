@@ -24,7 +24,7 @@ interface Props {
 const NUM_FIELDS: Array<{ key: "lengthCm" | "widthCm" | "heightCm" | "weightG"; label: string; max: number }> = [
   { key: "lengthCm", label: "الطول (سم)", max: 150 },
   { key: "widthCm", label: "العرض (سم)", max: 150 },
-  { key: "heightCm", label: "الارتفاع وهو واقف (سم)", max: 150 },
+  { key: "heightCm", label: "الارتفاع في وضع الوقوف (سم)", max: 150 },
   { key: "weightG", label: "الوزن (جم)", max: 30000 },
 ];
 
@@ -40,7 +40,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
     for (const f of NUM_FIELDS) {
       const v = values[f.key];
       if (mode === "measure" && (v === null || !(v > 0))) {
-        setError("أدخل الطول والعرض والارتفاع والوزن كلها");
+        setError("أدخل الطول والعرض والارتفاع والوزن جميعاً");
         return;
       }
       if (v !== initial[f.key] && v !== null) changes[f.key] = v;
@@ -49,7 +49,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
       if (values[k] !== initial[k] || mode === "measure") changes[k] = values[k];
     }
     if (Object.keys(changes).length === 0) {
-      setError("ما فيه تغيير");
+      setError("لم تغيّر أي قيمة");
       return;
     }
     setBusy(true);
@@ -62,7 +62,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
     <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-background p-3 text-sm">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {NUM_FIELDS.map((f) => (
-          <label key={f.key} className="grid gap-1">
+          <label key={f.key} className="grid content-start gap-1">
             <span className="text-muted">{f.label}</span>
             <input
               type="number"
@@ -73,7 +73,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
               dir="ltr"
               value={values[f.key] ?? ""}
               onChange={(e) => setValues({ ...values, [f.key]: e.target.value === "" ? null : Number(e.target.value) })}
-              className="rounded border border-border bg-surface px-2 py-1"
+              className="rounded border border-border bg-surface px-2 py-1.5"
             />
           </label>
         ))}
@@ -95,7 +95,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
       {error && <p className="text-critical">{error}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={busy} className="rounded bg-brand px-3 py-1.5 text-brand-contrast disabled:opacity-50">
-          {busy ? "جاري الحفظ…" : submitLabel}
+          {busy ? "جارٍ الحفظ…" : submitLabel}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="rounded border border-border px-3 py-1.5">

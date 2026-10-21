@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -16,8 +16,36 @@ import {
 } from "recharts";
 import type { Correction, ExtractionEvent, OrderRun } from "@/lib/db/types";
 import type { DashboardData } from "@/lib/monitoring/dashboard";
-import { fmtMs, fmtPct, fmtTime, fmtUsd, OUTCOME_LABEL, SOURCE_LABEL, STATUS_LABEL } from "@/lib/ui/format";
+import {
+  EXTRACTION_STATUS_LABEL,
+  fmtApiError,
+  fmtCount,
+  fmtMs,
+  fmtPct,
+  fmtAxisMs,
+  fmtTime,
+  fmtUsd,
+  ltr,
+  ORIGIN_LABEL,
+  OUTCOME_LABEL,
+  SOURCE_LABEL,
+  STATUS_LABEL,
+} from "@/lib/ui/format";
 import { StatusPill } from "./Badges";
+import { CardSkeleton, EmptyState } from "./PageHeader";
+
+const FIELD_LABEL: Record<string, string> = {
+  lengthCm: "الطول",
+  widthCm: "العرض",
+  heightCm: "الارتفاع",
+  weightG: "الوزن",
+  fragile: "قابل للكسر",
+  liquid: "سائل",
+  sensitive: "حساس",
+};
+const EMPLOYEE_ACTION: Record<string, string> = { pending: "لم يراجع بعد", confirmed: "أكّد التغليف", edited: "صحّح البيانات" };
+const RUNS = { one: "طلب واحد", two: "طلبان", few: "طلبات", many: "طلباً" };
+const READS = { one: "قراءة منتج واحدة", two: "قراءتان للمنتجات", few: "قراءات للمنتجات", many: "قراءة للمنتجات" };
 
 type Win = DashboardData["window"];
 const WINDOWS: Array<[Win, string]> = [
@@ -66,7 +94,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
   }, []);
 
   useEffect(() => {
-    // Poll the metrics endpoint: first load right away, then every 15 s.
+    // Poll the metrics endpoint: first load right away, then every 15 seconds.
     const first = setTimeout(() => void load(win), 0);
     const t = setInterval(() => void load(win), 15_000);
     return () => {
@@ -91,9 +119,11 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
   if (!data) {
     return error ? (
-      <p className="rounded-lg border border-critical bg-critical-soft p-4 text-sm">{error}</p>
+      <p className="rounded-lg border border-critical bg-critical-soft p-4 text-sm">
+        تعذّر تحميل أرقام الأداء. {fmtApiError(error)}
+      </p>
     ) : (
-      <div className="h-96 animate-pulse rounded-lg bg-border/50" />
+      <CardSkeleton />
     );
   }
 
@@ -104,20 +134,22 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
     uncached: p.cached ? null : p.totalMs,
     order: p.orderId,
   }));
+  const latencyMax = Math.max(0, ...data.latency.map((p) => p.totalMs));
   const sourceRows = (Object.keys(m.m2SourceMix.value) as Array<keyof typeof m.m2SourceMix.value>).map((k) => ({
     label: SOURCE_LABEL[k],
     value: m.m2SourceMix.value[k],
   }));
   const failureRows = Object.entries(m.m6GeminiFailureRate.byStatus)
     .filter(([s]) => s !== "ok")
-    .map(([status, value]) => ({ label: status, value }))
+    .map(([status, value]) => ({ label: EXTRACTION_STATUS_LABEL[status] ?? status, value }))
     .sort((a, b) => b.value - a.value);
 
   return (
     <div className={`space-y-6 transition-opacity ${refreshing ? "opacity-70" : ""}`}>
       {/* One filter row scopes every chart below. */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-2 text-sm" role="group" aria-label="الفترة الزمنية">
+        <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="الفترة الزمنية">
+          <span className="text-muted">الفترة:</span>
           {WINDOWS.map(([w, label]) => (
             <button
               key={w}
@@ -126,58 +158,62 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                 setRefreshing(true); // hold the previous render dimmed until the new window loads
                 setWin(w);
               }}
-              className={`rounded-full border px-3 py-1 ${win === w ? "border-brand bg-brand text-brand-contrast" : "border-border"}`}
+              aria-pressed={win === w}
+              className={`rounded-full border px-3 py-1 transition-colors ${win === w ? "border-brand bg-brand font-medium text-brand-contrast" : "border-border bg-surface hover:border-brand"}`}
             >
               {label}
             </button>
           ))}
         </div>
         <span className="ms-auto text-xs text-muted">
-          <span className="ltr-nums">{data.totals.runs}</span> طلب · <span className="ltr-nums">{data.totals.extractions}</span> استخراج ·
-          تحديث {fmtTime(data.generatedAt)}
+          {fmtCount(data.totals.runs, RUNS)} · {fmtCount(data.totals.extractions, READS)} · آخر تحديث {fmtTime(data.generatedAt)}
         </span>
       </div>
 
-      {error && <p className="text-sm text-critical">تعذر التحديث: {error} (يُعرض آخر تحديث ناجح)</p>}
+      {error && <p className="text-sm text-critical">تعذّر تحديث الأرقام ({fmtApiError(error)}). المعروض هو آخر تحديث ناجح.</p>}
       <Alerts alerts={data.alerts} failed={data.alertsError} />
 
       {/* Headline numbers: one number each, so stat tiles, not charts. */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Tile
-          title="M1 · نسبة تصحيح الـ AI"
+          code="M1"
+          title="منتجات صحّح الموظف بياناتها"
           value={fmtPct(m.m1CorrectionRate.value)}
           n={m.m1CorrectionRate.n}
           sufficient={m.m1CorrectionRate.sufficient}
-          hint="من منتجات الـ AI اللي راجعها الموظف، كم واحد احتاج تصحيح؟ إذا ارتفعت: الـ AI يقرأ غلط، راجع الـ prompt بالتقييم."
-          detail={`${m.m1CorrectionRate.corrected} من ${m.m1CorrectionRate.reviewed}`}
+          hint="من المنتجات التي قرأتها رصّة وراجعها الموظف، كم منها احتاج إلى تصحيح؟ كلما قلّت النسبة كانت القراءة أدق."
+          detail={`صحّح الموظف ${ltr(String(m.m1CorrectionRate.corrected))} من ${ltr(String(m.m1CorrectionRate.reviewed))}`}
         />
         <Tile
-          title="M6 · فشل Gemini"
+          code="M6"
+          title="قراءات المنتجات التي فشلت"
           value={fmtPct(m.m6GeminiFailureRate.value)}
           n={m.m6GeminiFailureRate.n}
           sufficient={m.m6GeminiFailureRate.sufficient}
-          hint="نسبة طلبات Gemini الفاشلة. إذا ارتفعت: المفتاح، أو حد الطلبات، أو تعطل الخدمة، أو رد غير صالح."
+          hint="إذا ارتفعت النسبة فقد تتعطل قراءة المنتجات الجديدة، وسيلزم قياسها يدوياً."
         />
         <Tile
-          title="M5 · زمن التجهيز p95"
+          code="M5"
+          title="سرعة تجهيز الطلب"
           value={`${fmtMs(m.m5Latency.cached.value.p95)} / ${fmtMs(m.m5Latency.uncached.value.p95)}`}
           n={m.m5Latency.cached.n + m.m5Latency.uncached.n}
           sufficient={m.m5Latency.cached.sufficient || m.m5Latency.uncached.sufficient}
-          hint="مع الكاش / بدون كاش. البطء مع الكاش = مشكلة في المحرك أو قاعدة البيانات، وبدون كاش = Gemini بطيء."
-          detail="مع الكاش / بدون كاش"
+          hint="95% من الطلبات تنتهي خلال هذا الزمن أو أقل. الأول لطلبات منتجاتها معروفة مسبقاً، والثاني لطلبات فيها منتجات جديدة تحتاج قراءة."
+          detail="منتجات معروفة / منتجات جديدة"
         />
         <Tile
-          title="M7 · التكلفة لكل طلب"
+          code="M7"
+          title="تكلفة تجهيز الطلب الواحد"
           value={fmtUsd(m.m7Cost.value)}
           n={m.m7Cost.n}
           sufficient={m.m7Cost.sufficient}
-          hint="تكلفة tokens لكل طلب. إذا ارتفعت: الكاش معطل أو الـ prompt طال."
-          detail={`الكاش ${fmtPct(m.m7Cost.cacheHitRate)}`}
+          hint="متوسط تكلفة الخدمة الآلية لكل طلب. ترتفع كلما زادت المنتجات الجديدة التي تحتاج قراءة."
+          detail={`منتجات معروفة مسبقاً: ${fmtPct(m.m7Cost.cacheHitRate)}`}
         />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card title="M5 · زمن التجهيز لكل طلب" hint="كل نقطة طلب. فجوة كبيرة بين الخطين تعني إن Gemini هو اللي ياخذ الوقت.">
+        <Card code="M5" title="زمن تجهيز كل طلب" hint="كل نقطة تمثل طلباً واحداً. الطلب الأبطأ غالباً فيه منتجات جديدة احتاجت قراءة.">
           {latency.length === 0 ? (
             <Empty />
           ) : (
@@ -186,43 +222,47 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                 <LineChart data={latency} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="t" {...AXIS} minTickGap={24} />
-                  <YAxis {...AXIS} width={52} tickFormatter={(v: number) => fmtMs(v)} />
-                  <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => fmtMs(Number(v))} labelFormatter={(l) => `الوقت ${l}`} />
+                  <YAxis {...AXIS} width={60} tickFormatter={(v: number) => fmtAxisMs(v, latencyMax)} />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(v) => fmtMs(Number(v))} labelFormatter={(l) => `الساعة ${l}`} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line name="مع الكاش" dataKey="cached" stroke="var(--series-1)" strokeWidth={2} dot={{ r: 4 }} connectNulls isAnimationActive={false} />
-                  <Line name="بدون كاش" dataKey="uncached" stroke="var(--series-2)" strokeWidth={2} dot={{ r: 4 }} connectNulls isAnimationActive={false} />
+                  <Line name="منتجاته معروفة مسبقاً" dataKey="cached" stroke="var(--series-1)" strokeWidth={2} dot={{ r: 4 }} connectNulls isAnimationActive={false} />
+                  <Line name="فيه منتجات جديدة" dataKey="uncached" stroke="var(--series-2)" strokeWidth={2} dot={{ r: 4 }} connectNulls isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           )}
           <TableView
-            head={["الوقت", "الطلب", "مع الكاش", "بدون كاش"]}
+            head={["الساعة", "رقم الطلب", "منتجاته معروفة مسبقاً", "فيه منتجات جديدة"]}
             rows={latency.map((p) => [p.t, p.order, fmtMs(p.cached), fmtMs(p.uncached)])}
           />
         </Card>
 
         <Card
-          title="M2 · مصدر أبعاد القطع"
-          hint={`نسبة غير المعروف ${fmtPct(m.m2SourceMix.unknownShare)}. إذا كثر التقديري أو غير المعروف: صفحات المتجر ناقصة البيانات.`}
+          code="M2"
+          title="من أين جاءت مقاسات القطع"
+          hint={`نسبة «غير معروف»: ${fmtPct(m.m2SourceMix.unknownShare)}. إذا زادت القطع التقديرية أو غير المعروفة فمعنى ذلك أن صفحات المتجر تنقصها المقاسات.`}
           n={m.m2SourceMix.n}
         >
           <HBar rows={sourceRows} />
           <TableView head={["المصدر", "عدد القطع"]} rows={sourceRows.map((r) => [r.label, String(r.value)])} />
         </Card>
 
-        <Card title="M6 · أسباب فشل Gemini" hint="config_error = المفتاح، rate_limited = حد الطلبات، parse_error = رد غير صالح، simulated_outage = تجربة العرض." n={m.m6GeminiFailureRate.n}>
-          {failureRows.length === 0 ? <p className="py-8 text-center text-sm text-ok">✓ لا توجد أخطاء في هذه الفترة</p> : <HBar rows={failureRows} />}
-          <TableView head={["الحالة", "العدد"]} rows={Object.entries(m.m6GeminiFailureRate.byStatus).map(([s, v]) => [s, String(v)])} />
+        <Card code="M6" title="أسباب فشل قراءة المنتجات" hint="الأسباب مرتبة من الأكثر تكراراً." n={m.m6GeminiFailureRate.n}>
+          {failureRows.length === 0 ? <p className="py-8 text-center text-sm text-ok">✓ لم يفشل أي طلب في هذه الفترة</p> : <HBar rows={failureRows} />}
+          <TableView
+            head={["الحالة", "العدد"]}
+            rows={Object.entries(m.m6GeminiFailureRate.byStatus).map(([s, v]) => [EXTRACTION_STATUS_LABEL[s] ?? s, String(v)])}
+          />
         </Card>
 
         <div className="grid gap-4">
-          <Card title="M3 · رفض الـ Validator لترتيبات المحرك" hint="يجب أن يكون صفراً دائماً. أي رقم أكبر يعني خطأ في المحرك: افتح التتبع وأعد إنتاجه في اختبار.">
+          <Card code="M3" title="ترتيبات رفضها المدقّق" hint="يفحص مدقّق مستقل كل ترتيب قبل أن يراه الموظف. يجب أن يبقى الرقم صفراً، وأي رقم غيره يعني خللاً يُبلَّغ به الفريق التقني.">
             {m.m3ValidatorRejections.value === 0 ? (
               <p className="text-2xl font-bold text-ok">✓ 0</p>
             ) : (
               <div>
                 <p className="text-2xl font-bold text-critical">⚠ {m.m3ValidatorRejections.value}</p>
-                <p className="mt-1 text-sm">
+                <p className="mt-1 text-sm" dir="ltr">
                   {Object.entries(m.m3ValidatorRejections.byCode)
                     .map(([c, v]) => `${c}: ${v}`)
                     .join(" · ")}
@@ -230,7 +270,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
               </div>
             )}
           </Card>
-          <Card title="M4 · طلبات بدون كرتون مناسب" hint="إذا ارتفعت: الكراتين ما تناسب المنتجات أو هامش الأمان كبير." n={m.m4NoBoxRate.n}>
+          <Card code="M4" title="طلبات بلا كرتون مناسب" hint="إذا ارتفعت النسبة فالكراتين المتوفرة لا تناسب منتجاتك، أو هامش الأمان كبير أكثر من اللازم." n={m.m4NoBoxRate.n}>
             <p className="text-2xl font-bold">{fmtPct(m.m4NoBoxRate.value)}</p>
             {Object.keys(m.m4NoBoxRate.skipReasons).length > 0 && (
               <ul className="mt-1 text-sm text-muted">
@@ -245,19 +285,21 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
         </div>
       </section>
 
-      <Card title="آخر الطلبات" hint="اضغط على أي طلب لعرض تتبعه الكامل (الاستخراج، والتوقيت، والتصحيحات).">
+      <Card title="آخر الطلبات المجهّزة" hint="اضغط على أي صف لعرض تفاصيله: ما قرأته رصّة من المنتجات، والأزمنة، وتصحيحات الموظف.">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm [&_td]:px-2 [&_th]:px-2">
+          <table className="w-full min-w-[820px] text-sm [&_td]:px-2 [&_td]:py-2.5 [&_th]:px-2 [&_th]:py-2">
             <thead className="text-xs text-muted">
               <tr className="border-b border-border">
-                <th className="py-2 text-start">الوقت</th>
-                <th className="text-start">الطلب</th>
-                <th className="text-start">الحالة</th>
-                <th className="text-start">الكرتون</th>
-                <th className="text-start">الزمن</th>
-                <th className="text-start">كاش/AI</th>
-                <th className="text-start">المصادر</th>
-                <th className="text-start">الموظف</th>
+                <th className="text-start font-medium">الوقت</th>
+                <th className="text-start font-medium">رقم الطلب</th>
+                <th className="text-start font-medium">النتيجة</th>
+                <th className="text-start font-medium">الكرتون</th>
+                <th className="text-start font-medium">مدة التجهيز</th>
+                <th className="text-start font-medium" title="عدد المنتجات المعروفة مسبقاً / عدد المنتجات الجديدة التي قرأتها رصّة">
+                  منتجات معروفة / جديدة
+                </th>
+                <th className="text-start font-medium">مصدر المقاسات</th>
+                <th className="text-start font-medium">ما فعله الموظف</th>
               </tr>
             </thead>
             <tbody className="tabular-nums">
@@ -267,15 +309,16 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                   tabIndex={0}
                   onClick={() => setTraceId(r.id)}
                   onKeyDown={(e) => e.key === "Enter" && setTraceId(r.id)}
+                  aria-selected={traceId === r.id}
                   className={`cursor-pointer border-b border-border last:border-0 hover:bg-background ${traceId === r.id ? "bg-background" : ""}`}
                 >
-                  <td className="py-2 text-xs">{fmtTime(r.createdAt)}</td>
+                  <td className="text-xs">{fmtTime(r.createdAt)}</td>
                   <td className="ltr-nums">#{r.orderId}</td>
                   <td>
                     <StatusPill status={r.status} label={STATUS_LABEL[r.status] ?? r.status} />
                   </td>
                   <td>{r.cartonId ?? "—"}</td>
-                  <td className="ltr-nums">{fmtMs(r.totalMs)}</td>
+                  <td>{fmtMs(r.totalMs)}</td>
                   <td className="ltr-nums">
                     {r.cacheHits}/{r.cacheMisses}
                   </td>
@@ -285,12 +328,14 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
                       .map(([k, v]) => `${SOURCE_LABEL[k as keyof typeof SOURCE_LABEL]} ${v}`)
                       .join(" · ")}
                   </td>
-                  <td className="text-xs">{{ pending: "—", confirmed: "أكّد", edited: "عدّل" }[r.employeeAction]}</td>
+                  <td className="text-xs">{EMPLOYEE_ACTION[r.employeeAction]}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {data.recentRuns.length === 0 && <Empty />}
+          {data.recentRuns.length === 0 && (
+            <EmptyState title="لا توجد طلبات مجهّزة في هذه الفترة">جهّز طلباً من صفحة «الطلبات» وسيظهر هنا.</EmptyState>
+          )}
         </div>
       </Card>
 
@@ -300,7 +345,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 }
 
 function Alerts({ alerts, failed }: { alerts: DashboardData["alerts"]; failed: boolean }) {
-  if (failed) return <p className="rounded-lg border border-warn bg-warn-soft p-3 text-sm">⚠ تعذر تقييم التنبيهات</p>;
+  if (failed) return <p className="rounded-lg border border-warn bg-warn-soft p-3 text-sm">⚠ تعذّر فحص التنبيهات</p>;
   if (alerts.length === 0) return <p className="rounded-lg border border-ok bg-ok-soft p-3 text-sm text-ok">✓ لا توجد تنبيهات مفتوحة</p>;
   const style = { critical: "border-critical bg-critical-soft", warning: "border-warn bg-warn-soft", info: "border-info bg-info-soft" };
   const icon = { critical: "⛔ حرج", warning: "⚠ تحذير", info: "ℹ معلومة" };
@@ -308,12 +353,11 @@ function Alerts({ alerts, failed }: { alerts: DashboardData["alerts"]; failed: b
     <div className="space-y-2" role="alert">
       {alerts.map((a) => (
         <div key={a.id ?? a.rule} className={`rounded-lg border p-3 text-sm ${style[a.severity]}`}>
-          <span className="font-bold">{icon[a.severity]}</span> <span className="ltr-nums text-xs">{a.rule}</span>
+          <span className="font-bold">{icon[a.severity]}</span> <span className="ltr-nums text-xs text-muted">{a.rule.split("_")[0]}</span>
           <p className="mt-1">{a.message}</p>
           <p className="mt-1 text-xs text-muted">
-            القيمة <span className="ltr-nums">{a.value <= 1 ? fmtPct(a.value) : a.value}</span> · الحد{" "}
-            <span className="ltr-nums">{a.threshold <= 1 ? fmtPct(a.threshold) : a.threshold}</span> · العينة{" "}
-            <span className="ltr-nums">{a.sampleSize}</span> · منذ {fmtTime(a.createdAt)}
+            القيمة {alertNumber(a.rule, a.value)} · الحدّ المسموح {alertNumber(a.rule, a.threshold)} · بناءً على{" "}
+            <span className="ltr-nums">{a.sampleSize}</span> حالة · بتاريخ {fmtTime(a.createdAt)}
             {a.simulated && " · (عطل تجريبي)"}
           </p>
         </div>
@@ -322,24 +366,49 @@ function Alerts({ alerts, failed }: { alerts: DashboardData["alerts"]; failed: b
   );
 }
 
-function Tile(props: { title: string; value: string; n: number; sufficient: boolean; hint: string; detail?: string }) {
+/** Alert numbers have different units per rule: M3 is a count, M5 is milliseconds, the rest are shares. */
+function alertNumber(rule: string, v: number): string {
+  if (rule.startsWith("M3_")) return ltr(String(v));
+  if (rule.startsWith("M5_")) return fmtMs(v);
+  return fmtPct(v);
+}
+
+function Sample({ n }: { n: number }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-4" title={props.hint}>
-      <p className="text-xs text-muted">{props.title}</p>
-      <p className="ltr-nums mt-2 text-2xl font-bold">{props.sufficient ? props.value : <span className="text-base text-muted">بيانات غير كافية</span>}</p>
+    <span title="عدد الحالات التي بُني عليها هذا الرقم. كلما قلّ العدد قلّ الاعتماد على الرقم.">
+      عدد الحالات: <span className="ltr-nums">{n}</span>
+    </span>
+  );
+}
+
+function Tile(props: { code?: string; title: string; value: string; n: number; sufficient: boolean; hint: string; detail?: string }) {
+  return (
+    <div data-metric={props.code} className="rounded-lg border border-border bg-surface p-4">
+      <p className="text-xs text-muted">
+        {props.title}
+      </p>
+      <p className="mt-2 text-2xl font-bold">
+        {props.sufficient ? props.value : <span className="text-base font-medium text-muted">الحالات قليلة، لا يُعتمد على الرقم بعد</span>}
+      </p>
       <p className="mt-1 text-xs text-muted">
-        {props.detail && props.sufficient ? `${props.detail} · ` : ""}n = <span className="ltr-nums">{props.n}</span>
+        {props.detail && props.sufficient ? `${props.detail} · ` : ""}
+        <Sample n={props.n} />
       </p>
       <p className="mt-2 text-xs text-muted">{props.hint}</p>
     </div>
   );
 }
 
-function Card({ title, hint, n, children }: { title: string; hint?: string; n?: number; children: React.ReactNode }) {
+function Card({ code, title, hint, n, children }: { code?: string; title: string; hint?: string; n?: number; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-border bg-surface p-4">
+    <section data-metric={code} className="rounded-lg border border-border bg-surface p-4">
       <h2 className="font-bold">
-        {title} {n !== undefined && <span className="ltr-nums text-xs font-normal text-muted">n = {n}</span>}
+        {title}{" "}
+        {n !== undefined && (
+          <span className="text-xs font-normal text-muted">
+            · <Sample n={n} />
+          </span>
+        )}
       </h2>
       {hint && <p className="mb-3 mt-1 text-xs text-muted">{hint}</p>}
       {children}
@@ -370,8 +439,8 @@ function HBar({ rows }: { rows: Array<{ label: string; value: number }> }) {
 function TableView({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
     <details className="mt-2 text-xs">
-      <summary className="cursor-pointer text-muted">عرض كجدول</summary>
-      <table className="mt-2 w-full tabular-nums">
+      <summary className="cursor-pointer text-muted">عرض البيانات في جدول</summary>
+      <table className="mt-2 w-full tabular-nums [&_td]:py-1">
         <thead>
           <tr className="text-muted">
             {head.map((h) => (
@@ -398,46 +467,44 @@ function TableView({ head, rows }: { head: string[]; rows: string[][] }) {
 }
 
 function Empty() {
-  return <p className="py-8 text-center text-sm text-muted">لا توجد بيانات في هذه الفترة</p>;
+  return <p className="py-8 text-center text-sm text-muted">لا توجد بيانات في هذه الفترة. جرّب فترة أطول، أو جهّز طلباً من صفحة «الطلبات».</p>;
 }
 
 function TraceView({ trace, onClose }: { trace: Trace; onClose: () => void }) {
   const r = trace.run;
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
   return (
-    <section className="rounded-lg border-2 border-brand bg-surface p-4" aria-label="تتبع الطلب">
+    <section ref={ref} className="rounded-lg border-2 border-brand bg-surface p-4" aria-label="تفاصيل الطلب">
       <div className="flex items-center gap-2">
-        <h2 className="font-bold">تتبع التشغيل</h2>
-        <span className="ltr-nums text-xs text-muted">{r.id}</span>
-        <button onClick={onClose} className="ms-auto rounded border border-border px-2 py-0.5 text-xs">
+        <h2 className="font-bold">تفاصيل تجهيز الطلب #{r.orderId}</h2>
+        <button onClick={onClose} className="ms-auto rounded border border-border px-3 py-1 text-xs hover:border-brand">
           إغلاق
         </button>
       </div>
-      <dl className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        <Kv k="الطلب" v={`#${r.orderId}`} />
-        <Kv k="الحالة" v={STATUS_LABEL[r.status] ?? r.status} />
-        <Kv k="الكرتون / الاستراتيجية" v={`${r.cartonId ?? "—"} / ${r.strategy ?? "—"}`} />
-        <Kv k="الزمن (استخراج / ترتيب / كلي)" v={`${fmtMs(r.extractMs)} / ${fmtMs(r.packMs)} / ${fmtMs(r.totalMs)}`} />
-        <Kv k="المرشحون المفحوصون" v={String(r.candidatesChecked)} />
-        <Kv k="رفض الـ Validator" v={String(r.validatorRejections)} />
-        <Kv k="tokens / التكلفة" v={`${r.tokensTotal} / ${fmtUsd(r.costUsd)}`} />
-        <Kv k="الإصدار" v={`${r.engineVersion} · prompt ${r.promptVersion}`} />
+      <dl className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+        <Kv k="النتيجة" v={STATUS_LABEL[r.status] ?? r.status} />
+        <Kv k="الكرتون المختار" v={r.cartonId ?? "—"} />
+        <Kv k="قراءة المنتجات الجديدة" v={fmtMs(r.extractMs)} />
+        <Kv k="المدة الكلية للتجهيز" v={fmtMs(r.totalMs)} />
+        <Kv k="تكلفة التجهيز" v={fmtUsd(r.costUsd)} />
       </dl>
       {r.attempts.length > 0 && (
         <p className="mt-3 text-xs text-muted">
-          الكراتين: {r.attempts.map((a) => `${a.cartonId} ${OUTCOME_LABEL[a.outcome] ?? a.outcome}`).join(" · ")}
+          نتيجة تجربة كل كرتون: {r.attempts.map((a) => `${a.cartonId}: ${OUTCOME_LABEL[a.outcome] ?? a.outcome}`).join(" · ")}
         </p>
       )}
-      <h3 className="mt-4 text-sm font-bold">استدعاءات Gemini ({trace.extractions.length})</h3>
+      <h3 className="mt-4 text-sm font-bold">المنتجات الجديدة التي قرأتها رصّة ({trace.extractions.length})</h3>
       {trace.extractions.length === 0 ? (
-        <p className="text-xs text-muted">كل المنتجات من الكاش.</p>
+        <p className="mt-1 text-xs text-muted">كل منتجات هذا الطلب كانت معروفة مسبقاً، فلم تحتج إلى قراءة جديدة.</p>
       ) : (
         <ul className="mt-1 space-y-1 text-xs">
           {trace.extractions.map((e) => (
             <li key={e.id} className="rounded border border-border p-2">
-              <span className="font-medium">{e.productId}</span> · {e.status} · {fmtMs(e.latencyMs)} · in {e.inputTokens} / out {e.outputTokens}
-              {e.errorCode && <span className="text-critical"> · {e.errorCode}</span>}
-              {e.dimsSource && <span> · {SOURCE_LABEL[e.dimsSource]}</span>}
-              {e.errorMessage && <p className="mt-0.5 text-muted">{e.errorMessage}</p>}
+              <span className="ltr-nums font-medium">{e.productId}</span> · {EXTRACTION_STATUS_LABEL[e.status] ?? e.status} · {fmtMs(e.latencyMs)}
+              {e.dimsSource && <span> · مقاسه: {SOURCE_LABEL[e.dimsSource]}</span>}
             </li>
           ))}
         </ul>
@@ -445,15 +512,40 @@ function TraceView({ trace, onClose }: { trace: Trace; onClose: () => void }) {
       {trace.corrections.length > 0 && (
         <>
           <h3 className="mt-4 text-sm font-bold">تصحيحات الموظف ({trace.corrections.length})</h3>
-          <ul className="mt-1 text-xs">
+          <ul className="mt-1 space-y-0.5 text-xs">
             {trace.corrections.map((c) => (
               <li key={c.id}>
-                {c.productId} · {c.field}: {c.oldValue ?? "—"} → {c.newValue} ({c.priorOrigin})
+                <span className="ltr-nums">{c.productId}</span> · {FIELD_LABEL[c.field] ?? c.field}: {ltr(String(c.oldValue ?? "—"))} ← {ltr(String(c.newValue))}
+                {" "}({ORIGIN_LABEL[c.priorOrigin] ?? c.priorOrigin})
               </li>
             ))}
           </ul>
         </>
       )}
+      <details className="mt-4 text-xs">
+        <summary className="cursor-pointer text-muted">تفاصيل تقنية (للفريق التقني)</summary>
+        <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Kv k="رقم المرجع" v={r.id ?? "—"} />
+          <Kv k="طريقة الترتيب المعتمدة" v={r.strategy ?? "—"} />
+          <Kv k="ترتيبات جُرّبت" v={String(r.candidatesChecked)} />
+          <Kv k="ترتيبات رفضها المدقّق" v={String(r.validatorRejections)} />
+          <Kv k="زمن البحث عن ترتيب" v={fmtMs(r.packMs)} />
+          <Kv k="وحدات النص المستهلكة" v={String(r.tokensTotal)} />
+          <Kv k="إصدار المحرك" v={r.engineVersion} />
+          <Kv k="إصدار تعليمات القراءة" v={r.promptVersion} />
+        </dl>
+        {trace.extractions.some((e) => e.errorCode || e.errorMessage) && (
+          <ul className="mt-2 space-y-0.5 text-muted" dir="ltr">
+            {trace.extractions
+              .filter((e) => e.errorCode || e.errorMessage)
+              .map((e) => (
+                <li key={e.id}>
+                  {e.productId}: {e.errorCode} {e.errorMessage}
+                </li>
+              ))}
+          </ul>
+        )}
+      </details>
     </section>
   );
 }
@@ -462,7 +554,7 @@ function Kv({ k, v }: { k: string; v: string }) {
   return (
     <div>
       <dt className="text-xs text-muted">{k}</dt>
-      <dd className="ltr-nums">{v}</dd>
+      <dd className="break-all">{v}</dd>
     </div>
   );
 }

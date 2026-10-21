@@ -24,13 +24,13 @@
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 37 | ✅ Done (gate passed) |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 48 | 48 | ✅ Done (gate passed) |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 54 | 54 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 36 | ✅ Done (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **518** | **447** | |
+| **Total** | | | | **524** | **453** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -586,6 +586,12 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.46** (M2) Test on phone width and desktop. — 390 px and 1440 px checked 2026-10-21
 - [x] **P7.47** (M2) Update the dashboard. **Gate G7 check.** — G7 passed (verified): full flow on PR #1 preview and production; 390 px and 1440 px checked (P7.44–P7.46)
 - [x] **P7.48** (M2) 3D views degrade to a 2D top view when WebGL is unavailable instead of crashing the page. Done when: with WebGL disabled, `/` and `/orders/[id]` render the 2D view and no error page; tested and on `main`. — verified 2026-10-21: reproduced the crash in Brave with WebGL off on production; after the fix (`components/Safe3D.tsx` WebGL check + error boundary, `components/TopView2D.tsx`) a local production build renders the 2D top view on both pages with no error page, and the 3D canvas still renders with WebGL on
+- [x] **P7.49** (M2) Order queue: `/orders` shows how many orders remain (of the total), a progress bar, filter tabs (remaining / needs attention / new / awaiting confirmation / packed / all), and orders needing attention as red cards with the reason. Done when: counts match the runs, and confirming an order moves it to "packed". — verified 2026-10-21 (memory backend, Brave): 20 orders, confirm #1001 → remaining 19; #1006 (needs measurement) and #1020 (no carton) red with reasons; `tests/orders/queue.test.ts` (8 tests)
+- [x] **P7.50** (M2) Navigation badges: the "الطلبات" button shows the remaining count (red when any order needs attention), the bell shows attention + open alerts, and both refresh every 20 s, on focus, and right after confirming. — verified 2026-10-21: badges 19 and 2, title prefix "(2)", update after confirm without reload
+- [x] **P7.51** (M2) Employee notifications page `/notifications`: needs attention, system alerts, new orders, awaiting confirmation, with an empty state; a toast "وصل طلب جديد" when a new order appears while the console is open. — verified 2026-10-21 at 1280 px and 390 px
+- [x] **P7.52** (M2) After "تأكيد التغليف" the result page links to the next order (or says none remain); an already packed order says when it was packed. — verified 2026-10-21: #1001 → "الطلب التالي #1002", then #1006
+- [x] **P7.53** (M2) Copy pass for end users: plain Arabic, no technical terms on employee screens (no cache, model name, tokens, run IDs, metric codes, env var names; technical detail only inside «تفاصيل تقنية»), API errors translated, Gregorian dates only, Arabic number agreement. — verified 2026-10-21 by screenshots of every page in dark and light; `tests/ui/format.test.ts`
+- [x] **P7.54** (M2) "اطبع الخطوات" prints the packing steps on white paper (navigation, buttons and 3D view hidden). — print styles in `app/globals.css`; checked 2026-10-21
 
 ---
 
@@ -736,7 +742,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.15** (M3) Production env vars double-checked against the matrix. — checked 2026-10-21 against the matrix: Supabase, Gemini (model/prices/key), DEMO_MODE, ENGINE_VERSION, PROMPT_VERSION set for production + preview
 - [x] **P10.16** (M3) `/api/health` all green on production. — done 2026-10-21: status ok, database ok, gemini key present, engine-0.2
 - [x] **P10.17** (M3) Supabase project not paused. Note the inactivity rule. — project active; free projects pause after 1 week of inactivity (open it on demo morning, P12.6)
-- [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs. — not run on purpose: it deletes events/alerts. Run once after the last rehearsal, before the demo (Thursday morning)
+- [ ] **P10.18** (M3) Run `scripts/reset-events.ts` (clean slate for the demo). Keep eval runs. — not run on purpose: it deletes events/alerts. Run once after the last rehearsal, before the demo (Thursday morning). It also clears the smoke-test runs, which otherwise make production orders show as "بانتظار تأكيدك" in the order queue (P7.49) instead of "جديد"
 - [x] **P10.19** (M1, →T21) Pre-warm: extract all 30 products on production (`trigger='admin'`). Facts present for groups A and B. — done 2026-10-21: 30/30 extracted (15 page, 12 inferred, 3 unknown)
 - [x] **P10.20** (M3, →T22) Smoke test **all 20 orders** on the production URL. Statuses as expected. Record results in `docs/demo-script.md`. — done 2026-10-21: 17 box_found, 2 needs_measurement, 1 no_box; see demo-script.md
 - [x] **P10.21** (M3) Check Vercel function logs for errors during the smoke test. — Vercel runtime errors (24 h): none

@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import MonitoringDashboard from "@/components/MonitoringDashboard";
+import { CardSkeleton, PageHeader } from "@/components/PageHeader";
 
-export const metadata: Metadata = { title: "المراقبة" };
+export const metadata: Metadata = { title: "الأداء" };
 
 export default function MonitoringPage(props: PageProps<"/monitoring">) {
   return (
-    <div className="space-y-4">
-      <header>
-        <h1 className="text-2xl font-bold">المراقبة</h1>
-        <p className="mt-1 text-muted">
-          سبعة مؤشرات، كل واحد يكشف مشكلة في مرحلة محددة: جودة الـ AI، والبيانات، والمحرك، والأداء، وGemini، والتكلفة. التقييم التجريبي مستبعد من هذه الأرقام.
-        </p>
-      </header>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-border/50" />}>
+    <div className="space-y-5">
+      <PageHeader title="الأداء">
+        كيف تعمل رصّة على طلباتك: سرعة التجهيز، ودقة قراءة المنتجات، وتكلفة كل طلب. طلبات الاختبار التجريبية لا تدخل في هذه الأرقام.
+      </PageHeader>
+      <Suspense fallback={<CardSkeleton />}>
         <Dashboard searchParams={props.searchParams} />
       </Suspense>
     </div>

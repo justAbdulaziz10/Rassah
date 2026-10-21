@@ -59,6 +59,26 @@
   }
 }
 
+/* "اطبع الخطوات": always print dark text on white paper, whatever the screen theme. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --foreground: #000000;
+    --muted: #3f4643;
+    --border: #c9cfcc;
+    --brand: #0f766e;
+    --brand-contrast: #ffffff;
+    --fragile-soft: #fef3c7;
+    --liquid-soft: #dbeafe;
+    --sensitive-soft: #ede9fe;
+    --ok-soft: #dcfce7;
+    --warn-soft: #fef3c7;
+    --critical-soft: #fee2e2;
+    --info-soft: #dbeafe;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);

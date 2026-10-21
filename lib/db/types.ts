@@ -19,6 +19,8 @@ export interface OrderSummary {
   expect: string | null;
   lineCount: number;
   unitCount: number;
+  /** Distinct products in the order. */
+  productIds: string[];
 }
 
 export interface OrderWithLines {

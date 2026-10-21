@@ -12,9 +12,10 @@ export const metadata: Metadata = {
 
 const NAV = [
   { href: "/orders", label: "الطلبات" },
-  { href: "/catalog", label: "الكتالوج" },
-  { href: "/monitoring", label: "المراقبة" },
-  { href: "/evaluation", label: "التقييم" },
+  { href: "/notifications", label: "الإشعارات" },
+  { href: "/catalog", label: "المنتجات" },
+  { href: "/monitoring", label: "الأداء" },
+  { href: "/evaluation", label: "الدقة" },
 ];
 
 // Every number below comes from eval/results/*.json via docs/report/results.md (2026-10-21). Don't type new ones by hand.
@@ -28,11 +29,11 @@ const MEASURED = [
 ];
 
 const RULES = [
-  { swatch: "bg-fragile", title: "القابل للكسر لا يُوضع فوقه شيء", body: "ويُلفّ بغلاف فقاعي 1.5 سم على الأقل." },
+  { swatch: "bg-fragile", title: "القابل للكسر لا يُوضع فوقه شيء", body: "ويُلفّ بغلاف فقاعي لا تقل سماكته عن 1.5 سم." },
   { swatch: "bg-liquid", title: "السائل يبقى واقفًا", body: "فلا يُقلب على جنبه مهما وفّر ذلك من مساحة." },
   { swatch: "bg-sensitive", title: "الحساس يأخذ حشوة من كل الجهات", body: "مثل الشواحن والإلكترونيات الصغيرة." },
-  { swatch: "estimated", title: "المقاس التقديري موسوم", body: "ويطلب من الموظف التأكد أنه يدخل قبل الإغلاق." },
-  { swatch: "none", title: "إذا ما عرف المقاس، يطلب القياس", body: "ولا يقترح كرتونًا مبنيًا على تخمين." },
+  { swatch: "estimated", title: "المقاس التقديري موسوم", body: "ويطلب من الموظف التأكد من أنه يدخل قبل الإغلاق." },
+  { swatch: "none", title: "إذا لم يعرف المقاس، يطلب قياسه", body: "ولا يقترح كرتونًا مبنيًا على تخمين." },
 ];
 
 export default function LandingPage() {
@@ -148,8 +149,8 @@ export default function LandingPage() {
               <div className="rounded-lg bg-[var(--paper)] p-4 leading-7">
                 <p>ضع «عسل سدر جبلي 500 جرام» في قاع الكرتون.</p>
                 <ul className="mt-2 space-y-1 text-[color-mix(in_oklab,var(--ink)_75%,transparent)]">
-                  <li>لفّه بغلاف فقاعي 1.5 سم على الأقل، ولا تضع فوقه أي شيء.</li>
-                  <li>أبقِه واقفًا، هذا الجانب للأعلى.</li>
+                  <li>لُفّه بغلاف فقاعي لا تقل سماكته عن 1.5 سم، ولا تضع فوقه أي شيء.</li>
+                  <li>أبقِه واقفًا ولا تقلبه على جنبه، ويكون غطاؤه إلى الأعلى.</li>
                 </ul>
               </div>
             </Step>
@@ -164,7 +165,7 @@ export default function LandingPage() {
             قواعد لا يتنازل عنها
           </h2>
           <p className="mt-4 max-w-md leading-8 text-[color-mix(in_oklab,var(--ink)_70%,transparent)]">
-            كل ترتيب يقترحه المحرّك يمر على مدقّق مستقل لا يعتمد على كود المحرّك. إذا خالف قاعدة واحدة، لا يظهر للموظف.
+            كل ترتيب يقترحه المحرّك يمرّ على مدقّق مستقل لا يعتمد على كود المحرّك. إذا خالف قاعدة واحدة، لا يظهر للموظف.
           </p>
         </div>
         <ul className="divide-y divide-[color-mix(in_oklab,var(--ink)_12%,transparent)] border-y border-[color-mix(in_oklab,var(--ink)_12%,transparent)]">
@@ -195,7 +196,7 @@ export default function LandingPage() {
               href="/evaluation"
               className="mt-6 inline-block rounded text-[var(--tape)] underline underline-offset-8 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--tape)]"
             >
-              صفحة التقييم الكاملة
+              صفحة الدقة الكاملة
             </Link>
           </div>
 
@@ -204,7 +205,7 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 py-20 text-center md:py-24">
-        <p className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold">جرّبه على طلب من المتجر التجريبي.</p>
+        <p className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold">جرّبها على طلب من المتجر التجريبي.</p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
             href="/orders"
@@ -216,7 +217,7 @@ export default function LandingPage() {
             href="/monitoring"
             className="rounded-lg border border-[color-mix(in_oklab,var(--ink)_20%,transparent)] px-6 py-3.5 font-bold hover:border-[var(--ink)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--deep)]"
           >
-            شاهد لوحة المراقبة
+            شاهد أداء رصّة
           </Link>
         </div>
       </section>

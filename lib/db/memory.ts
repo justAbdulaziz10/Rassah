@@ -51,6 +51,7 @@ export class MemoryRepo implements Repo {
       expect: o.expect,
       lineCount: o.lines.length,
       unitCount: o.lines.reduce((s, l) => s + l.qty, 0),
+      productIds: [...new Set(o.lines.map((l) => l.productId))],
     }));
   }
   async getOrder(id: string) {

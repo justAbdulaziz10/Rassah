@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { DataSource } from "@/lib/engine/types";
-import { fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_LABEL } from "@/lib/ui/format";
+import { fmtApiError, fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_HINT, SOURCE_LABEL } from "@/lib/ui/format";
 import { FlagChips, SourceBadge } from "./Badges";
 import FactsForm from "./FactsForm";
+import { EmptyState } from "./PageHeader";
 
 export interface CatalogRow {
   productId: string;
@@ -49,7 +50,7 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
     const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
     const data = await res.json().catch(() => ({}));
     setBusy(null);
-    if (!res.ok) return (data as { error?: string }).error ?? `HTTP ${res.status}`;
+    if (!res.ok) return fmtApiError((data as { error?: string }).error ?? `HTTP ${res.status}`);
     router.refresh();
     return null;
   }
@@ -60,17 +61,19 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
     ["inferred", SOURCE_LABEL.inferred],
     ["manual", SOURCE_LABEL.manual],
     ["unknown", SOURCE_LABEL.unknown],
-    ["none", "لم يُستخرج بعد"],
+    ["none", "لم تُقرأ بعد"],
   ];
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2 text-sm" role="group" aria-label="تصفية حسب المصدر">
+      <div className="flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="تصفية حسب مصدر المقاس">
+        <span className="text-muted">مصدر المقاس:</span>
         {filters.map(([k, label]) => (
           <button
             key={k}
             onClick={() => setFilter(k)}
-            className={`rounded-full border px-3 py-1 ${filter === k ? "border-brand bg-brand text-brand-contrast" : "border-border"}`}
+            aria-pressed={filter === k}
+            className={`rounded-full border px-3 py-1 transition-colors ${filter === k ? "border-brand bg-brand font-medium text-brand-contrast" : "border-border bg-surface hover:border-brand"}`}
           >
             {label}
           </button>
@@ -78,24 +81,31 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
       </div>
       {message && <p className="text-sm text-critical">{message}</p>}
       <div className="overflow-x-auto rounded-lg border border-border bg-surface">
-        <table className="w-full min-w-[820px] text-sm [&_td]:px-2 [&_th]:px-2">
-          <thead className="text-xs text-muted">
+        <table className="w-full min-w-[900px] text-sm [&_td]:px-3 [&_td]:py-3 [&_th]:px-3 [&_th]:py-2.5">
+          <thead className="bg-background/60 text-xs text-muted">
             <tr className="border-b border-border">
-              <th className="p-2 text-start">المنتج</th>
-              <th className="text-start">الأبعاد</th>
-              <th className="text-start">الوزن</th>
-              <th className="text-start">التعامل</th>
-              <th className="text-start">المصدر</th>
-              <th className="text-start">الأصل</th>
-              <th className="text-start">آخر استخراج</th>
+              <th className="text-start font-medium">المنتج</th>
+              <th className="text-start font-medium">
+                المقاس (سم)
+                <span className="block text-[11px] font-normal">الطول × العرض × الارتفاع</span>
+              </th>
+              <th className="text-start font-medium">الوزن</th>
+              <th className="text-start font-medium">تنبيهات التغليف</th>
+              <th className="text-start font-medium" title="هل المقاس مكتوب في الصفحة، أم تقدير، أم قياس يدوي؟">
+                مصدر المقاس
+              </th>
+              <th className="text-start font-medium" title="من أنتج هذه البيانات: رصّة بالذكاء الاصطناعي، أم موظف، أم بيانات تجريبية؟">
+                من أدخل البيانات
+              </th>
+              <th className="text-start font-medium">آخر قراءة</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {visible.map((r) => (
-              <tr key={r.productId} className="border-b border-border align-top last:border-0">
-                <td className="p-2">
-                  <span className="font-medium">{r.name}</span> <span className="ltr-nums text-xs text-muted">{r.productId}</span>
+              <tr key={r.productId} className="border-b border-border align-top last:border-0 hover:bg-background/50">
+                <td className="min-w-[230px]">
+                  <span className="font-medium">{r.name}</span> <span className="ltr-nums text-xs text-muted" title="رمز المنتج">{r.productId}</span>
                   {r.facts?.evidence && <p className="mt-0.5 max-w-xs text-xs text-muted">«{r.facts.evidence}»</p>}
                   {editing === r.productId && (
                     <div className="mt-2 min-w-[520px]">
@@ -121,35 +131,43 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
                     </div>
                   )}
                 </td>
-                <td className="ltr-nums">{r.facts ? fmtDims([r.facts.lengthCm, r.facts.widthCm, r.facts.heightCm]) : "—"}</td>
-                <td className="ltr-nums">{r.facts ? fmtWeight(r.facts.weightG) : "—"}</td>
+                <td className="whitespace-nowrap">{r.facts ? fmtDims([r.facts.lengthCm, r.facts.widthCm, r.facts.heightCm]) : "—"}</td>
+                <td className="whitespace-nowrap">{r.facts ? fmtWeight(r.facts.weightG) : "—"}</td>
                 <td>{r.facts ? <FlagChips {...r.facts} /> : "—"}</td>
-                <td>{r.facts ? <SourceBadge source={r.facts.dimsSource} /> : <span className="text-xs text-muted">لم يُستخرج</span>}</td>
+                <td>
+                  {r.facts ? (
+                    <SourceBadge source={r.facts.dimsSource} title={SOURCE_HINT[r.facts.dimsSource]} />
+                  ) : (
+                    <span className="text-xs text-muted">لم تُقرأ بعد</span>
+                  )}
+                </td>
                 <td className="text-xs">
                   {r.facts ? ORIGIN_LABEL[r.facts.origin] ?? r.facts.origin : "—"}
-                  {r.facts?.stale && <p className="text-warn">النص تغيّر</p>}
+                  {r.facts?.stale && <p className="mt-0.5 text-warn">وصف المنتج تغيّر بعد القراءة</p>}
                 </td>
-                <td className="ltr-nums text-xs text-muted">{fmtTime(r.facts?.extractedAt)}</td>
-                <td className="whitespace-nowrap p-2 text-xs">
+                <td className="text-xs text-muted">{r.facts?.extractedAt ? fmtTime(r.facts.extractedAt) : "—"}</td>
+                <td className="whitespace-nowrap text-xs">
                   <button onClick={() => setEditing(editing === r.productId ? null : r.productId)} className="text-brand underline">
-                    {r.facts && r.facts.dimsSource !== "unknown" ? "تعديل" : "قياس"}
+                    {r.facts && r.facts.dimsSource !== "unknown" ? "تعديل" : "إدخال القياس"}
                   </button>
                   {demoMode && (
                     <>
                       <button
                         disabled={busy === r.productId}
                         onClick={async () => setMessage(await call(r.productId, `/api/products/${r.productId}/extract`, "POST"))}
+                        title="تقرأ رصّة صفحة المنتج من جديد بالذكاء الاصطناعي. لا تستبدل ما قاسه موظف يدوياً."
                         className="ms-3 text-muted underline disabled:opacity-50"
                       >
-                        {busy === r.productId ? "…" : "إعادة استخراج"}
+                        {busy === r.productId ? "جارٍ القراءة…" : "إعادة القراءة"}
                       </button>
                       {r.facts && (
                         <button
                           disabled={busy === r.productId}
                           onClick={async () => setMessage(await call(r.productId, `/api/products/${r.productId}/facts`, "DELETE"))}
+                          title="يحذف البيانات المحفوظة لهذا المنتج، فتُقرأ من جديد عند أول طلب يحتويه."
                           className="ms-3 text-muted underline disabled:opacity-50"
                         >
-                          مسح الكاش
+                          حذف البيانات المحفوظة
                         </button>
                       )}
                     </>
@@ -159,6 +177,11 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
             ))}
           </tbody>
         </table>
+        {visible.length === 0 && (
+          <div className="p-4">
+            <EmptyState title="لا توجد منتجات بهذا المصدر">اختر «الكل» لعرض كل المنتجات.</EmptyState>
+          </div>
+        )}
       </div>
     </div>
   );

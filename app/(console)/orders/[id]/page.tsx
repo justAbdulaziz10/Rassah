@@ -27,7 +27,7 @@ export default async function OrderResultPage(props: PageProps<"/orders/[id]">) 
 
   return (
     <div className="space-y-4">
-      <Link href="/orders" className="text-sm text-muted hover:text-foreground">
+      <Link href="/orders" className="text-sm text-muted hover:text-foreground print:hidden">
         ← كل الطلبات
       </Link>
       <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-border/50" />}>

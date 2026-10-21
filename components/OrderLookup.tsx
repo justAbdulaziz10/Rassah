@@ -13,18 +13,18 @@ export default function OrderLookup({ demoMode }: { demoMode: boolean }) {
     e.preventDefault();
     const n = value.trim().replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
     if (!/^\d{1,10}$/.test(n)) {
-      setError("رقم الطلب أرقام فقط");
+      setError("اكتب رقم الطلب بالأرقام فقط");
       return;
     }
     router.push(`/orders/${n}${outage ? "?outage=1" : ""}`);
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-border bg-surface p-4">
-      <label htmlFor="order" className="block font-medium">
-        رقم الطلب
-      </label>
-      <div className="mt-2 flex flex-wrap gap-2">
+    <form onSubmit={submit} className="flex flex-col items-end gap-1.5">
+      <div className="flex items-center gap-2">
+        <label htmlFor="order" className="text-sm text-muted">
+          رقم الطلب
+        </label>
         <input
           id="order"
           inputMode="numeric"
@@ -36,19 +36,23 @@ export default function OrderLookup({ demoMode }: { demoMode: boolean }) {
             setValue(e.target.value);
             setError(null);
           }}
-          className="w-40 rounded border border-border bg-background px-3 py-2 text-lg"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "order-error" : undefined}
+          className="w-28 rounded-lg border border-border bg-surface px-3 py-2"
         />
-        <button type="submit" className="rounded bg-brand px-5 py-2 font-medium text-brand-contrast">
-          جهّز الطلب
+        <button type="submit" className="rounded-lg bg-brand px-4 py-2 font-medium text-brand-contrast hover:opacity-90">
+          افتح
         </button>
       </div>
-      {error && <p className="mt-2 text-sm text-critical">{error}</p>}
+      {error && (
+        <p id="order-error" className="text-sm text-critical">
+          {error}
+        </p>
+      )}
       {demoMode && (
-        <label className="mt-3 flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-xs text-muted">
           <input type="checkbox" checked={outage} onChange={(e) => setOutage(e.target.checked)} />
-          <span>
-            <span className="rounded bg-warn-soft px-1.5 py-0.5 text-xs text-warn">تحكم العرض</span> محاكاة تعطل Gemini
-          </span>
+          للعرض فقط: جرّب الطلب كأن خدمة القراءة الآلية متوقفة
         </label>
       )}
     </form>

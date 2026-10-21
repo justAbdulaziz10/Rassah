@@ -4,56 +4,56 @@ import { Suspense } from "react";
 import { isLocalBackend } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { loadEval, type EvalView } from "@/lib/monitoring/evaluation";
-import { fmtTime } from "@/lib/ui/format";
+import { CardSkeleton, EmptyState, PageHeader } from "@/components/PageHeader";
+import { fmtMs, fmtTime, ltr } from "@/lib/ui/format";
 
-export const metadata: Metadata = { title: "التقييم" };
+export const metadata: Metadata = { title: "الدقة" };
 
-type Fmt = "pct" | "num" | "ms" | "usd" | "text";
+type Fmt = "pct" | "num" | "ms" | "usd" | "sar" | "text";
 const PACKING_ROWS: Array<[string, string, Fmt]> = [
-  ["engineValidity", "صحة ترتيبات المحرك (يجب 100%)", "pct"],
-  ["knownFeasibleRecall", "إيجاد حل للحالات المضمونة (تعبئة 100%)", "pct"],
-  ["impossibleFalseClaims", "ادعاءات خاطئة على حالات مستحيلة (يجب 0)", "num"],
-  ["baselineInvalidRate", "ترتيبات الـ Baseline البسيط المرفوضة", "pct"],
-  ["engineOnlyValid", "حالات صحيحة بالمحرك وغلط بالـ Baseline", "num"],
-  ["meanCostSavingSar", "متوسط التوفير مقابل الـ Baseline (ر.س، حالات صحيحة للطرفين)", "num"],
-  ["runtimeP50Ms", "زمن البحث p50", "ms"],
-  ["runtimeP95Ms", "زمن البحث p95", "ms"],
+  ["engineValidity", "ترتيبات رصّة الصحيحة (المطلوب 100%)", "pct"],
+  ["knownFeasibleRecall", "الحالات المحكمة التي وجدت رصّة لها حلاً (المطلوب 100%)", "pct"],
+  ["impossibleFalseClaims", "مرات قالت فيها رصّة إن طلباً مستحيلاً يدخل الكرتون (المطلوب 0)", "num"],
+  ["baselineInvalidRate", "ترتيبات الطريقة البسيطة المقارَنة التي خالفت قاعدة تغليف", "pct"],
+  ["engineOnlyValid", "حالات نجحت فيها رصّة وأخفقت الطريقة البسيطة", "num"],
+  ["meanCostSavingSar", "متوسط التوفير مقابل الطريقة البسيطة (للطلب، في الحالات الصحيحة عند الطرفين)", "sar"],
+  ["runtimeP50Ms", "زمن البحث المعتاد عن ترتيب (النصف الأسرع من الحالات)", "ms"],
+  ["runtimeP95Ms", "زمن البحث الذي تنتهي خلاله 95% من الحالات", "ms"],
 ];
 const EXTRACTION_ROWS: Array<[string, string, Fmt]> = [
-  ["dimAccuracy1cm", "دقة الأبعاد ±1 سم (مكتوبة في الصفحة)", "pct"],
-  ["weightAccuracy10pct", "دقة الوزن ±10% (مكتوب في الصفحة)", "pct"],
-  ["inferredDimMape", "خطأ تقدير الأبعاد (MAPE) يبرر هامش الأمان", "pct"],
-  ["inferredWeightMape", "خطأ تقدير الوزن (MAPE)", "pct"],
-  ["honestyRate", "الأمانة: «غير معروف» بدل اختراع رقم", "pct"],
-  ["fragileRecall", "اكتشاف القابل للكسر (Recall)", "pct"],
-  ["fragilePrecision", "دقة وسم القابل للكسر (Precision)", "pct"],
-  ["liquidAccuracy", "دقة السوائل", "pct"],
-  ["sourceCorrectness", "صحة مصدر المعلومة", "pct"],
-  ["parseSuccess", "ردود صالحة", "pct"],
-  ["avgLatencyMs", "متوسط الزمن", "ms"],
-  ["costPerProductUsd", "التكلفة لكل منتج", "usd"],
+  ["dimAccuracy1cm", "دقة الأبعاد المكتوبة في الصفحة (خطأ لا يزيد على 1 سم)", "pct"],
+  ["weightAccuracy10pct", "دقة الوزن المكتوب في الصفحة (خطأ لا يزيد على 10%)", "pct"],
+  ["inferredDimMape", "متوسط نسبة الخطأ في الأبعاد التي تقدّرها رصّة (ولذلك نضيف هامش أمان)", "pct"],
+  ["inferredWeightMape", "متوسط نسبة الخطأ في الأوزان التي تقدّرها رصّة", "pct"],
+  ["honestyRate", "قول «غير معروف» بدل اختراع رقم", "pct"],
+  ["fragileRecall", "اكتشاف المنتجات القابلة للكسر (من بين القابل للكسر فعلاً)", "pct"],
+  ["fragilePrecision", "صحة وسم «قابل للكسر» (من بين ما وُسم به)", "pct"],
+  ["liquidAccuracy", "دقة اكتشاف السوائل", "pct"],
+  ["sourceCorrectness", "صحة تحديد مصدر المقاس (مكتوب في الصفحة أم تقدير)", "pct"],
+  ["parseSuccess", "ردود الخدمة الصالحة للاستخدام", "pct"],
+  ["avgLatencyMs", "متوسط زمن قراءة منتج واحد", "ms"],
+  ["costPerProductUsd", "تكلفة قراءة المنتج الواحد", "usd"],
 ];
 
 function fmt(v: unknown, f: Fmt): string {
   if (v === null || v === undefined) return "—";
   if (typeof v !== "number") return String(v);
-  if (f === "pct") return `${Math.round(v * 1000) / 10}%`;
-  if (f === "ms") return `${v} ms`;
-  if (f === "usd") return `$${v.toFixed(5)}`;
-  return String(v);
+  if (f === "pct") return ltr(`${Math.round(v * 1000) / 10}%`);
+  if (f === "ms") return fmtMs(v);
+  if (f === "usd") return ltr(`$${v.toFixed(5)}`);
+  if (f === "sar") return `${ltr(String(Math.round(v * 100) / 100))} ر.س`;
+  return ltr(String(v));
 }
 
 export default function EvaluationPage() {
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">التقييم</h1>
-        <p className="mt-1 text-muted">
-          قياس على بيانات ثابتة بإجابات معروفة، منفصل عن المراقبة الحية. <strong>البيانات اصطناعية</strong> كتبها الفريق بأسلوب صفحات المتاجر
-          السعودية. الإجابات الصحيحة صاغها الذكاء الاصطناعي من الأوصاف، ومراجعتها المستقلة من عضو آخر في الفريق لم تكتمل بعد.
-        </p>
-      </header>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-border/50" />}>
+    <div className="space-y-5">
+      <PageHeader title="الدقة">
+        نتائج اختبار رصّة على حالات نعرف إجابتها الصحيحة مسبقاً، وهو منفصل عن العمل اليومي. <strong>البيانات اصطناعية</strong> كتبها
+        الفريق بأسلوب صفحات المتاجر السعودية. والإجابات الصحيحة صاغها الذكاء الاصطناعي من الأوصاف، ولم تكتمل مراجعتها المستقلة من عضو
+        آخر في الفريق.
+      </PageHeader>
+      <Suspense fallback={<CardSkeleton />}>
         <Evals />
       </Suspense>
     </div>
@@ -69,20 +69,20 @@ async function Evals() {
   return (
     <>
       <EvalCard
-        title="تقييم الترتيب: المحرك مقابل Baseline بسيط (60 حالة)"
+        title="دقة ترتيب القطع في الكرتون (60 حالة، مقارنةً بطريقة بسيطة)"
         command="npm run eval:packing"
         view={packing}
         rows={PACKING_ROWS}
         version={(run) => run.engineVersion ?? ""}
       />
       <EvalCard
-        title="تقييم استخراج Gemini (30 منتج)"
+        title="دقة قراءة بيانات المنتجات (30 منتجاً)"
         command="npm run eval:extraction"
         view={extraction}
         rows={EXTRACTION_ROWS}
         pick={(s) => (s.all as Record<string, unknown>) ?? s}
         holdout={(s) => (s.holdout as Record<string, unknown>) ?? null}
-        version={(run) => `${run.model ?? ""} · prompt ${run.promptVersion ?? ""}`}
+        version={(run) => `${run.model ?? ""} · ${run.promptVersion ?? ""}`}
       />
     </>
   );
@@ -102,9 +102,11 @@ function EvalCard(props: {
     return (
       <section className="rounded-lg border border-border bg-surface p-4">
         <h2 className="font-bold">{props.title}</h2>
-        <p className="mt-2 text-sm text-muted">
-          لا توجد نتائج بعد. شغّل <code className="ltr-nums rounded bg-background px-1">{props.command}</code>.
-        </p>
+        <div className="mt-3">
+          <EmptyState title="لم يُجرَ هذا الاختبار بعد">
+            يشغّله الفريق التقني بالأمر <code className="ltr-nums rounded bg-background px-1">{props.command}</code>.
+          </EmptyState>
+        </div>
       </section>
     );
   }
@@ -117,27 +119,28 @@ function EvalCard(props: {
   return (
     <section className="rounded-lg border border-border bg-surface p-4">
       <h2 className="font-bold">{props.title}</h2>
-      <p className="mt-1 text-xs text-muted">
-        آخر تشغيل {fmtTime(view.latest.createdAt)} · <span className="ltr-nums">{props.version(view.latest)}</span> · المصدر:{" "}
-        {view.source === "database" ? "قاعدة البيانات" : "ملفات eval/results"}
-      </p>
+      <p className="mt-1 text-xs text-muted">آخر اختبار: {fmtTime(view.latest.createdAt)}</p>
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full min-w-[560px] text-sm tabular-nums [&_td]:px-2 [&_th]:px-2">
-          <thead className="text-xs text-muted">
+        <table className="w-full text-sm [&_td]:px-3 [&_td]:py-2.5 [&_th]:px-3 [&_th]:py-2">
+          <thead className="bg-background/60 text-xs text-muted">
             <tr className="border-b border-border">
-              <th className="py-2 text-start">المؤشر</th>
-              <th className="text-start">آخر تشغيل</th>
-              {holdout && <th className="text-start">بيانات الاختبار المحجوزة</th>}
-              {previous && <th className="text-start">التشغيل السابق</th>}
+              <th className="text-start font-medium">ما الذي نقيسه</th>
+              <th className="text-start font-medium">نتيجة آخر اختبار</th>
+              {holdout && (
+                <th className="text-start font-medium" title="حالات محجوزة لم تُستخدم في تحسين رصّة، فهي أصدق مقياس">
+                  الحالات المحجوزة
+                </th>
+              )}
+              {previous && <th className="text-start font-medium">الاختبار السابق</th>}
             </tr>
           </thead>
           <tbody>
             {props.rows.map(([key, label, f]) => (
               <tr key={key} className="border-b border-border last:border-0">
-                <td className="py-2">{label}</td>
-                <td className="ltr-nums font-medium">{fmt(latest[key], f)}</td>
-                {holdout && <td className="ltr-nums">{fmt(holdout[key], f)}</td>}
-                {previous && <td className="ltr-nums text-muted">{fmt(previous[key], f)}</td>}
+                <td className="leading-6">{label}</td>
+                <td className="whitespace-nowrap font-medium">{fmt(latest[key], f)}</td>
+                {holdout && <td className="whitespace-nowrap">{fmt(holdout[key], f)}</td>}
+                {previous && <td className="whitespace-nowrap text-muted">{fmt(previous[key], f)}</td>}
               </tr>
             ))}
           </tbody>
@@ -145,15 +148,22 @@ function EvalCard(props: {
       </div>
       <details className="mt-3 text-sm">
         <summary className="cursor-pointer text-muted">
-          الحالات اللي ما نجحت (<span className="ltr-nums">{failed.length}</span> من <span className="ltr-nums">{view.results.length}</span>)
+          الحالات التي لم تنجح (<span className="ltr-nums">{failed.length}</span> من <span className="ltr-nums">{view.results.length}</span>)
         </summary>
         <ul className="mt-2 space-y-1 text-xs">
+          {failed.length === 0 && <li className="text-muted">لا توجد حالات فاشلة.</li>}
           {failed.map((r) => (
             <li key={r.caseId} className="ltr-nums rounded border border-border p-2" dir="ltr">
               <span className="font-medium">{r.caseId}</span> {JSON.stringify(r.details).slice(0, 220)}
             </li>
           ))}
         </ul>
+      </details>
+      <details className="mt-2 text-xs">
+        <summary className="cursor-pointer text-muted">تفاصيل تقنية</summary>
+        <p className="mt-2 text-muted" dir="ltr">
+          {props.version(view.latest)} · {view.source === "database" ? "database" : "eval/results"} · {props.command}
+        </p>
       </details>
     </section>
   );
