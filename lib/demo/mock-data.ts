@@ -123,25 +123,26 @@ export function buildMockData(nowMs: number, opts: { promptVersion: string; engi
     // The last 24 hours.
     ["9028", "heavy", "no_box", 70],
     ["9026", "unnamed", "needs_measurement", 95],
+    ["9066", "heavy", "no_box", 640],
     ["9022", "coffee", "done_edited", 130],
     ["9021", "fragileHeavy", "done", 170],
     ["9020", "perfume", "done_after_failure", 210],
     ["9019", "unnamed", "done_measured", 260],
     ["9018", "gift", "done_measured", 320],
-    ["9017", "oils", "done", 380],
+    ["9017", "oils", "done_edited", 380],
     ["9016", "phone", "done_after_failure", 450],
     ["9015", "basket", "done", 520],
     ["9014", "stationery", "done_after_failure", 600],
     ["9013", "perfumes", "done_edited", 690],
     ["9012", "plates", "done", 780],
     ["9011", "bottle", "done_after_failure", 870],
-    ["9010", "dryer", "done", 960],
+    ["9010", "dryer", "done_edited", 960],
     ["9009", "coffee", "done_after_failure", 1050],
     ["9008", "gift", "done_measured", 1140],
     ["9007", "mugs", "done_edited", 1230],
     ["9006", "flat", "done", 1320],
     // Earlier this week.
-    ["9005", "electronics", "done", 1600],
+    ["9005", "electronics", "done_edited", 1600],
     ["9004", "fragileHeavy", "done_after_failure", 2000],
     ["9003", "liquids", "done", 2500],
     ["9002", "perfume", "done_edited", 3100],
@@ -158,7 +159,7 @@ export function buildMockData(nowMs: number, opts: { promptVersion: string; engi
   plan.push(["9030", "liquids", "new", 25], ["9031", "bottle", "new", 300]);
 
   const validatorOrder = "9041"; // one validated-layout rejection, about three days ago
-  const slowOrders = new Set(["9046", "9052"]); // slow product reads, five to six days ago
+  const slowOrders = new Set(["9015", "9020", "9046", "9052"]); // slow product reads: two today, two five to six days ago
 
   for (const [orderId, key, story, endMinutes] of plan) {
     const t = TEMPLATES[key];

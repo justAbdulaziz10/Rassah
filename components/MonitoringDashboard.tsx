@@ -713,7 +713,11 @@ function CorrectionsCard({ data }: { data: DashboardData }) {
                 <XAxis dataKey="i" reversed hide />
                 <YAxis orientation="right" {...AXIS} width={40} allowDecimals={false} />
                 <Tooltip cursor={{ fill: "var(--chart-grid)", opacity: 0.5 }} content={<CorrectionTip />} />
-                <Bar dataKey="ok" stackId="m1" fill="var(--series-1)" maxBarSize={18} isAnimationActive={false} />
+                <Bar dataKey="ok" stackId="m1" fill="var(--series-1)" maxBarSize={18} isAnimationActive={false}>
+                  {points.map((p) => (
+                    <Cell key={p.i} radius={p.fixed ? 0 : 3} />
+                  ))}
+                </Bar>
                 <Bar dataKey="fixed" stackId="m1" fill="var(--series-2)" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>

@@ -59,7 +59,11 @@ describe("mock demo history", () => {
   });
 
   it("breaks the alert rules the demo shows, and only those", () => {
-    const breached = evaluateRules({ ...data, nowMs: NOW }).filter((e) => e.breached).map((e) => e.rule).sort();
+    // The app evaluates the rules over the last 7 days (refreshAlerts).
+    const from = new Date(NOW - 7 * 24 * 3600_000).toISOString();
+    const keep = <T extends { createdAt?: string }>(rows: T[]) => rows.filter((r) => r.createdAt! >= from);
+    const week = { runs: keep(data.runs), extractions: keep(data.extractions), corrections: keep(data.corrections) };
+    const breached = evaluateRules({ ...week, nowMs: NOW }).filter((e) => e.breached).map((e) => e.rule).sort();
     expect(breached).toEqual(["M1_correction_rate", "M4_no_box_rate", "M5_latency_p95", "M6_gemini_failure_rate"]);
   });
 
@@ -73,6 +77,10 @@ describe("mock demo history", () => {
     const day = since(24 * 3600_000);
     expect(hour.m4NoBoxRate.sufficient).toBe(false);
     expect(day.m4NoBoxRate.sufficient).toBe(true);
-    expect(day.m1CorrectionRate.sufficient).toBe(true);
+    // The default 24 h view agrees with the open alerts: corrections and slow reads are over their limits.
+    expect(day.m1CorrectionRate.value).toBeGreaterThan(0.2);
+    expect(day.m5Latency.uncached.value.p95).toBeGreaterThan(8000);
+    expect(day.m4NoBoxRate.value).toBeGreaterThan(0.15);
+    expect(day.m6GeminiFailureRate.value).toBeGreaterThan(0.1);
   });
 });
