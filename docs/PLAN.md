@@ -15,6 +15,7 @@ Merchants who ship multi-item orders pick a carton by eye. Three things go wrong
 3. **Missing product data.** Professional cartonization tools (e.g. Paccurate) assume clean product dimensions already exist in a warehouse system. Small Saudi merchants don't have that data. It lives as free text on their product pages, in Arabic and English, in many formats ("٣٠×٢٠×١٠ سم", "12 x 8 x 4 in", "100 مل").
 
 **What we don't know yet:** we have no merchant interviews. The size of the problem is a *hypothesis*. Before demo day, at least one team member messages 2–3 Salla/Zid merchants (see §11, task T0) and asks how they pick cartons today. Any reply goes in the pitch. If nobody replies, we say so honestly.
+> **Outcome (2026-10-21):** the team decided not to contact merchants during the camp. All data is synthetic, and the pitch and report say so (`docs/discovery.md`).
 
 ## 2. Solution in one sentence
 

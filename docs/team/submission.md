@@ -24,7 +24,7 @@ We are submitting our Project 1 work for *AI Product Development and Monitoring*
 
 - The data is synthetic (30 products, 20 orders), written by the team. All evaluation numbers are on synthetic data and are in `docs/report/results.md`.
 - We do not claim cost savings. The value shown in the evaluation is safety: the naive baseline breaks a packing rule in 20 of 28 layouts, the engine's layouts pass the independent validator 40 of 40.
-- The problem size is a hypothesis. Merchant outreach has no replies recorded (`docs/discovery.md`).
+- The problem size is a hypothesis. We did not contact merchants during the camp (`docs/discovery.md`).
 - The live app uses the free Gemini tier, so a burst of new products can hit its rate limit; the demo catalog is pre-warmed.
 
 Please tell us if anything fails to open, or if you need another format.

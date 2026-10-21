@@ -38,7 +38,7 @@ Method: the reader asks the question, the answerer speaks up to 20 seconds witho
 | Q4 | What happens when a product page has no dimensions? | Gemini infers from clues (ml, pages, pieces) and tags it `inferred`; the engine adds a 15% margin; the UI shows "تقديري" and says check the fit. With no basis it returns `unknown` and the order stops with "needs measurement". Never a silent guess. |
 | Q5 | Where does the 15% margin come from? | Inferred-dimension error rounded up: 12.9% over 12 inferred products, so 15%. Holdout (4 products) is 16.1%, above 15%, so we say it is noisy and a real-merchant pilot should re-measure. |
 | Q7 | Is the data real? | No. 30 synthetic products in the style of Saudi store pages, ground truth labeled separately, 10-product holdout. Next step: a pilot on a real catalog. |
-| C1 | "Is carton choice really a pain?" | Our angle is volumetric shipping, breakage and onboarding new packers. Evidence is whatever `docs/discovery.md` holds; so far it has no replies, so the problem size is a hypothesis. |
+| C1 | "Is carton choice really a pain?" | Our angle is volumetric shipping, breakage and onboarding new packers. We did not contact merchants (all data is synthetic), so the problem size is a hypothesis; the ask is a one-merchant pilot. |
 | C2 | "Precise geometry on estimated inputs?" | Yes, which is why every estimate is tagged, padded by 15% and shown to the packer; the M2 metric tracks how much of the catalog is estimated. |
 
 Log: date, who drilled whom, missed cards. Date: ______ . Missed: ______ .

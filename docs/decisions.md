@@ -9,6 +9,7 @@ One line per decision: date, decision, reason, alternatives considered. The brie
 | 2026-10-20 | Supabase (Postgres) for the catalog cache, events and eval results | Vercel functions are stateless, so a local SQLite file would not persist | SQLite |
 | 2026-10-20 | Gemini (Flash tier, model id in `GEMINI_MODEL`) as the LLM | Team has access to Gemini. Fast and cheap for short extraction. | Claude, GPT |
 | 2026-10-20 | Synthetic product dataset, stated openly in the report | No access to a real merchant catalog within 2 days | Real store pages (time), physically measured products |
+| 2026-10-21 | **No merchant outreach during the camp.** The problem size stays a hypothesis, and the report, deck slide 2, pitch script and Q&A all say so. The ask is a one-merchant pilot. | Team chose to spend the two days on the product, monitoring and evaluation | Messaging 2–3 Salla/Zid stores (planned in PLAN §1, not done) |
 | 2026-10-20 | Next.js 16.4 (create-next-app default) with Cache Components on. No `runtime`/`dynamic` route exports. Per-request work uses `connection()` + `<Suspense>`. | Current default and recommended model. Vercel-native. | Turning Cache Components off (previous caching model) |
 | 2026-10-20 | Node.js 24 LTS (`.nvmrc`, `engines`), `@types/node` 24 | Active LTS. Vitest 5 requires `@types/node` ≥ 22. | Node 22 |
 | 2026-10-20 | Exact dependency versions pinned in `package.json` | Same build locally, in CI and on Vercel | Caret ranges |

@@ -1,20 +1,26 @@
 # Merchant discovery log (P0.7 to P0.9, P11.41)
 
-## Purpose
+## Status (final, 2026-10-21)
 
-Rassah's problem statement is a **hypothesis**: small Saudi merchants choose cartons by eye, and that costs them money (volumetric shipping), breakage and returns. We have no interviews yet (`docs/PLAN.md` section 1). This log records the outreach we do to test the hypothesis, with replies exactly as received. **Never invent a store, a reply or a number.** If nobody replies, the pitch says so.
+**We did not contact any merchants.** In the two-day build the team chose to spend the time on the product, monitoring and evaluation. All data in Rassah is **synthetic**: 30 products written by us in the style of Saudi store pages, plus 20 orders, 5 cartons and illustrative shipping rates (`data/`).
 
-## The 3 questions
+So the problem statement is a **hypothesis**, not a validated finding. Small Saudi merchants choosing cartons by eye, and paying for it in volumetric shipping, breakage and returns, is what we believe. It is not something a merchant has told us.
+
+## What we say (pitch, report, Q&A)
+
+> "We did not interview merchants yet. All our data is synthetic, so the size of the problem is our hypothesis. That is why our ask is a pilot with one real merchant: 100 real orders, the packer and Rassah side by side, measuring carton spend, courier invoices, breakage and packing time."
+
+Do not say or imply that any merchant was contacted, replied, or confirmed the problem.
+
+## Planned outreach (for the pilot, after the camp)
+
+The 3 questions:
 
 1. How do you choose which carton (box size) to use for an order?
 2. Do you see breakage, or oversized boxes that raise the shipping cost?
 3. How many carton sizes do you keep in stock?
 
-## Message to send
-
-Keep it short. Send one message per store, on the channel the store publishes (WhatsApp, Instagram DM, or the contact email), and record the date.
-
-### Arabic (ready to paste)
+### Message (Arabic, ready to paste)
 
 ```
 السلام عليكم ورحمة الله وبركاته،
@@ -27,36 +33,10 @@ Keep it short. Send one message per store, on the channel the store publishes (W
 شاكر لكم وقتكم وتعاونكم.
 ```
 
-### English
-
-```
-Hello,
-I am [name], a student at Tuwaiq Academy, working on a student project that helps online stores choose the right carton for an order.
-Could I ask three quick questions?
-1) How do you choose the carton size for each order?
-2) Do you see broken items, or oversized boxes that raise your shipping cost?
-3) How many carton sizes do you keep in stock?
-Any answer helps. We will not name your store without your permission.
-Thank you for your time.
-```
-
-## How to run it
-
-- Pick 3 stores selling rigid products (perfume, cosmetics, electronics, books) on Salla or Zid (P0.7).
-- Send the message to each (P0.8).
-- Log replies verbatim, or "no reply", by Wed 18:00 (P0.9). Update the final version at P11.41.
-- Do not paraphrase replies, do not edit them to look better, and do not publish a store name or quote without the merchant's permission.
+Rules when outreach happens: log replies verbatim (or "no reply") with the date and channel. Never paraphrase a reply to look better. Never publish a store name or quote without permission.
 
 ## Log
 
-Pick 3 stores selling rigid products (perfume, cosmetics, electronics, books). Rows are intentionally empty until real contact is made.
-
-| # | Store | Platform (Salla / Zid) | Category | Date contacted | Channel | Reply (verbatim) | No reply |
-|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | |
-| 2 | | | | | | | |
-| 3 | | | | | | | |
-
-## What we say in the pitch
-
-Only what is in the table above. If there are no replies: "We contacted N stores and have no replies yet, so the size of the problem is still a hypothesis; the ask is a pilot with one merchant." If there are replies, quote them accurately and with permission.
+| # | Store | Platform | Date | Channel | Reply (verbatim) |
+|---|---|---|---|---|---|
+| — | No outreach done during the camp (team decision, 2026-10-21) | | | | |

@@ -19,18 +19,18 @@
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 33 | 13 | 🟨 In progress |
 | 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 35 | 🟨 In progress |
-| 2 | Database (Supabase) | M3 | Tue night | 30 | 30 | ✅ Done (gate passed) |
+| 2 | Database (Supabase) | M3 | Tue night | 30 | 30 | ✅ Done |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 37 | ✅ Done (gate passed) |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 48 | 48 | ✅ Done (gate passed) |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 37 | ✅ Done |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 48 | 48 | ✅ Done |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
-| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 36 | ✅ Done (gate passed) |
+| 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 36 | ✅ Done |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 40 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 41 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **518** | **447** | |
+| **Total** | | | | **518** | **448** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -120,9 +120,9 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P0.6** (ALL) Create a team chat channel for blockers. Link it in the Blockers section below. — not verifiable by agent; needs team confirmation (no channel link recorded in Blockers)
 
 ### 0B. Customer discovery (problem validation)
-- [ ] **P0.7** (M1, →T0) Pick 3 Salla/Zid stores that sell rigid products (perfume, cosmetics, electronics, books). Note them in `docs/discovery.md`. — not done: the log in `docs/discovery.md` is empty (no stores named)
-- [ ] **P0.8** (M1) Send each a short message: how do they choose cartons, do they see breakage or oversized boxes, and how many carton sizes do they keep. — not done: no outreach recorded; message drafts are ready in `docs/discovery.md`
-- [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies. — not done: no replies and no "no reply" rows logged; the report says so honestly
+- [ ] **P0.7** (M1, →T0) Pick 3 Salla/Zid stores that sell rigid products (perfume, cosmetics, electronics, books). Note them in `docs/discovery.md`. — WON'T DO (team decision 2026-10-21): no merchant outreach during the camp; all data is synthetic; report, deck and Q&A say so (docs/discovery.md)
+- [ ] **P0.8** (M1) Send each a short message: how do they choose cartons, do they see breakage or oversized boxes, and how many carton sizes do they keep. — WON'T DO (team decision 2026-10-21): no merchant outreach during the camp; all data is synthetic; report, deck and Q&A say so (docs/discovery.md)
+- [ ] **P0.9** (M1) Log replies (or "no reply") in `docs/discovery.md` by Wed 18:00. Never invent replies. — WON'T DO (team decision 2026-10-21): no merchant outreach during the camp; all data is synthetic; report, deck and Q&A say so (docs/discovery.md)
 
 ### 0C. Gemini (Google AI Studio)
 - [x] **P0.10** (M3, →T2) Create the Gemini API key in Google AI Studio (C2, C3). **Critical path.** — done 2026-10-21 (key created by the owner)
@@ -814,7 +814,7 @@ CI needs **no** secrets because tests never call external services.
 ### 11E. Supporting documents
 - [x] **P11.39** (M3) `docs/demo-script.md`: exact clicks for the 3 demo orders + outage story + backup plan.
 - [x] **P11.40** (ALL) `docs/decisions.md` complete (all decisions with reasons). — decisions.md complete (2026-10-21)
-- [ ] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest). — file is honest but the outreach log is still empty (P0.7–P0.9); finalize after outreach or leave as is and say so in the pitch
+- [x] **P11.41** (M1) `docs/discovery.md` final (merchant outreach and replies, honest). — ✅ 2026-10-21: final. States that no merchants were contacted and all data is synthetic.
 - [x] **P11.42** (ALL) `docs/report/results.md` final. — marked FINAL 2026-10-21
 - [x] **P11.43** (ALL) Q&A answer sheet: written answers to the PLAN §15 question bank (`docs/qa.md`).
 
