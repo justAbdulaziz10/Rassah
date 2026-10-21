@@ -83,18 +83,18 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 ## 8. Benchmarks and evaluation results
 
-**Packing** (60 fixtures, `eval/results/packing-2026-10-20-engine-0.1.json`):
+**Packing** (60 fixtures, `eval/results/packing-2026-10-21-engine-0.2.json`):
 
 | Metric | Result |
 |---|---|
-| Engine layouts passing the independent validator | **35 / 35 (100%)** |
-| Known-feasible recall (zero-slack exact fills) | **15 / 20 (75%)** |
+| Engine layouts passing the independent validator | **40 / 40 (100%)** |
+| Known-feasible recall (zero-slack exact fills) | **20 / 20 (100%)** |
 | False claims on impossible cases | **0 / 20** |
-| Naive baseline layouts failing the validator | **27 / 35**: liquid tipped 17, on fragile 7, overweight 7, floating 2 |
+| Naive baseline layouts failing the validator | **20 / 28**: liquid tipped 17, on fragile 7, floating 2 |
 | Mean cost saving vs baseline (both valid, n = 8) | 0 SAR (**no savings claimed**) |
-| Runtime p50 / p95 | 0.8 / 30.9 ms |
+| Runtime p50 / p95 | 0.3 / 12.9 ms |
 
-**Evaluation-driven iteration:** recall 3/20 (extreme points) → 9/20 (corner grid + seeded restarts; more restarts gave no gain) → **15/20** ("tight" placement scores, found by diagnosing fixture `feasible-05`).
+**Evaluation-driven iteration:** recall 3/20 (extreme points) → 9/20 (corner grid + seeded restarts; more restarts gave no gain) → 15/20 ("tight" placement scores, found by diagnosing fixture `feasible-05`) → **20/20** (engine-0.2: backtracking anchor search for the exact fills the greedy passes missed). The 0 SAR saving is by construction (both pick the cheapest fitting carton), not a bug.
 
 **Extraction** ⏳ (`npm run eval:extraction`, all / tuning / holdout): dims ±1 cm, weight ±10%, inferred MAPE (→ safety margin), honesty on no-info products, fragile recall/precision, liquid accuracy, parse success, latency, tokens, cost per product.
 

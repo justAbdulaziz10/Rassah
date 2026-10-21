@@ -1,20 +1,23 @@
 // Packing evaluation (docs/stack/07 §3): engine vs naive baseline on 60 fixed fixtures.
-// No network. Writes eval/results/packing-<date>-<engine>.json, and eval_runs/eval_results
-// in Supabase when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are set.
-// Usage: npm run eval:packing
+// No network. Prints the summary. With --write it also writes
+// eval/results/packing-<date>-<engine>.json (tracked in git, so only on purpose).
+// Stores eval_runs/eval_results in Supabase when SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY are set.
+// Usage: npm run eval:packing            (read-only run)
+//        npm run eval:packing -- --write (also write the results file)
 
 import fs from "node:fs";
 import path from "node:path";
 import { loadCartons, loadPackingFixtures } from "../lib/data/load";
 import { baselinePack } from "../lib/engine/baseline";
-import { ENGINE_CONFIG } from "../lib/engine/config";
+import { ENGINE_CONFIG, ENGINE_VERSION as DEFAULT_ENGINE_VERSION } from "../lib/engine/config";
 import { estimateCost } from "../lib/engine/cost";
 import { packUnits } from "../lib/engine/packer";
 import type { Unit, ViolationCode } from "../lib/engine/types";
 import { validateLayout } from "../lib/engine/validator";
 import { hasSupabaseEnv, must, scriptSupabase } from "./_supabase";
 
-const ENGINE_VERSION = process.env.ENGINE_VERSION?.trim() || "engine-0.1";
+const ENGINE_VERSION = process.env.ENGINE_VERSION?.trim() || DEFAULT_ENGINE_VERSION;
+const WRITE = process.argv.includes("--write");
 const VOPTS = { minSupport: ENGINE_CONFIG.minSupport, eps: ENGINE_CONFIG.eps };
 
 function percentile(values: number[], p: number) {
@@ -39,6 +42,9 @@ async function main() {
   const engineMs: number[] = [];
   const costDeltas: number[] = [];
   let engineOnlyValid = 0;
+  let jointlyValidSingleCarton = 0;
+  const emptyBucket = () => ({ sameCost: 0, engineCheaper: 0, engineCostlier: 0 });
+  const vsBaseline = { baselineValid: emptyBucket(), baselineInvalid: emptyBucket() };
 
   for (const f of fixtures) {
     const cartons = allCartons.filter((c) => f.cartonIds.includes(c.id));
@@ -88,8 +94,16 @@ async function main() {
       const baseCost = estimateCost(base.carton, units, shipping, ENGINE_CONFIG.wallCm).totalSar;
       costDelta = round(baseCost - engine.cost.totalSar, 2);
       costDeltas.push(costDelta);
+      if (cartons.length === 1) jointlyValidSingleCarton++;
     } else if (engine.status === "box_found" && engineOk && !(base && baseOk)) {
       engineOnlyValid++;
+    }
+    // Carton price comparison wherever both returned a layout, split by baseline validity.
+    // Where the baseline is invalid, a cheaper baseline carton is the price of the rules it broke.
+    if (engine.status === "box_found" && engineOk && base) {
+      const d = estimateCost(base.carton, units, shipping, ENGINE_CONFIG.wallCm).totalSar - engine.cost.totalSar;
+      const bucket = vsBaseline[baseOk ? "baselineValid" : "baselineInvalid"];
+      bucket[d > 0.005 ? "engineCheaper" : d < -0.005 ? "engineCostlier" : "sameCost"]++;
     }
 
     let passed: boolean | null = null;
@@ -141,29 +155,39 @@ async function main() {
     baselineInvalidByCode: baselineByCode,
     jointlyValid: costDeltas.length,
     meanCostSavingSar: costDeltas.length ? round(costDeltas.reduce((s, v) => s + v, 0) / costDeltas.length, 2) : null,
+    jointlyValidSingleCarton,
+    cartonCostVsBaseline: vsBaseline,
     engineOnlyValid,
     runtimeP50Ms: round(percentile(engineMs, 50) ?? 0, 1),
     runtimeP95Ms: round(percentile(engineMs, 95) ?? 0, 1),
   };
 
-  const date = new Date().toISOString().slice(0, 10);
-  const outDir = path.join(process.cwd(), "eval", "results");
-  fs.mkdirSync(outDir, { recursive: true });
-  const file = path.join(outDir, `packing-${date}-${ENGINE_VERSION}.json`);
-  fs.writeFileSync(file, JSON.stringify({ kind: "packing", createdAt: new Date().toISOString(), summary, results }, null, 2) + "\n");
-
-  console.log("\nPacking evaluation");
+  const fmt = (b: ReturnType<typeof emptyBucket>) =>
+    `same ${b.sameCost}, engine cheaper ${b.engineCheaper}, engine costlier ${b.engineCostlier}`;
+  console.log(`\nPacking evaluation (${ENGINE_VERSION})`);
   console.table({
     "Engine layout validity (must be 100%)": `${engineValid}/${engineLayouts}`,
     "Known-feasible recall": `${feasibleFound}/${feasibleTotal}`,
     "Impossible false claims (must be 0)": `${impossibleClaims}/${impossibleTotal}`,
     "Baseline layouts failing the validator": `${baselineInvalid}/${baselineLayouts}`,
     "Baseline violations by code": JSON.stringify(baselineByCode),
-    "Mean cost saving vs baseline (jointly valid)": `${summary.meanCostSavingSar} SAR over ${costDeltas.length} fixtures`,
+    "Mean cost saving vs baseline (jointly valid)": `${summary.meanCostSavingSar} SAR over ${costDeltas.length} fixtures (${jointlyValidSingleCarton} offer one carton only)`,
+    "Carton cost vs valid baseline": fmt(vsBaseline.baselineValid),
+    "Carton cost vs invalid baseline": fmt(vsBaseline.baselineInvalid),
     "Engine valid where baseline was not": engineOnlyValid,
     "Engine runtime p50 / p95": `${summary.runtimeP50Ms} / ${summary.runtimeP95Ms} ms`,
   });
-  console.log(`Wrote ${path.relative(process.cwd(), file)}`);
+
+  if (WRITE) {
+    const date = new Date().toISOString().slice(0, 10);
+    const outDir = path.join(process.cwd(), "eval", "results");
+    fs.mkdirSync(outDir, { recursive: true });
+    const file = path.join(outDir, `packing-${date}-${ENGINE_VERSION}.json`);
+    fs.writeFileSync(file, JSON.stringify({ kind: "packing", createdAt: new Date().toISOString(), summary, results }, null, 2) + "\n");
+    console.log(`Wrote ${path.relative(process.cwd(), file)}`);
+  } else {
+    console.log("Read-only run: pass --write to save eval/results/packing-<date>-<engine>.json.");
+  }
 
   if (hasSupabaseEnv()) {
     const db = scriptSupabase();
@@ -177,7 +201,7 @@ async function main() {
     );
     console.log(`Stored eval run ${run[0].id} in Supabase.`);
   } else {
-    console.log("Supabase not configured: results saved to the JSON file only.");
+    console.log("Supabase not configured: nothing stored in the database.");
   }
 }
 

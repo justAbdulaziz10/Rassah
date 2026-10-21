@@ -1,0 +1,1866 @@
+{
+  "kind": "packing",
+  "createdAt": "2026-10-21T05:18:08.659Z",
+  "summary": {
+    "fixtures": 60,
+    "seed": 20261022,
+    "engineVersion": "engine-0.2",
+    "engineValidity": 1,
+    "engineLayouts": 40,
+    "knownFeasibleRecall": 1,
+    "knownFeasibleFound": 20,
+    "knownFeasibleTotal": 20,
+    "impossibleFalseClaims": 0,
+    "impossibleTotal": 20,
+    "baselineLayouts": 28,
+    "baselineInvalid": 20,
+    "baselineInvalidRate": 0.714,
+    "baselineInvalidByCode": {
+      "on_fragile": 7,
+      "liquid_tipped": 17,
+      "floating": 2
+    },
+    "jointlyValid": 8,
+    "meanCostSavingSar": 0,
+    "jointlyValidSingleCarton": 1,
+    "cartonCostVsBaseline": {
+      "baselineValid": {
+        "sameCost": 8,
+        "engineCheaper": 0,
+        "engineCostlier": 0
+      },
+      "baselineInvalid": {
+        "sameCost": 12,
+        "engineCheaper": 1,
+        "engineCostlier": 1
+      }
+    },
+    "engineOnlyValid": 32,
+    "runtimeP50Ms": 0.3,
+    "runtimeP95Ms": 12.9
+  },
+  "results": [
+    {
+      "caseId": "feasible-01",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 4,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "volume_fragile_anywhere",
+          "valid": true,
+          "totalSar": 34.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 10.8,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-02",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "restart_19",
+          "valid": true,
+          "totalSar": 50.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 2.7,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-03",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "anchor_search",
+          "valid": true,
+          "totalSar": 44.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 6.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-04",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "volume_tight_x",
+          "valid": true,
+          "totalSar": 37.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 1.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-05",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "FLAT",
+          "strategy": "volume_tight_x",
+          "valid": true,
+          "totalSar": 25.1
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-06",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "anchor_search",
+          "valid": true,
+          "totalSar": 21.9
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 12.9,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-07",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "anchor_search",
+          "valid": true,
+          "totalSar": 24.9
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 5.5,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-08",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume_tight_y",
+          "valid": true,
+          "totalSar": 47.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.6,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-09",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "FLAT",
+          "strategy": "anchor_search",
+          "valid": true,
+          "totalSar": 22.1
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 10.7,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-10",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 4,
+        "engine": {
+          "status": "box_found",
+          "carton": "FLAT",
+          "strategy": "restart_4",
+          "valid": true,
+          "totalSar": 22.1
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-11",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "base_area_fragile_anywhere",
+          "valid": true,
+          "totalSar": 50.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0.8,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-12",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 4,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume_tight_x",
+          "valid": true,
+          "totalSar": 44.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.1,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-13",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "volume_tight_x",
+          "valid": true,
+          "totalSar": 31.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-14",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume_tight_y",
+          "valid": true,
+          "totalSar": 44.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-15",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "FLAT",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 25.1
+        },
+        "baseline": {
+          "carton": "FLAT",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-16",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "restart_9",
+          "valid": true,
+          "totalSar": 21.9
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.8,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-17",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "restart_17",
+          "valid": true,
+          "totalSar": 24.9
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 1.5,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-18",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 4,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume_tight_x",
+          "valid": true,
+          "totalSar": 44.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-19",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "restart_14",
+          "valid": true,
+          "totalSar": 47.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 2.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "feasible-20",
+      "passed": true,
+      "details": {
+        "group": "known_feasible",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "anchor_search",
+          "valid": true,
+          "totalSar": 31.6
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 3.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "impossible-01",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0.1,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-02",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-03",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "XL",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-04",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-05",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-06",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-07",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-08",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-09",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-10",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-11",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-12",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "XL",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-13",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-14",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-15",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-16",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-17",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "impossible-18",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 1,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "carton": "XL",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "liquid_too_tall"
+      }
+    },
+    {
+      "caseId": "impossible-19",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 2,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "oversize",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "oversize"
+      }
+    },
+    {
+      "caseId": "impossible-20",
+      "passed": true,
+      "details": {
+        "group": "impossible",
+        "units": 6,
+        "engine": {
+          "status": "no_box",
+          "attempts": [
+            {
+              "cartonId": "S",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "FLAT",
+              "outcome": "oversize",
+              "strategy": null
+            },
+            {
+              "cartonId": "M",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "L",
+              "outcome": "overweight",
+              "strategy": null
+            },
+            {
+              "cartonId": "XL",
+              "outcome": "overweight",
+              "strategy": null
+            }
+          ]
+        },
+        "baseline": {
+          "status": "no_layout"
+        },
+        "costDeltaSar": null,
+        "ms": 0,
+        "impossibleReason": "overweight"
+      }
+    },
+    {
+      "caseId": "random-01",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 8,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 44.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 4,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-02",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 2,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0.8,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-03",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 2.4,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-04",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-05",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "XL",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 66.8
+        },
+        "baseline": {
+          "carton": "XL",
+          "valid": false,
+          "violations": [
+            "liquid_tipped",
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 118.6,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-06",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 6.7,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-07",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 1,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 21.9
+        },
+        "baseline": {
+          "carton": "S",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0.1,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-08",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 1,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 18.9
+        },
+        "baseline": {
+          "carton": "S",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0.1,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-09",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 7,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 2.7,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-10",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 8,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 41.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped",
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 142.5,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-11",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 1.4,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-12",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 8,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 3.1,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-13",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "base_area",
+          "valid": true,
+          "totalSar": 31.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 1.4,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-14",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 8,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 41.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 3.6,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-15",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 3,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 28.6
+        },
+        "baseline": {
+          "carton": "M",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-16",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 1,
+        "engine": {
+          "status": "box_found",
+          "carton": "S",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 18.9
+        },
+        "baseline": {
+          "carton": "S",
+          "valid": true,
+          "violations": []
+        },
+        "costDeltaSar": 0,
+        "ms": 0.1,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-17",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 5,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "liquid_tipped",
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0.8,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-18",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 6,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "L",
+          "valid": false,
+          "violations": [
+            "on_fragile"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 1.3,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-19",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 2,
+        "engine": {
+          "status": "box_found",
+          "carton": "M",
+          "strategy": "base_area",
+          "valid": true,
+          "totalSar": 25.6
+        },
+        "baseline": {
+          "carton": "M",
+          "valid": false,
+          "violations": [
+            "liquid_tipped",
+            "floating"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 0.2,
+        "impossibleReason": null
+      }
+    },
+    {
+      "caseId": "random-20",
+      "passed": true,
+      "details": {
+        "group": "random",
+        "units": 8,
+        "engine": {
+          "status": "box_found",
+          "carton": "L",
+          "strategy": "volume",
+          "valid": true,
+          "totalSar": 38.6
+        },
+        "baseline": {
+          "carton": "M",
+          "valid": false,
+          "violations": [
+            "liquid_tipped",
+            "on_fragile",
+            "floating"
+          ]
+        },
+        "costDeltaSar": null,
+        "ms": 182.8,
+        "impossibleReason": null
+      }
+    }
+  ]
+}
