@@ -1,5 +1,7 @@
 # Rassah: Master Plan
 
+> **Scope: a two-day MVP.** Tuwaiq Academy's Project 1 brief asked us to come up with an AI product, build it end to end between 20 and 22 Oct 2026, deploy it publicly so anyone can try it, and monitor it. This plan covers that MVP only; what would come after is in [CHECKLIST.md](CHECKLIST.md#post-camp-backlog-not-tracked-for-thursday).
+>
 > Owner: the whole team (3 members). Written 20 Oct 2026; "As built" notes added 21 Oct 2026 where the build differs from the plan (reasons in [decisions.md](decisions.md)). Demo: Thu 22 Oct 2026 (3-minute pitch + 10-minute Q&A).
 > Every member must be able to explain **every** section of this plan, not only their own part. Judges may ask any member about any component.
 > **Progress is tracked only in [CHECKLIST.md](CHECKLIST.md).** This plan explains the what and why. The checklist tracks what is done.

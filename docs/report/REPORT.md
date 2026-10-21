@@ -1,10 +1,12 @@
 # Rassah (رصّة): AI Packing Assistant. Project Report
 
-**Project 1: AI Product Development and Monitoring** · Tuwaiq Academy × Startupbootcamp × Meta · 22 October 2026
-**Team:** M1 (AI & Data) · M2 (Engine & UI) · M3 (Platform & Monitoring)
-**Date:** 2026-10-22
+**Project 1: AI Product Development and Monitoring** · Tuwaiq Academy × Startupbootcamp × Meta · 22 October 2026\
+**Team:** Abdulaziz Alkhlaiwe, Hana, Bayan. Lanes: AI & Data, Engine & UI, Platform & Monitoring\
+**Date:** 2026-10-22\
 **Live demo:** https://rassah.vercel.app · **Repository:** https://github.com/justAbdulaziz10/Rassah
 
+> **Rassah is an MVP built in two days.** The brief asked each team to come up with an AI product, build it end to end between 20 and 22 October 2026, deploy it so anyone can try it, and monitor it. It runs on synthetic data, with no login and no live store integration (see section 11, Limitations).
+>
 > Every number comes from `eval/results/*.json`, `docs/report/results.md`, `docs/demo-script.md` or the dashboard.
 
 ---

@@ -9,6 +9,6 @@
 ## Checks
 
 - [ ] `npm run check` passes locally
-- [ ] Vercel preview opened and the changed flow tried
+- [ ] Changed flow tried locally (`DATA_BACKEND=memory npm run dev`)
 - [ ] `docs/CHECKLIST.md` boxes ticked for what this PR completes
 - [ ] Numbers in docs still match `eval/results/*.json`

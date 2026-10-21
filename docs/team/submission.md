@@ -9,7 +9,7 @@ Dear [instructor name],
 
 We are submitting our Project 1 work for *AI Product Development and Monitoring*.
 
-**Project:** Rassah (رصّة). A packer types an order number and gets the cheapest safe carton, numbered Arabic packing instructions and a 3D layout. Gemini reads messy Arabic and English product pages, a packing search computes the layout, and an independent validator checks it. Monitoring covers seven metrics with alert rules and a trace for every run.
+**Project:** Rassah (رصّة), an MVP we came up with and built end to end in two days, deployed publicly so anyone can try it. A packer types an order number and gets the cheapest safe carton, numbered Arabic packing instructions and a 3D layout. Gemini reads messy Arabic and English product pages, a packing search computes the layout, and an independent validator checks it. Monitoring covers seven metrics with alert rules and a trace for every run.
 
 **Links**
 

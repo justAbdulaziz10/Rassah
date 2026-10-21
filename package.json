@@ -2,6 +2,13 @@
   "name": "rassah",
   "version": "0.1.0",
   "private": true,
+  "description": "Rassah (رصّة): AI packing assistant MVP built in two days for Tuwaiq Academy. Gemini reads product pages, a 3D packing engine picks the cheapest safe carton.",
+  "homepage": "https://rassah.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justAbdulaziz10/Rassah.git"
+  },
+  "license": "MIT",
   "engines": {
     "node": "24.x"
   },
