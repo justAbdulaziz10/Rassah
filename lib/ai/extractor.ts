@@ -44,6 +44,11 @@ export interface ExtractDeps {
   priceOutputPerM: number;
   timeoutMs?: number;
   maxAttempts?: number;
+  /**
+   * Shared end time for every call in one request, on the `now` clock. Attempts are shortened to
+   * fit and no retry starts after it, so a slow model cannot push a pack past the route's limit.
+   */
+  deadlineAt?: number;
   /** Demo fault injection: fail before any network call. */
   simulateOutage?: boolean;
   sleep?: (ms: number) => Promise<void>;
@@ -152,10 +157,21 @@ export async function extractFacts(
     return { facts: null, event };
   }
 
+  const deadlineAt = deps.deadlineAt ?? Infinity;
+  const timedOut = (afterMs: number): ExtractOutcome => {
+    event.latencyMs = now() - start;
+    event.status = "timeout";
+    event.errorCode = "timeout";
+    event.errorMessage = `No response within ${Math.round(afterMs)} ms`;
+    return { facts: null, event };
+  };
+
   let response: GenerateResponse | null = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const attemptMs = Math.min(timeoutMs, deadlineAt - now());
+    if (attemptMs <= 0) return timedOut(now() - start);
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), attemptMs);
     try {
       response = await deps.generate({ system: SYSTEM_PROMPT, user: buildUserPrompt(product), signal: controller.signal });
       break;
@@ -163,16 +179,16 @@ export async function extractFacts(
       const aborted = controller.signal.aborted;
       const ge = err instanceof GenerateError ? err : null;
       if (!aborted && ge?.retryable && attempt < maxAttempts) {
-        // Exponential backoff with jitter: ~1 s, then ~3 s.
-        await sleep((attempt === 1 ? 1000 : 3000) + Math.floor(random() * 300));
-        continue;
+        // Exponential backoff with jitter: ~1 s, then ~3 s. No retry when the wait alone would use up the budget.
+        const backoffMs = (attempt === 1 ? 1000 : 3000) + Math.floor(random() * 300);
+        if (now() + backoffMs < deadlineAt) {
+          await sleep(backoffMs);
+          continue;
+        }
       }
+      if (aborted) return timedOut(attemptMs);
       event.latencyMs = now() - start;
-      if (aborted) {
-        event.status = "timeout";
-        event.errorCode = "timeout";
-        event.errorMessage = `No response within ${timeoutMs} ms`;
-      } else if (ge) {
+      if (ge) {
         event.status = ge.status;
         event.errorCode = ge.code;
         event.errorMessage = ge.message.slice(0, 300);

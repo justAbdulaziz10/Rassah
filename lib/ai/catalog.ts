@@ -1,6 +1,6 @@
 import "server-only";
-// Catalog cache: return stored facts when fresh, extract the rest with Gemini (bounded concurrency).
-// Manual or corrected facts are never overwritten by extraction. Offline-seeded facts (memory
+// Catalog cache: return stored facts when fresh, extract the rest with Gemini (bounded concurrency,
+// one shared time budget). Manual or corrected facts are never overwritten by extraction. Offline-seeded facts (memory
 // backend only) count as a cache hit, but an admin re-extract (force) may replace them.
 
 import type { Repo } from "@/lib/db/repo";
@@ -17,7 +17,13 @@ export interface CatalogRequest {
   /** Re-extract even if cached (admin). Still never overwrites manual/corrected facts. */
   force?: boolean;
   nowIso?: () => string;
+  /** Total time for every model call in this request (default 40 s, inside the routes' 60 s limit). */
+  budgetMs?: number;
+  /** Rows the caller already read for these ids, to skip a second round trip. */
+  preloaded?: { products: Product[]; facts: Map<string, StoredFacts> };
 }
+
+const DEFAULT_BUDGET_MS = 40_000;
 
 export interface CatalogResult {
   facts: Map<string, StoredFacts>;
@@ -55,7 +61,9 @@ function isFresh(cached: StoredFacts, product: Product): boolean {
 export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogResult> {
   const nowIso = req.nowIso ?? (() => new Date().toISOString());
   const productIds = [...new Set(req.productIds)]; // a repeated id must not call the model twice
-  const [products, cached] = await Promise.all([req.repo.getProducts(productIds), req.repo.getFacts(productIds)]);
+  const [products, cached] = req.preloaded
+    ? [req.preloaded.products, req.preloaded.facts]
+    : await Promise.all([req.repo.getProducts(productIds), req.repo.getFacts(productIds)]);
   const byId = new Map(products.map((p) => [p.id, p]));
   const missingProducts = productIds.filter((id) => !byId.has(id));
 
@@ -74,46 +82,35 @@ export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogRes
     }
   }
 
-  const outcomes = await mapLimit(toExtract, req.concurrency ?? 2, (p) => extractFacts(p, req.deps));
-  const events: ExtractionEvent[] = [];
+  const now = req.deps.now ?? (() => performance.now());
+  const deps = { ...req.deps, deadlineAt: now() + (req.budgetMs ?? DEFAULT_BUDGET_MS) };
   let degraded = false;
-  // A packer may have saved a measurement while the model was reading (up to ~20 s). Check again so
-  // the AI result never replaces it.
-  let latest = new Map<string, StoredFacts>();
-  const extractedIds = toExtract.filter((_, i) => outcomes[i].facts).map((p) => p.id);
-  if (extractedIds.length > 0) {
-    try {
-      latest = await req.repo.getFacts(extractedIds);
-    } catch {
-      // Could not re-check: fall back to the first read (the write below still reports its own failure).
+  // Each product is saved as soon as it is read, so a slow neighbour cannot lose it.
+  const events = await mapLimit(toExtract, req.concurrency ?? 2, async (product): Promise<ExtractionEvent> => {
+    const { facts: extracted, event } = await extractFacts(product, deps);
+    if (extracted) {
+      const stored: StoredFacts = {
+        ...extracted,
+        origin: "ai",
+        sourceHash: product.sourceHash,
+        model: req.deps.model,
+        promptVersion: req.deps.promptVersion,
+        extractedAt: nowIso(),
+        updatedAt: nowIso(),
+      };
+      try {
+        // A packer may have measured it while the model was reading; then the measurement stays.
+        facts.set(product.id, await req.repo.saveExtractedFacts(stored));
+      } catch {
+        facts.set(product.id, stored);
+        degraded = true;
+      }
     }
-  }
-  for (let i = 0; i < toExtract.length; i++) {
-    const product = toExtract[i];
-    const { facts: extracted, event } = outcomes[i];
-    events.push({ ...event, runId: req.runId, trigger: req.trigger });
-    if (!extracted) continue; // failed: the product stays unknown for this request
-    const now = latest.get(product.id);
-    if (now && isAuthoritative(now)) {
-      facts.set(product.id, now);
-      continue;
-    }
-    const stored: StoredFacts = {
-      ...extracted,
-      origin: "ai",
-      sourceHash: product.sourceHash,
-      model: req.deps.model,
-      promptVersion: req.deps.promptVersion,
-      extractedAt: nowIso(),
-      updatedAt: nowIso(),
-    };
-    facts.set(product.id, stored);
-    try {
-      await req.repo.upsertFacts(stored);
-    } catch {
-      degraded = true;
-    }
-  }
+    // Failed: the product stays unknown for this request.
+    return { ...event, runId: req.runId, trigger: req.trigger };
+  });
 
-  return { facts, events, cacheHits, cacheMisses: toExtract.length, degraded, missingProducts };
+  // Request order, not finish order, so stored runs list products the same way every time.
+  const ordered = new Map(productIds.filter((id) => facts.has(id)).map((id) => [id, facts.get(id)!]));
+  return { facts: ordered, events, cacheHits, cacheMisses: toExtract.length, degraded, missingProducts };
 }

@@ -43,13 +43,16 @@ export interface PackResponse {
   cost: CostEstimate | null;
   reason: string | null;
   attempts: CartonAttempt[];
-  productsToMeasure: Array<{ productId: string; name: string; failedExtraction: boolean }>;
+  /** `known` holds what is already stored (flags, any measured side), so measuring keeps it instead of resetting it. */
+  productsToMeasure: Array<{ productId: string; name: string; failedExtraction: boolean; known: MeasureStart }>;
   /** origin is null when the product has no stored facts. */
   lines: Array<{ productId: string; name: string; qty: number; dimsSource: DataSource; origin: StoredFacts["origin"] | null }>;
   timings: { extractMs: number; packMs: number; totalMs: number };
   cache: { hits: number; misses: number };
   monitoring: { saved: boolean };
   errorMessage: string | null;
+  /** Machine-readable cause when status is error or not_found (same code as the stored run). */
+  errorCode: string | null;
   /** Where the order came from: "rassah" (own database) or the external platform's name. */
   orderSource: string;
   /**
@@ -57,6 +60,16 @@ export interface PackResponse {
    * like a normal answer. null when no split works either (e.g. one item fits no carton).
    */
   split: PackSplitView | null;
+}
+
+export interface MeasureStart {
+  lengthCm: number | null;
+  widthCm: number | null;
+  heightCm: number | null;
+  weightG: number | null;
+  fragile: boolean;
+  liquid: boolean;
+  sensitive: boolean;
 }
 
 interface PackSplitView {
@@ -86,6 +99,8 @@ export interface PackRequest {
    * never written to Rassah's tables; its products must already be in Rassah's catalog.
    */
   externalOrders?: (orderId: string) => Promise<ExternalOrder | null>;
+  /** Runs the alert check after the response is sent (the route passes `after`); awaited inline when absent. */
+  defer?: (task: () => Promise<void>) => void;
 }
 
 export interface ExternalOrder {
@@ -118,6 +133,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
     cache: { hits: 0, misses: 0 },
     monitoring: { saved: true },
     errorMessage: null,
+    errorCode: null,
     orderSource: "rassah",
     split: null,
   };
@@ -170,12 +186,18 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
         externalError = (err as Error)?.message?.slice(0, 200) ?? "store unreachable";
       }
     }
-    const missing = order
-      ? await req.repo.getProducts(order.lines.map((l) => l.productId)).then((ps) => {
-          const known = new Set(ps.map((p) => p.id));
-          return order!.lines.map((l) => l.productId).filter((id) => !known.has(id));
-        })
-      : [];
+    const productIds = order ? [...new Set(order.lines.map((l) => l.productId))] : [];
+    // Everything the pack needs, in one round trip.
+    const [products, stored, cartons, rates] = order
+      ? await Promise.all([
+          req.repo.getProducts(productIds),
+          req.repo.getFacts(productIds),
+          req.repo.listCartons(),
+          req.repo.getShippingRates(),
+        ])
+      : [[], new Map<string, StoredFacts>(), [], null];
+    const names = new Map(products.map((p) => [p.id, p.name]));
+    const missing = productIds.filter((id) => !names.has(id));
     if (externalError) {
       response.status = "error";
       response.errorMessage = `Could not reach the store's orders API: ${externalError}`;
@@ -189,16 +211,15 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
       response.errorMessage = `Products not in Rassah's catalog yet: ${missing.join(", ")}`;
       run.errorCode = "product_not_in_catalog";
     } else {
-      const productIds = order.lines.map((l) => l.productId);
-      const [products, cartons, rates] = await Promise.all([
-        req.repo.getProducts(productIds),
-        req.repo.listCartons(),
-        req.repo.getShippingRates(),
-      ]);
-      const names = new Map(products.map((p) => [p.id, p.name]));
-
       const tExtract = now();
-      const catalog = await getOrExtractFacts({ repo: req.repo, productIds, deps: req.deps, trigger: "order", runId: req.runId });
+      const catalog = await getOrExtractFacts({
+        repo: req.repo,
+        productIds,
+        deps: req.deps,
+        trigger: "order",
+        runId: req.runId,
+        preloaded: { products, facts: stored },
+      });
       run.extractMs = now() - tExtract;
       extractionEvents = catalog.events;
       run.cacheHits = catalog.cacheHits;
@@ -251,16 +272,28 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
       };
 
       const tPack = now();
-      const result = packOrder(lines, catalog.facts as Map<string, ProductFacts>, cartons, rates, config);
+      const result = packOrder(lines, catalog.facts as Map<string, ProductFacts>, cartons, rates!, config);
       run.packMs = now() - tPack;
 
       if (result.status === "needs_measurement") {
         response.status = run.status = "needs_measurement";
-        response.productsToMeasure = result.productIds.map((id) => ({
-          productId: id,
-          name: names.get(id) ?? id,
-          failedExtraction: failedExtraction.has(id),
-        }));
+        response.productsToMeasure = result.productIds.map((id) => {
+          const f = catalog.facts.get(id);
+          return {
+            productId: id,
+            name: names.get(id) ?? id,
+            failedExtraction: failedExtraction.has(id),
+            known: {
+              lengthCm: f?.lengthCm ?? null,
+              widthCm: f?.widthCm ?? null,
+              heightCm: f?.heightCm ?? null,
+              weightG: f?.weightG ?? null,
+              fragile: f?.fragile ?? false,
+              liquid: f?.liquid ?? false,
+              sensitive: f?.sensitive ?? false,
+            },
+          };
+        });
       } else if (result.status === "invalid_input") {
         response.status = "error";
         run.errorCode = "invalid_input";
@@ -312,21 +345,19 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
   response.timings = { extractMs: Math.round(run.extractMs), packMs: Math.round(run.packMs), totalMs: Math.round(run.totalMs) };
   response.cache = { hits: run.cacheHits, misses: run.cacheMisses };
   if (response.status === "not_found") run.status = "error";
+  response.errorCode = run.errorCode;
 
   // Monitoring writes must never break the product: on failure the result is still returned.
-  try {
-    await req.repo.insertOrderRun(run);
-    await req.repo.insertExtractionEvents(extractionEvents);
-  } catch {
-    response.monitoring.saved = false;
-  }
-  if (run.monitoringDegraded) response.monitoring.saved = false;
+  const saved = await Promise.allSettled([req.repo.insertOrderRun(run), req.repo.insertExtractionEvents(extractionEvents)]);
+  if (run.monitoringDegraded || saved.some((r) => r.status === "rejected")) response.monitoring.saved = false;
 
-  try {
-    await refreshAlerts(req.repo, nowMs(), req.webhookUrl);
-  } catch {
-    // Alert evaluation is best effort; the dashboard re-evaluates on load.
-  }
+  // Alert evaluation is best effort (the dashboard re-evaluates on load), so it never delays or fails the pack.
+  const alerts = () => refreshAlerts(req.repo, nowMs(), req.webhookUrl).then(
+    () => {},
+    () => {},
+  );
+  if (req.defer) req.defer(alerts);
+  else await alerts();
 
   return response;
 }

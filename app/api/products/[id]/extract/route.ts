@@ -17,15 +17,20 @@ export async function POST(request: Request, ctx: RouteContext<"/api/products/[i
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
 
-  const result = await getOrExtractFacts({
-    repo,
-    productIds: [id],
-    deps: serverExtractDeps(),
-    trigger: "admin",
-    runId: null,
-    force: true,
-    concurrency: 1,
-  });
+  let result: Awaited<ReturnType<typeof getOrExtractFacts>>;
+  try {
+    result = await getOrExtractFacts({
+      repo,
+      productIds: [id],
+      deps: serverExtractDeps(),
+      trigger: "admin",
+      runId: null,
+      force: true,
+      concurrency: 1,
+    });
+  } catch {
+    return jsonError(503, "Could not read the product from the database");
+  }
   try {
     await repo.insertExtractionEvents(result.events);
   } catch {

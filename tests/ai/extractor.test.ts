@@ -124,6 +124,28 @@ describe("extractFacts: reliability", () => {
     expect(r.event.status).toBe("timeout");
   });
 
+  it("a shared deadline shortens the call and stops retries that would not fit", async () => {
+    const limited = vi.fn<GenerateFn>().mockRejectedValue(new GenerateError("429", "rate_limited", "http_429", true));
+    // The fake clock advances 10 ms per read: 500 ms left is less than the 1 s backoff, so no retry.
+    const r = await extractFacts(product, deps(limited, { deadlineAt: 500 }));
+    expect(limited).toHaveBeenCalledTimes(1);
+    expect(r.event.status).toBe("rate_limited");
+
+    const hang: GenerateFn = ({ signal }) =>
+      new Promise((_, reject) => signal.addEventListener("abort", () => reject(new Error("aborted"))));
+    const started = performance.now();
+    const slow = await extractFacts(product, deps(hang, { now: () => performance.now(), deadlineAt: started + 30 }));
+    expect(slow.event.status).toBe("timeout");
+    expect(performance.now() - started).toBeLessThan(1000); // not the 20 s per-call default
+  });
+
+  it("makes no call once the deadline has passed", async () => {
+    const generate = vi.fn<GenerateFn>();
+    const r = await extractFacts(product, deps(generate, { deadlineAt: 0 }));
+    expect(generate).not.toHaveBeenCalled();
+    expect(r.event).toMatchObject({ status: "timeout", errorCode: "timeout" });
+  });
+
   it("simulated outage fails before any network call", async () => {
     const generate = vi.fn<GenerateFn>();
     const r = await extractFacts(product, deps(generate, { simulateOutage: true }));

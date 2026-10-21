@@ -41,4 +41,11 @@ describe("DELETE /api/products/[id]/facts", () => {
     expect(Number(blocked.headers.get("retry-after"))).toBeGreaterThanOrEqual(1);
     expect((await call("198.51.100.2")).status).toBe(200);
   });
+
+  it("answers 503 with a JSON error when the database fails", async () => {
+    vi.spyOn(repo, "deleteFacts").mockRejectedValue(new Error("connection reset"));
+    const res = await call();
+    expect(res.status).toBe(503);
+    expect(await res.json()).toMatchObject({ error: expect.any(String) });
+  });
 });

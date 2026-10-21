@@ -98,6 +98,13 @@ export class MemoryRepo implements Repo {
     this.guard("upsertFacts");
     this.facts.set(f.productId, f);
   }
+  async saveExtractedFacts(f: StoredFacts) {
+    this.guard("saveExtractedFacts");
+    const now = this.facts.get(f.productId);
+    if (now && (now.origin === "manual" || now.origin === "ai_corrected")) return now;
+    this.facts.set(f.productId, f);
+    return f;
+  }
   async deleteFacts(productId: string | "all") {
     if (productId === "all") this.facts.clear();
     else this.facts.delete(productId);

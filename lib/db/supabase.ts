@@ -377,6 +377,24 @@ export class SupabaseRepo implements Repo {
     check("upsertFacts", await this.db.from("product_facts").upsert(fromFacts(facts), { onConflict: "product_id" }));
   }
 
+  async saveExtractedFacts(facts: StoredFacts) {
+    const row = fromFacts(facts);
+    const table = () => this.db.from("product_facts");
+    // Replace only rows that are still machine-made; a manual or corrected row is left alone.
+    const updated = check(
+      "saveExtractedFacts",
+      await table().update(row).eq("product_id", facts.productId).in("origin", ["ai", "seeded"]).select("product_id"),
+    ) as Row[];
+    if (updated.length > 0) return facts;
+    // No row yet: insert, unless one appeared in the meantime (then it is the authoritative one).
+    const inserted = check(
+      "saveExtractedFacts",
+      await table().upsert(row, { onConflict: "product_id", ignoreDuplicates: true }).select("product_id"),
+    ) as Row[];
+    if (inserted.length > 0) return facts;
+    return (await this.getFacts([facts.productId])).get(facts.productId) ?? facts;
+  }
+
   async deleteFacts(productId: string | "all") {
     const q = this.db.from("product_facts").delete();
     check("deleteFacts", productId === "all" ? await q.neq("product_id", "") : await q.eq("product_id", productId));

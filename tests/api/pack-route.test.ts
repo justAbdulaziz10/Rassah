@@ -4,7 +4,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRepo } from "@/lib/db/memory";
 
-vi.mock("next/server", () => ({ connection: async () => {} }));
+vi.mock("next/server", () => ({ connection: async () => {}, after: (task: () => unknown) => void task() }));
 
 let repo: MemoryRepo;
 vi.mock("@/lib/http", async (importOriginal) => {

@@ -77,6 +77,21 @@ describe("getOrExtractFacts", () => {
     expect(r.events).toHaveLength(1); // the model call is still recorded
   });
 
+  it("saves each product as soon as it is read, before a slower one finishes", async () => {
+    const { repo, generate, deps } = setup();
+    let savedBeforeSlowFinished = false;
+    generate.mockImplementation(async ({ user }) => {
+      if (user.includes("desc p-02")) {
+        for (let i = 0; i < 20 && !repo.facts.has("p-01"); i++) await new Promise((r) => setTimeout(r, 1));
+        savedBeforeSlowFinished = repo.facts.has("p-01");
+      }
+      return { text: JSON.stringify(RESPONSES.explicitPerfume), inputTokens: 1, outputTokens: 1, thinkingTokens: 0, blocked: false };
+    });
+    const r = await getOrExtractFacts({ repo, productIds: ["p-02", "p-01"], deps, trigger: "order", runId: null });
+    expect(savedBeforeSlowFinished).toBe(true);
+    expect([...r.facts.keys()]).toEqual(["p-02", "p-01"]); // request order, not finish order
+  });
+
   it("writes nothing to the cache when extraction fails, but still records the event", async () => {
     const { repo, deps } = setup();
     const r = await getOrExtractFacts({ repo, productIds: ["p-01"], deps: { ...deps, simulateOutage: true }, trigger: "order", runId: "r" });

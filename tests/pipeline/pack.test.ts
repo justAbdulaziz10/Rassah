@@ -72,6 +72,17 @@ describe("runPack", () => {
     expect(repo.orderRuns[0].unitSources.unknown).toBe(2);
   });
 
+  it("needs_measurement keeps what is already known, so measuring does not reset the flags", async () => {
+    const { repo, deps } = setup({ ...RESPONSES.noInfo, fragile: true, weightSource: "page", weightG: 400 });
+    const r = await runPack(req(repo, deps));
+    expect(r.status).toBe("needs_measurement");
+    expect(r.productsToMeasure[0].known).toEqual({ lengthCm: null, widthCm: null, heightCm: null, weightG: 400, fragile: true, liquid: false, sensitive: false });
+    // The form sends only what changed: the three sides. The stored flag and weight survive.
+    await updateProductFacts({ repo, productId: "p-01", changes: { lengthCm: 10, widthCm: 8, heightCm: 5 }, runId: "run-1" });
+    expect(repo.facts.get("p-01")).toMatchObject({ fragile: true, weightG: 400, dimsSource: "manual" });
+    expect(repo.corrections.map((c) => c.field)).toEqual(["length_cm", "width_cm", "height_cm"]);
+  });
+
   it("no_box when nothing fits", async () => {
     const { repo, deps } = setup({ ...RESPONSES.explicitPerfume, lengthCm: 100, widthCm: 60, heightCm: 50 });
     const r = await runPack(req(repo, deps));
@@ -111,6 +122,18 @@ describe("runPack", () => {
     for (let i = 0; i < 3; i++) await runPack(req(repo, { ...deps, simulateOutage: true }, "1001", `fail-${i}`));
     expect(repo.alerts.map((a) => a.rule)).toContain("M6_gemini_failure_rate");
   });
+
+  it("with defer, the alert check waits until after the answer", async () => {
+    const { repo, deps } = setup();
+    const deferred: Array<() => Promise<void>> = [];
+    for (let i = 0; i < 3; i++) {
+      const r = await runPack({ ...req(repo, { ...deps, simulateOutage: true }, "1001", `fail-${i}`), defer: (t) => deferred.push(t) });
+      expect(r.status).toBe("needs_measurement");
+    }
+    expect(repo.alerts).toHaveLength(0);
+    await Promise.all(deferred.map((t) => t()));
+    expect(repo.alerts.map((a) => a.rule)).toContain("M6_gemini_failure_rate");
+  });
 });
 
 describe("corrections and actions", () => {
@@ -131,6 +154,16 @@ describe("corrections and actions", () => {
     ]);
     expect(repo.facts.get("p-01")).toMatchObject({ heightCm: 18, origin: "ai_corrected", dimsSource: "manual", weightSource: "page" });
     expect(repo.orderRuns[0].employeeAction).toBe("edited");
+  });
+
+  it("edit on a run that was never saved still keeps the correction, unlinked", async () => {
+    const { repo, deps } = setup();
+    await runPack(req(repo, deps));
+    const res = await applyRunAction(repo, "lost-run", { action: "edit", productId: "p-01", changes: { heightCm: 18 } });
+    expect(res.action).toBe("edited");
+    expect(repo.facts.get("p-01")).toMatchObject({ heightCm: 18 });
+    expect(repo.corrections.at(-1)).toMatchObject({ runId: null, field: "height_cm" });
+    await expect(applyRunAction(repo, "lost-run", { action: "confirm" })).rejects.toThrow(/not found/);
   });
 
   it("manual measurement of an unknown product creates manual facts", async () => {

@@ -227,7 +227,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
               <FactsForm
                 mode="measure"
                 submitLabel="احفظ القياس وأعد الحساب"
-                initial={{ lengthCm: null, widthCm: null, heightCm: null, weightG: null, fragile: false, liquid: false, sensitive: false }}
+                initial={p.known}
                 onSubmit={(c) => saveFacts(p.productId, c, false)}
               />
             </div>
@@ -392,11 +392,13 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
         </section>
       )}
 
-      <p className="text-xs text-muted print:hidden">
-        <Link href={`/monitoring?run=${d.runId}`} className="underline underline-offset-4 hover:text-foreground">
-          سجل هذا التجهيز في صفحة الأداء
-        </Link>
-      </p>
+      {d.monitoring.saved && (
+        <p className="text-xs text-muted print:hidden">
+          <Link href={`/monitoring?run=${d.runId}`} className="underline underline-offset-4 hover:text-foreground">
+            سجل هذا التجهيز في صفحة الأداء
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

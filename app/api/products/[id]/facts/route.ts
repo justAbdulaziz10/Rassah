@@ -39,7 +39,11 @@ export async function DELETE(request: Request, ctx: RouteContext<"/api/products/
   if (!PRODUCT_ID.test(id)) return jsonError(400, "Invalid product id");
   const repo = repoOrError();
   if (repo instanceof Response) return repo;
-  await repo.deleteFacts(id);
+  try {
+    await repo.deleteFacts(id);
+  } catch {
+    return jsonError(503, "Could not clear the product's data");
+  }
   log({ stage: "clear-facts", productId: id });
   return Response.json({ cleared: id });
 }

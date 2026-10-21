@@ -1,4 +1,4 @@
-import { connection } from "next/server";
+import { after, connection } from "next/server";
 import { isUuid, jsonError, log, readJson, repoOrError } from "@/lib/http";
 import { applyRunAction, FactsError, RunActionSchema } from "@/lib/pipeline/facts";
 import { refreshAlerts } from "@/lib/pipeline/pack";
@@ -18,7 +18,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/runs/[runId
   try {
     const result = await applyRunAction(repo, runId, parsed.data);
     log({ runId, stage: "action", action: result.action, corrections: result.corrections.length });
-    await refreshAlerts(repo, Date.now(), appEnv().ALERT_WEBHOOK_URL).catch(() => {});
+    const webhookUrl = appEnv().ALERT_WEBHOOK_URL;
+    after(() => refreshAlerts(repo, Date.now(), webhookUrl).catch(() => {}));
     return Response.json(result);
   } catch (e) {
     if (e instanceof FactsError) return jsonError(e.httpStatus, e.message);

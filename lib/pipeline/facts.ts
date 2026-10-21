@@ -120,12 +120,13 @@ export type RunAction = z.infer<typeof RunActionSchema>;
 
 export async function applyRunAction(repo: Repo, runId: string, action: RunAction) {
   const run = await repo.getOrderRun(runId);
-  if (!run) throw new FactsError(`Run ${runId} not found`, 404);
   if (action.action === "confirm") {
+    if (!run) throw new FactsError(`Run ${runId} not found`, 404);
     await repo.setOrderRunAction(runId, "confirmed");
     return { action: "confirmed" as const, corrections: [] as Correction[] };
   }
-  const { corrections } = await updateProductFacts({ repo, productId: action.productId, changes: action.changes, runId });
-  await repo.setOrderRunAction(runId, "edited");
-  return { action: "edited" as const, corrections, repackHint: true };
+  // A run whose save failed has no row: the correction is still kept, just not linked to it.
+  const { corrections } = await updateProductFacts({ repo, productId: action.productId, changes: action.changes, runId: run ? runId : null });
+  if (run) await repo.setOrderRunAction(runId, "edited");
+  return { action: "edited" as const, corrections };
 }

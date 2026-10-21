@@ -64,7 +64,8 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [traceId, setTraceId] = useState<string | null>(initialRun);
-  const [trace, setTrace] = useState<Trace | null>(null);
+  // data null = the trace could not be loaded (unknown run or network error).
+  const [trace, setTrace] = useState<{ id: string; data: Trace | null } | null>(null);
 
   // State is only set after the await, never synchronously inside the effect.
   // Only the newest request may update the screen: a slow reply for an old window must not overwrite the selected one.
@@ -101,10 +102,10 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
     fetch(`/api/runs/${traceId}/trace`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
-        if (!cancelled) setTrace(j as Trace | null);
+        if (!cancelled) setTrace({ id: traceId, data: j as Trace | null });
       })
       .catch(() => {
-        if (!cancelled) setTrace(null); // never leave the previous run's trace under a new selection
+        if (!cancelled) setTrace({ id: traceId, data: null });
       });
     return () => {
       cancelled = true;
@@ -115,7 +116,8 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
     return error ? <Notice tone="critical">تعذّر تحميل أرقام الأداء. {fmtApiError(error)}</Notice> : <DashboardSkeleton />;
   }
 
-  const shownTrace = trace && trace.run.id === traceId ? trace : null;
+  // Only the selected run's trace is shown; undefined while it is still loading.
+  const shownTrace = trace && trace.id === traceId ? trace.data : undefined;
   const toggleRun = (id: string) => setTraceId((cur) => (cur === id ? null : id));
 
   return (
@@ -180,7 +182,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
       {traceId && !data.recentRuns.some((r) => r.id === traceId) && (
         <section className="rounded-xl border-2 border-brand bg-surface p-4 sm:p-5" aria-label="تفاصيل الطلب">
-          {shownTrace ? <TraceView trace={shownTrace} /> : <p className="text-sm text-muted">جارٍ تحميل التفاصيل…</p>}
+          <TraceSlot trace={shownTrace} />
           <button onClick={() => setTraceId(null)} className="mt-3 rounded-lg border border-border px-3 py-1 text-xs hover:border-brand">
             إغلاق
           </button>
@@ -980,10 +982,9 @@ function matches(r: OrderRun, f: RunFilter) {
   return true;
 }
 
-function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openId: string | null; trace: Trace | null; onToggle: (id: string) => void }) {
+function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openId: string | null; trace: Trace | null | undefined; onToggle: (id: string) => void }) {
   const [filter, setFilter] = useState<RunFilter>("all");
   const shown = runs.filter((r) => matches(r, filter));
-  const details = (r: OrderRun) => (openId === r.id ? trace ? <TraceView trace={trace} /> : <p className="text-sm text-muted">جارٍ تحميل التفاصيل…</p> : null);
 
   return (
     <Card title="آخر الطلبات المجهّزة" hint="آخر 25 تجهيزاً، الأحدث أولاً. اضغط «التفاصيل» لترى ما قرأته رصّة من المنتجات، وتجربة كل كرتون، والأزمنة، وتصحيحات الموظف.">
@@ -1028,10 +1029,10 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                     <Kv k="مصدر المقاسات" v={sourcesText(r)} />
                   </div>
                 </dl>
-                <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} id={r.id} />
+                <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} panelId={`run-card-${r.id}`} />
                 {openId === r.id && (
-                  <div id={`run-${r.id}`} className="mt-3 border-t border-border pt-3">
-                    {details(r)}
+                  <div id={`run-card-${r.id}`} className="mt-3 border-t border-border pt-3">
+                    <TraceSlot trace={trace} />
                   </div>
                 )}
               </li>
@@ -1076,13 +1077,13 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                     <td className="text-xs">{sourcesText(r)}</td>
                     <td className="text-xs">{EMPLOYEE_ACTION[r.employeeAction]}</td>
                     <td className="text-end">
-                      <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} id={r.id} />
+                      <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} panelId={`run-row-${r.id}`} />
                     </td>
                   </tr>
                   {openId === r.id && (
                     <tr className="border-b-2 border-brand bg-brand/5">
-                      <td colSpan={9} id={`run-${r.id}`} className="!px-4 !pb-5">
-                        {details(r)}
+                      <td colSpan={9} id={`run-row-${r.id}`} className="!px-4 !pb-5">
+                        <TraceSlot trace={trace} />
                       </td>
                     </tr>
                   )}
@@ -1108,17 +1109,24 @@ function sourcesText(r: OrderRun): string {
   return parts.length ? parts.join(" · ") : "—";
 }
 
-function DetailsButton({ open, onClick, id }: { open: boolean; onClick: () => void; id: string }) {
+// Phones get cards and wide screens a table, both in the DOM, so each layout has its own panel id.
+function DetailsButton({ open, onClick, panelId }: { open: boolean; onClick: () => void; panelId: string }) {
   return (
     <button
       onClick={onClick}
       aria-expanded={open}
-      aria-controls={`run-${id}`}
+      aria-controls={panelId}
       className={`mt-2 rounded-lg border px-2.5 py-1 text-xs font-medium lg:mt-0 ${open ? "border-brand text-brand" : "border-border hover:border-brand hover:text-brand"}`}
     >
       {open ? "إخفاء التفاصيل" : "التفاصيل"}
     </button>
   );
+}
+
+function TraceSlot({ trace }: { trace: Trace | null | undefined }) {
+  if (trace === undefined) return <p className="text-sm text-muted">جارٍ تحميل التفاصيل…</p>;
+  if (trace === null) return <p className="text-sm text-warn">تعذّر تحميل تفاصيل هذا الطلب. حدّث الصفحة وحاول مرة أخرى.</p>;
+  return <TraceView trace={trace} />;
 }
 
 function TraceView({ trace }: { trace: Trace }) {

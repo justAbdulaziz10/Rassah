@@ -35,6 +35,11 @@ export interface Repo {
   getFacts(ids: string[]): Promise<Map<string, StoredFacts>>;
   listFacts(): Promise<StoredFacts[]>;
   upsertFacts(facts: StoredFacts): Promise<void>;
+  /**
+   * Writes AI-extracted facts in one conditional step, unless the row turned manual or corrected
+   * meanwhile (an employee measured while the model was reading). Returns what is stored now.
+   */
+  saveExtractedFacts(facts: StoredFacts): Promise<StoredFacts>;
   deleteFacts(productId: string | "all"): Promise<void>;
 
   // Monitoring events

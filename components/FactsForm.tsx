@@ -50,7 +50,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
       for (const k of ["lengthCm", "widthCm", "heightCm"] as const) if (values[k] !== null) changes[k] = values[k];
     }
     for (const k of ["fragile", "liquid", "sensitive"] as const) {
-      if (values[k] !== initial[k] || mode === "measure") changes[k] = values[k];
+      if (values[k] !== initial[k]) changes[k] = values[k];
     }
     if (Object.keys(changes).length === 0) {
       setError("لم تغيّر أي قيمة");
@@ -76,7 +76,7 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
             <input
               type="number"
               inputMode="decimal"
-              step="0.1"
+              step="any"
               min="0.1"
               max={f.max}
               dir="ltr"
