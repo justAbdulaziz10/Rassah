@@ -34,7 +34,7 @@ const FIELD_LABEL: Record<string, string> = {
   liquid: "سائل",
   sensitive: "حساس",
 };
-const EMPLOYEE_ACTION: Record<string, string> = { pending: "لم يؤكّد بعد", confirmed: "أكّد التغليف", edited: "صحّح البيانات" };
+const EMPLOYEE_ACTION: Record<string, string> = { pending: "لم يراجع بعد", confirmed: "أكّد التغليف", edited: "صحّح البيانات" };
 const ORDERS = { one: "طلب واحد", two: "طلبان", few: "طلبات", many: "طلباً" };
 const READS = { one: "قراءة واحدة", two: "قراءتان", few: "قراءات", many: "قراءة" };
 const PRODUCTS = { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجاً" };
@@ -141,7 +141,11 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
             ))}
           </span>
         </div>
-        <p className="flex items-center gap-2 text-xs text-muted sm:ms-auto" aria-live="polite">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted sm:ms-auto" aria-live="polite">
+          <span>
+            {fmtCount(data.totals.runs, ORDERS)} · {fmtCount(data.totals.extractions, { one: "قراءة منتج واحدة", two: "قراءتان للمنتجات", few: "قراءات للمنتجات", many: "قراءة للمنتجات" })} ·{" "}
+            {fmtCount(data.totals.corrections, { one: "تصحيح واحد", two: "تصحيحان", few: "تصحيحات", many: "تصحيحاً" })}
+          </span>
           <span title={fmtTime(data.generatedAt)}>
             آخر تحديث {fmtClock(data.generatedAt)} · يتحدّث تلقائياً كل {ltr(String(REFRESH_SECONDS))} ثانية
           </span>
@@ -154,7 +158,7 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
           >
             حدّث الآن
           </button>
-        </p>
+        </div>
       </div>
 
       {error && <Notice tone="warn">تعذّر تحديث الأرقام ({fmtApiError(error)}). المعروض هو آخر تحديث ناجح.</Notice>}
@@ -164,15 +168,17 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
 
       <section className="grid gap-4 lg:grid-cols-2">
         <LatencyCard data={data} />
+        <SourcesCard data={data} />
+        <FailuresCard data={data} />
         <OutcomesCard data={data} />
         <div className="grid content-start gap-4">
-          <SourcesCard data={data} />
-          <ReadsCard data={data} />
+          <ValidatorCard data={data} />
+          <CacheCard data={data} />
         </div>
       </section>
 
       {traceId && !data.recentRuns.some((r) => r.id === traceId) && (
-        <section className="panel p-4 sm:p-5" aria-label="تفاصيل الطلب">
+        <section className="rounded-xl border-2 border-brand bg-surface p-4 sm:p-5" aria-label="تفاصيل الطلب">
           {shownTrace ? <TraceView trace={shownTrace} /> : <p className="text-sm text-muted">جارٍ تحميل التفاصيل…</p>}
           <button onClick={() => setTraceId(null)} className="mt-3 rounded-lg border border-border px-3 py-1 text-xs hover:border-brand">
             إغلاق
@@ -397,69 +403,212 @@ function alertNumber(rule: string, v: number): string {
 
 function Numbers({ data }: { data: DashboardData }) {
   const m = data.metrics;
-  const o = data.outcomes;
-  const runs = data.totals.runs;
+  const t = data.targets;
+  const m1 = m.m1CorrectionRate;
+  const m6 = m.m6GeminiFailureRate;
+  const cached = m.m5Latency.cached;
+  const uncached = m.m5Latency.uncached;
   const cost = m.m7Cost;
+  const failed = m6.n - (m6.byStatus.ok ?? 0);
   return (
-    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="أرقام الفترة">
-      <Tile code="runs" label="طلبات جُهّزت" value={ltr(String(runs))}>
-        {runs > 0 && (
-          <ul className="space-y-0.5">
-            {(["box_found", "no_box", "needs_measurement", "error"] as const)
-              .filter((s) => o[s] > 0)
-              .map((s) => (
-                <li key={s} className="flex items-center gap-1.5">
-                  <span className={`size-2 rounded-full ${OUTCOME_DOT[s]}`} aria-hidden />
-                  {OUTCOME_SHORT[s]}: <span className="ltr-nums">{o[s]}</span>
-                </li>
-              ))}
-          </ul>
-        )}
-      </Tile>
-      <Tile code="M5" label="95% من الطلبات تنتهي خلال" value={fmtMs(m.m5Latency.cached.value.p95 ?? m.m5Latency.uncached.value.p95)}>
-        <p>نصف الطلبات خلال {fmtMs(m.m5Latency.cached.value.p50 ?? m.m5Latency.uncached.value.p50)}</p>
-        {m.m5Latency.uncached.n > 0 && m.m5Latency.cached.n > 0 && <p>مع منتج جديد: {fmtMs(m.m5Latency.uncached.value.p95)}</p>}
-      </Tile>
-      <Tile code="M7-cache" label="منتجات كانت معروفة مسبقاً" value={fmtPct(cost.cacheHitRate)}>
-        <p>
-          {ltr(String(cost.hits))} من {fmtCount(cost.hits + cost.misses, PRODUCTS)} لم تحتج قراءة جديدة، لذلك يكون التجهيز أسرع وبلا تكلفة.
-        </p>
-      </Tile>
-      <Tile code="M7" label="تكلفة الذكاء الاصطناعي للطلب" value={fmtAiSar(cost.value)}>
-        <p>لكل 1000 طلب: {fmtAiSar(cost.value === null ? null : cost.value * 1000)}</p>
-        <p>إجمالي الفترة: {fmtAiSar(cost.totalUsd)}</p>
-      </Tile>
+    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="الأرقام الرئيسية">
+      <Tile
+        code="M1"
+        title="منتجات صحّح الموظف بياناتها"
+        value={fmtPct(m1.value)}
+        n={m1.n}
+        minN={m1.minN}
+        sufficient={m1.sufficient}
+        over={m1.sufficient && (m1.value ?? 0) > t.correctionRate}
+        limit={`الحدّ المسموح ${fmtPct(t.correctionRate)}`}
+        detail={m1.reviewed > 0 ? `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, PRODUCTS)} راجعها` : "لم يراجع الموظف أي منتج قرأته رصّة بعد"}
+        hint="من المنتجات التي قرأتها رصّة وراجعها الموظف، كم منها احتاج إلى تصحيح؟ كلما قلّت النسبة كانت القراءة أدق."
+      />
+      <Tile
+        code="M6"
+        title="قراءات المنتجات التي فشلت"
+        value={fmtPct(m6.value)}
+        n={m6.n}
+        minN={m6.minN}
+        sufficient={m6.sufficient}
+        over={m6.sufficient && (m6.value ?? 0) > t.failureRate}
+        limit={`الحدّ المسموح ${fmtPct(t.failureRate)}`}
+        detail={m6.n > 0 ? `فشلت ${ltr(String(failed))} من ${fmtCount(m6.n, READS)}` : "لم تحتج رصّة إلى قراءة أي منتج جديد"}
+        hint="إذا ارتفعت النسبة فقد تتعطل قراءة المنتجات الجديدة، وسيلزم قياسها يدوياً. الأسباب في بطاقة «أسباب فشل قراءة المنتجات»."
+      />
+      <Tile
+        code="M5"
+        title="سرعة تجهيز الطلب"
+        value={
+          <span className="grid grid-cols-2 gap-3">
+            <SpeedValue label="منتجاته معروفة" ms={cached.value.p95} n={cached.n} over={cached.sufficient && (cached.value.p95 ?? 0) > t.cachedP95Ms} />
+            <SpeedValue label="فيه منتج جديد" ms={uncached.value.p95} n={uncached.n} over={uncached.sufficient && (uncached.value.p95 ?? 0) > t.uncachedP95Ms} />
+          </span>
+        }
+        n={cached.n + uncached.n}
+        minN={cached.minN}
+        sufficient={cached.sufficient || uncached.sufficient}
+        limit={`الحدّ المسموح ${fmtMs(t.cachedP95Ms)} للمعروفة، و${fmtMs(t.uncachedP95Ms)} مع منتج جديد`}
+        detail={`نصف الطلبات تنتهي خلال ${fmtMs(cached.value.p50 ?? uncached.value.p50)}`}
+        hint="95% من الطلبات تنتهي خلال هذا الزمن أو أقل. الطلب الذي فيه منتج جديد أبطأ لأن رصّة تقرأ صفحته أول مرة."
+      />
+      <Tile
+        code="M7"
+        title="تكلفة الذكاء الاصطناعي للطلب"
+        value={fmtAiSar(cost.value)}
+        n={cost.n}
+        minN={cost.minN}
+        sufficient={cost.sufficient}
+        detail={`لكل 1000 طلب: ${fmtAiSar(cost.value === null ? null : cost.value * 1000)} · إجمالي الفترة: ${fmtAiSar(cost.totalUsd)}`}
+        hint="متوسط ما يكلّفه الذكاء الاصطناعي لكل طلب. ترتفع كلما زادت المنتجات الجديدة التي تحتاج قراءة، والمنتجات المعروفة مسبقاً بلا تكلفة."
+      />
     </section>
   );
 }
 
-const OUTCOME_SHORT = { box_found: "كرتون واحد", no_box: "لا يتّسع له كرتون واحد", needs_measurement: "يحتاج قياساً", error: "تعذّر التجهيز" } as const;
-const OUTCOME_DOT = { box_found: "bg-ok", no_box: "bg-warn", needs_measurement: "bg-info", error: "bg-critical" } as const;
-
-function Tile({ code, label, value, children }: { code: string; label: string; value: string; children?: React.ReactNode }) {
+function SpeedValue({ label, ms, n, over }: { label: string; ms: number | null; n: number; over: boolean }) {
   return (
-    <div data-metric={code} className="panel flex flex-col p-4">
-      <p className="text-sm text-muted">{label}</p>
-      <p className="ltr-nums mt-1 whitespace-nowrap font-display text-2xl font-bold leading-tight">{value}</p>
-      {children && <div className="mt-2 space-y-0.5 text-xs leading-5 text-muted">{children}</div>}
+    <span className="block">
+      <span className="block font-sans text-xs font-normal text-muted">{label}</span>
+      <span className={`block whitespace-nowrap text-xl ${over ? "text-critical" : ""}`}>{n > 0 ? fmtMs(ms) : "—"}</span>
+    </span>
+  );
+}
+
+function Tile(props: {
+  code: string;
+  title: string;
+  value: React.ReactNode;
+  n: number;
+  minN: number;
+  sufficient: boolean;
+  over?: boolean;
+  limit?: string;
+  detail?: string;
+  hint: string;
+}) {
+  return (
+    <div data-metric={props.code} className={`panel flex flex-col p-4 ${props.over ? "border-critical" : ""}`}>
+      <p className="flex items-start gap-2 text-sm font-medium leading-6">
+        {props.title}
+        {props.over && (
+          <span className="ms-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-critical-soft px-2 py-0.5 text-xs font-bold text-critical">
+            <AlertIcon className="size-3.5" />
+            فوق الحدّ
+          </span>
+        )}
+      </p>
+      <div className={`ltr-nums mt-2 text-[1.65rem] font-bold leading-tight ${typeof props.value === "string" && /^[\d.%\s\u2066-\u2069—]+$/.test(props.value) ? "font-display" : ""} ${props.over ? "text-critical" : ""}`}>
+        {props.value}
+      </div>
+      {props.detail && <p className="mt-1.5 text-xs leading-5 text-muted">{props.detail}</p>}
+      <p className="mt-1 flex flex-wrap gap-x-2 text-xs leading-5 text-muted">
+        {props.limit && <span>{props.limit}</span>}
+        <Sample n={props.n} minN={props.minN} sufficient={props.sufficient} />
+      </p>
+      <p className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted">{props.hint}</p>
     </div>
+  );
+}
+
+/** How many cases a number rests on; below the minimum the value stays visible but is marked as not reliable yet. */
+function Sample({ n, minN, sufficient = true }: { n: number; minN?: number; sufficient?: boolean }) {
+  if (!sufficient && minN) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-border/50 px-2 font-medium">
+        <InfoIcon className="size-3" />
+        الحالات قليلة: <span className="ltr-nums">{n}</span> من <span className="ltr-nums">{minN}</span> المطلوبة، فلا يُعتمد على الرقم بعد
+      </span>
+    );
+  }
+  return (
+    <span title="عدد الحالات التي بُني عليها هذا الرقم. كلما قلّ العدد قلّ الاعتماد على الرقم.">
+      عدد الحالات: <span className="ltr-nums">{n}</span>
+    </span>
   );
 }
 
 /* ---------------------------------------------------------------- charts */
 
-function Card({ code, title, hint, children, className = "" }: { code?: string; title: string; hint?: string; children: React.ReactNode; className?: string }) {
+function Card(props: { code?: string; title: string; hint?: string; n?: number; children: React.ReactNode; className?: string }) {
   return (
-    <section data-metric={code} className={`panel p-4 sm:p-5 ${className}`}>
-      <h2 className="text-lg font-bold leading-7">{title}</h2>
-      {hint && <p className="mb-4 mt-0.5 text-sm leading-6 text-muted">{hint}</p>}
-      {children}
+    <section data-metric={props.code} className={`panel p-4 sm:p-5 ${props.className ?? ""}`}>
+      <h2 className="text-lg font-bold leading-7">
+        {props.title}{" "}
+        {props.n !== undefined && (
+          <span className="text-xs font-normal text-muted">
+            · <Sample n={props.n} />
+          </span>
+        )}
+      </h2>
+      {props.hint && <p className="mb-4 mt-1 text-sm leading-6 text-muted">{props.hint}</p>}
+      {props.children}
     </section>
   );
 }
 
-function Empty({ children = "لا توجد بيانات في هذه الفترة. جرّب فترة أطول." }: { children?: React.ReactNode }) {
-  return <p className="py-6 text-center text-sm text-muted">{children}</p>;
+function Empty({ children = "لا توجد بيانات في هذه الفترة. جرّب فترة أطول، أو جهّز طلباً من صفحة «الطلبات»." }: { children?: React.ReactNode }) {
+  return <p className="py-8 text-center text-sm text-muted">{children}</p>;
+}
+
+/** The same numbers as a plain table, for screen readers and exact values. */
+function TableView({ head, rows }: { head: string[]; rows: string[][] }) {
+  if (rows.length === 0) return null;
+  return (
+    <details className="mt-3 text-xs">
+      <summary className="cursor-pointer text-muted">عرض البيانات في جدول</summary>
+      <table className="mt-2 w-full tabular-nums [&_td]:py-1 [&_td]:pe-2">
+        <thead>
+          <tr className="text-muted">
+            {head.map((h) => (
+              <th key={h} className="text-start font-medium">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-border">
+              {r.map((c, j) => (
+                <td key={j} className="ltr-nums">
+                  {c}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  );
+}
+
+const share = (v: number, total: number) => (total ? `${Math.round((v / total) * 100)}%` : "—");
+
+/**
+ * One series, one color for every bar, as before; label on the start side, count and share at the end.
+ * Plain HTML so Arabic labels never get cut and the bars grow from the right like the text.
+ */
+function HBar({ rows, total }: { rows: Array<{ key: string; label: string; value: number; note?: string }>; total?: number }) {
+  const max = Math.max(0, ...rows.map((r) => r.value));
+  const sum = total ?? rows.reduce((s, r) => s + r.value, 0);
+  if (max === 0) return <Empty />;
+  return (
+    <ul className="space-y-3">
+      {rows.map((r) => (
+        <li key={r.key} className="grid grid-cols-[minmax(6.5rem,9rem)_1fr_4.5rem] items-center gap-x-3 text-sm">
+          <span className="leading-5">{r.label}</span>
+          <span className="h-5 rounded bg-border/30" aria-hidden>
+            <span className="block h-full rounded bg-[var(--series-1)]" style={{ width: r.value ? `max(4px, ${(r.value / max) * 100}%)` : 0 }} />
+          </span>
+          <span className="ltr-nums whitespace-nowrap text-end text-xs text-muted">
+            <b className="text-sm text-foreground">{r.value}</b> · {share(r.value, sum)}
+          </span>
+          {r.note && <span className="col-span-3 mt-0.5 text-xs leading-5 text-muted sm:col-start-2 sm:col-end-4">{r.note}</span>}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function LatencyCard({ data }: { data: DashboardData }) {
@@ -470,13 +619,19 @@ function LatencyCard({ data }: { data: DashboardData }) {
   const top = Math.max(max, showLimit ? limit : 0);
   const unit = top >= 1000 ? "بالثواني" : "بالملّي ثانية (جزء من ألف من الثانية)";
   return (
-    <Card code="M5" title="مدة تجهيز آخر الطلبات" hint="كل عمود طلب واحد، والأحدث على اليسار. الطلب الذي فيه منتج جديد أبطأ لأن رصّة تقرأ صفحته أول مرة." className="lg:col-span-2">
+    <Card
+      code="M5"
+      title="زمن تجهيز كل طلب"
+      hint="كل عمود طلب واحد، والأحدث على اليسار. الطلب الأبطأ غالباً فيه منتجات جديدة احتاجت قراءة. مرّر المؤشر على العمود لترى رقم الطلب ووقته."
+      n={points.length}
+      className="lg:col-span-2"
+    >
       {points.length === 0 ? (
         <Empty />
       ) : (
         <>
           <p className="mb-1 text-xs text-muted">المدة {unit}</p>
-          <div className="h-56">
+          <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={points} margin={{ top: 8, right: 4, bottom: 0, left: 4 }} barCategoryGap={2}>
                 <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
@@ -492,14 +647,14 @@ function LatencyCard({ data }: { data: DashboardData }) {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-2 flex flex-wrap gap-4 text-xs text-muted">
+          <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
             <span className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-sm bg-[var(--series-1)]" aria-hidden />
-              كل منتجاته معروفة مسبقاً
+              منتجاته معروفة مسبقاً
             </span>
             <span className="flex items-center gap-1.5">
               <span className="size-2.5 rounded-sm bg-[var(--series-2)]" aria-hidden />
-              فيه منتج جديد احتاج قراءة
+              فيه منتجات جديدة
             </span>
             {showLimit && (
               <span className="flex items-center gap-1.5">
@@ -511,6 +666,10 @@ function LatencyCard({ data }: { data: DashboardData }) {
           </p>
         </>
       )}
+      <TableView
+        head={["الوقت", "رقم الطلب", "منتجاته", "مدة التجهيز"]}
+        rows={[...points].reverse().map((p) => [fmtClock(p.at), `#${p.order}`, p.cached ? "معروفة مسبقاً" : "فيه منتجات جديدة", fmtMs(p.ms)])}
+      />
     </Card>
   );
 }
@@ -524,166 +683,35 @@ function LatencyTip({ active, payload }: { active?: boolean; payload?: Array<{ p
         الطلب <span className="ltr-nums">#{p.order}</span>
       </p>
       <p>
-        {fmtMs(p.ms)} · {p.cached ? "منتجاته معروفة" : "فيه منتج جديد"}
+        {fmtMs(p.ms)} · {p.cached ? "منتجاته معروفة مسبقاً" : "فيه منتجات جديدة"}
       </p>
-      <p className="text-muted">{fmtClock(p.at)}</p>
+      <p className="text-muted">الساعة {fmtClock(p.at)}</p>
     </div>
   );
 }
-
-/** One horizontal bar split into shares; the legend under it carries the exact numbers. */
-function StackBar({ parts, label }: { parts: Array<{ key: string; value: number; color: string }>; label: string }) {
-  const total = parts.reduce((s, p) => s + p.value, 0);
-  if (total === 0) return null;
-  return (
-    <div className="flex h-3 w-full overflow-hidden rounded-full bg-border/50" role="img" aria-label={label}>
-      {parts
-        .filter((p) => p.value > 0)
-        .map((p) => (
-          <span key={p.key} className={p.color} style={{ width: `${(p.value / total) * 100}%` }} />
-        ))}
-    </div>
-  );
-}
-
-function Legend({ rows }: { rows: Array<{ key: string; label: string; value: number; color: string; note?: string }> }) {
-  const total = rows.reduce((s, r) => s + r.value, 0);
-  return (
-    <ul className="mt-3 space-y-2 text-sm">
-      {rows.map((r) => (
-        <li key={r.key} className="grid grid-cols-[auto_1fr_auto] items-baseline gap-x-2">
-          <span className={`size-2.5 translate-y-0.5 rounded-sm ${r.color}`} aria-hidden />
-          <span>
-            {r.label}
-            {r.note && <span className="block text-xs leading-5 text-muted">{r.note}</span>}
-          </span>
-          <span className="ltr-nums whitespace-nowrap text-muted">
-            <b className="font-bold text-foreground">{r.value}</b> · {total ? `${Math.round((r.value / total) * 100)}%` : "—"}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function OutcomesCard({ data }: { data: DashboardData }) {
-  const o = data.outcomes;
-  const rows = (["box_found", "no_box", "needs_measurement", "error"] as const).map((s) => ({
-    key: s,
-    label: OUTCOME_SHORT[s],
-    value: o[s],
-    color: OUTCOME_DOT[s],
-    note: OUTCOME_NOTE[s],
-  }));
-  const skips = Object.entries(data.metrics.m4NoBoxRate.skipReasons).sort((a, b) => b[1] - a[1]);
-  return (
-    <Card code="M4" title="نتيجة تجهيز الطلبات" hint="ماذا حدث لكل طلب جُهّز في هذه الفترة.">
-      {data.totals.runs === 0 ? (
-        <Empty />
-      ) : (
-        <>
-          <StackBar label="توزيع نتائج التجهيز" parts={rows.map((r) => ({ key: r.key, value: r.value, color: r.color }))} />
-          <Legend rows={rows} />
-        </>
-      )}
-      {data.problemOrders.length > 0 && (
-        <div className="mt-4 border-t border-border pt-3">
-          <p className="text-sm font-medium">طلبات تحتاج متابعة (آخر نتيجة لها)</p>
-          <ul className="mt-2 flex flex-wrap gap-2">
-            {data.problemOrders.map((p) => (
-              <li key={p.orderId}>
-                <Link href={`/orders/${p.orderId}`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs hover:border-brand">
-                  <span className="ltr-nums font-bold">#{p.orderId}</span>
-                  <span className="text-muted">{OUTCOME_SHORT[p.status as keyof typeof OUTCOME_SHORT] ?? STATUS_LABEL[p.status]}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {skips.length > 0 && (
-        <details className="mt-3 text-xs text-muted">
-          <summary className="cursor-pointer">لماذا لم يتّسع كرتون واحد؟</summary>
-          <p className="mt-1">لكل طلب قُسّم، كم مرة استُبعد كرتون ولأي سبب:</p>
-          <ul className="mt-1 space-y-0.5">
-            {skips.map(([k, v]) => (
-              <li key={k}>
-                {OUTCOME_LABEL[k] ?? k}: <span className="ltr-nums">{v}</span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
-    </Card>
-  );
-}
-
-const OUTCOME_NOTE = {
-  box_found: "اختارت رصّة الكرتون الأوفر الذي يتّسع للطلب",
-  no_box: "الطلب أكبر أو أثقل من أي كرتون، فتقترح رصّة تقسيمه على أكثر من كرتون",
-  needs_measurement: "منتج بلا مقاس معروف، ينتظر أن يقيسه الموظف",
-  error: "رقم طلب غير موجود أو خطأ في النظام",
-} as const;
-
-const SOURCE_COLOR = { page: "bg-ok", inferred: "bg-warn", manual: "bg-info", unknown: "bg-critical" } as const;
 
 function SourcesCard({ data }: { data: DashboardData }) {
   const mix = data.metrics.m2SourceMix;
-  const rows = (["page", "inferred", "manual", "unknown"] as const).map((k) => ({
-    key: k,
-    label: SOURCE_LABEL[k],
-    value: mix.value[k],
-    color: SOURCE_COLOR[k],
-    note: SOURCE_HINT[k],
-  }));
+  const over = mix.sufficient && (mix.unknownShare ?? 0) > data.targets.unknownShare;
+  const rows = (["page", "inferred", "manual", "unknown"] as const).map((k) => ({ key: k, label: SOURCE_LABEL[k], value: mix.value[k], note: SOURCE_HINT[k] }));
   return (
-    <Card code="M2" title="من أين جاءت مقاسات القطع" hint="كل قطعة في الطلبات المجهّزة، حسب مصدر مقاسها. كلما زادت «من الصفحة» و«قياس يدوي» كان الاختيار أدق.">
-      {mix.n === 0 ? (
-        <Empty />
-      ) : (
-        <>
-          <StackBar label="توزيع مصادر المقاسات" parts={rows.map((r) => ({ key: r.key, value: r.value, color: r.color }))} />
-          <Legend rows={rows} />
-        </>
+    <Card
+      code="M2"
+      title="من أين جاءت مقاسات القطع"
+      hint={`كل قطعة في الطلبات المجهّزة حسب مصدر مقاسها. نسبة «غير معروف» ${fmtPct(mix.unknownShare)} والحدّ المسموح ${fmtPct(data.targets.unknownShare)}. إذا زادت القطع التقديرية أو غير المعروفة فمعنى ذلك أن صفحات المتجر تنقصها المقاسات.`}
+      n={mix.n}
+    >
+      {over && (
+        <Notice tone="warn">
+          قطع كثيرة بلا مقاس معروف.{" "}
+          <Link href="/catalog" className="font-medium underline">
+            افتح المنتجات
+          </Link>{" "}
+          وأدخل مقاساتها.
+        </Notice>
       )}
-    </Card>
-  );
-}
-
-function ReadsCard({ data }: { data: DashboardData }) {
-  const m6 = data.metrics.m6GeminiFailureRate;
-  const ok = m6.byStatus.ok ?? 0;
-  const failures = Object.entries(m6.byStatus)
-    .filter(([s]) => s !== "ok")
-    .sort((a, b) => b[1] - a[1]);
-  return (
-    <Card code="M6" title="قراءة صفحات المنتجات الجديدة" hint="عندما يصل منتج لم تره رصّة من قبل، تقرأ صفحته بالذكاء الاصطناعي لتعرف مقاسه ووزنه.">
-      {m6.n === 0 ? (
-        <Empty>لم تحتج رصّة إلى قراءة أي صفحة في هذه الفترة، فكل المنتجات كانت معروفة.</Empty>
-      ) : (
-        <>
-          <StackBar
-            label="نجاح القراءات"
-            parts={[
-              { key: "ok", value: ok, color: "bg-ok" },
-              { key: "failed", value: m6.n - ok, color: "bg-critical" },
-            ]}
-          />
-          <Legend
-            rows={[
-              { key: "ok", label: "نجحت", value: ok, color: "bg-ok" },
-              ...failures.map(([s, v]) => ({
-                key: s,
-                label: `فشلت: ${EXTRACTION_STATUS_LABEL[s] ?? s}`,
-                value: v,
-                color: "bg-critical",
-                note: FAILURE_NOTE[s],
-              })),
-            ]}
-          />
-          {failures.length > 0 && <p className="mt-3 text-xs leading-5 text-muted">المنتج الذي فشلت قراءته يظهر للموظف «يحتاج قياس» حتى يقيسه أو تنجح القراءة لاحقاً.</p>}
-        </>
-      )}
+      {mix.n === 0 ? <Empty /> : <HBar rows={rows} />}
+      <TableView head={["المصدر", "عدد القطع", "النسبة"]} rows={rows.map((r) => [r.label, String(r.value), share(r.value, mix.n)])} />
     </Card>
   );
 }
@@ -699,22 +727,189 @@ const FAILURE_NOTE: Record<string, string> = {
   empty: "ردّت الخدمة بلا محتوى",
 };
 
+function FailuresCard({ data }: { data: DashboardData }) {
+  const m6 = data.metrics.m6GeminiFailureRate;
+  const ok = m6.byStatus.ok ?? 0;
+  const failed = m6.n - ok;
+  const rows = Object.entries(m6.byStatus)
+    .filter(([s]) => s !== "ok")
+    .sort((a, b) => b[1] - a[1])
+    .map(([s, v]) => ({ key: s, label: EXTRACTION_STATUS_LABEL[s] ?? s, value: v, note: FAILURE_NOTE[s] }));
+  return (
+    <Card
+      code="M6"
+      title="أسباب فشل قراءة المنتجات"
+      hint="عندما يصل منتج لم تره رصّة من قبل، تقرأ صفحته بالذكاء الاصطناعي لتعرف مقاسه ووزنه. الأسباب مرتبة من الأكثر تكراراً."
+      n={m6.n}
+    >
+      {m6.n === 0 ? (
+        <Empty>لم تحتج رصّة إلى قراءة أي منتج في هذه الفترة، فكل المنتجات كانت معروفة مسبقاً.</Empty>
+      ) : (
+        <>
+          <p className="mb-4 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <span>
+              نجحت <b className="ltr-nums">{ok}</b>
+            </span>
+            <span className={failed ? "font-medium text-critical" : ""}>
+              فشلت <b className="ltr-nums">{failed}</b>
+            </span>
+            <span className="text-muted">من أصل {fmtCount(m6.n, READS)} ({fmtPct(m6.value)} فشل)</span>
+          </p>
+          {rows.length === 0 ? (
+            <p className="flex items-center justify-center gap-2 py-6 text-sm font-medium text-ok">
+              <CheckIcon className="size-5" />
+              لم تفشل أي قراءة في هذه الفترة
+            </p>
+          ) : (
+            <>
+              <HBar rows={rows} total={failed} />
+              <p className="mt-4 text-xs leading-5 text-muted">
+                المنتج الذي فشلت قراءته يظهر للموظف «يحتاج قياس» حتى يقيسه أو تنجح القراءة لاحقاً. تفاصيل كل فشل في «تفاصيل تقنية» داخل الطلب.
+              </p>
+            </>
+          )}
+        </>
+      )}
+      <TableView
+        head={["الحالة", "العدد", "النسبة"]}
+        rows={Object.entries(m6.byStatus).map(([s, v]) => [EXTRACTION_STATUS_LABEL[s] ?? s, String(v), share(v, m6.n)])}
+      />
+    </Card>
+  );
+}
+
+const OUTCOME_SHORT = { box_found: "كرتون واحد", no_box: "بلا كرتون مناسب", needs_measurement: "يحتاج قياساً", error: "تعذّر التجهيز" } as const;
+const OUTCOME_NOTE = {
+  box_found: "اختارت رصّة الكرتون الأوفر الذي يتّسع للطلب",
+  no_box: "الطلب أكبر أو أثقل من أي كرتون، فتقترح رصّة تقسيمه على أكثر من كرتون",
+  needs_measurement: "منتج بلا مقاس معروف، ينتظر أن يقيسه الموظف",
+  error: "رقم طلب غير موجود أو خطأ في النظام",
+} as const;
+const SKIP_NOTE: Record<string, string> = {
+  oversize: "قطعة أطول أو أعرض من الكرتون",
+  overweight: "مجموع الوزن أكبر مما يتحمله الكرتون",
+  search_budget: "لم يكتمل البحث في الوقت المسموح",
+  no_layout: "القطع لا تتسع معاً مهما رُتّبت",
+  validator_rejected: "وُجد ترتيب لكن المدقّق رفضه",
+};
+
+function OutcomesCard({ data }: { data: DashboardData }) {
+  const m4 = data.metrics.m4NoBoxRate;
+  const o = data.outcomes;
+  const over = m4.sufficient && (m4.value ?? 0) > data.targets.noBoxRate;
+  const rows = (["box_found", "no_box", "needs_measurement", "error"] as const).map((s) => ({ key: s, label: OUTCOME_SHORT[s], value: o[s], note: OUTCOME_NOTE[s] }));
+  const skips = Object.entries(m4.skipReasons)
+    .filter(([k]) => k !== "not_needed")
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => ({ key: k, label: OUTCOME_LABEL[k] ?? k, value: v, note: SKIP_NOTE[k] }));
+  return (
+    <Card
+      code="M4"
+      title="نتيجة تجهيز الطلبات"
+      hint="ماذا حدث لكل طلب جُهّز في هذه الفترة. إذا ارتفعت نسبة «بلا كرتون مناسب» فالكراتين المتوفرة لا تناسب منتجاتك، أو هامش الأمان كبير أكثر من اللازم."
+      n={data.totals.runs}
+    >
+      <div className="mb-4 flex flex-wrap items-end gap-x-3 gap-y-1">
+        <p className={`ltr-nums font-display text-3xl font-bold ${over ? "text-critical" : ""}`}>{fmtPct(m4.value)}</p>
+        <p className="pb-1 text-sm text-muted">
+          طلبات بلا كرتون مناسب · الحدّ المسموح {fmtPct(data.targets.noBoxRate)} · <Sample n={m4.n} minN={m4.minN} sufficient={m4.sufficient} />
+        </p>
+      </div>
+      {data.totals.runs === 0 ? <Empty /> : <HBar rows={rows} />}
+
+      {data.problemOrders.length > 0 && (
+        <div className="mt-5 border-t border-border pt-4">
+          <h3 className="text-sm font-bold">طلبات تحتاج متابعة</h3>
+          <p className="mt-0.5 text-xs text-muted">آخر تجهيز لها لم ينتهِ بكرتون واحد. اضغط الطلب لفتحه.</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {data.problemOrders.map((p) => (
+              <li key={p.orderId}>
+                <Link href={`/orders/${p.orderId}`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs hover:border-brand">
+                  <span className="ltr-nums font-bold">#{p.orderId}</span>
+                  <span className="text-muted">{OUTCOME_SHORT[p.status]}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {skips.length > 0 && (
+        <div className="mt-5 border-t border-border pt-4">
+          <h3 className="text-sm font-bold">لماذا استُبعدت الكراتين</h3>
+          <p className="mb-3 mt-0.5 text-xs text-muted">في الطلبات التي لم يتّسع لها كرتون واحد: كم مرة استُبعد كرتون، ولأي سبب.</p>
+          <HBar rows={skips} />
+        </div>
+      )}
+      <TableView head={["النتيجة", "عدد الطلبات", "النسبة"]} rows={rows.map((r) => [r.label, String(r.value), share(r.value, data.totals.runs)])} />
+    </Card>
+  );
+}
+
+function ValidatorCard({ data }: { data: DashboardData }) {
+  const m3 = data.metrics.m3ValidatorRejections;
+  return (
+    <Card code="M3" title="ترتيبات رفضها المدقّق" hint="يفحص مدقّق مستقل كل ترتيب قبل أن يراه الموظف. يجب أن يبقى الرقم صفراً، وأي رقم غيره يعني خللاً يُبلَّغ به الفريق التقني.">
+      {m3.value === 0 ? (
+        <p className="flex items-center gap-2 text-3xl font-bold text-ok">
+          <CheckIcon className="size-7" />
+          <span className="ltr-nums">0</span>
+          <span className="font-sans text-sm font-medium">كل ترتيب رآه الموظف اجتاز الفحص</span>
+        </p>
+      ) : (
+        <div>
+          <p className="flex items-center gap-2 text-3xl font-bold text-critical">
+            <AlertIcon className="size-7" />
+            <span className="ltr-nums">{m3.value}</span>
+          </p>
+          <p className="mt-1 text-sm" dir="ltr">
+            {Object.entries(m3.byCode)
+              .map(([c, v]) => `${c}: ${v}`)
+              .join(" · ")}
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function CacheCard({ data }: { data: DashboardData }) {
+  const c = data.metrics.m7Cost;
+  const total = c.hits + c.misses;
+  return (
+    <Card code="M7-cache" title="منتجات كانت معروفة مسبقاً" hint="المنتج الذي قرأته رصّة مرة تحفظ بياناته، فلا يحتاج قراءة جديدة: تجهيز أسرع وبلا تكلفة.">
+      <p className="ltr-nums font-display text-3xl font-bold">{fmtPct(c.cacheHitRate)}</p>
+      <p className="mt-1 text-sm text-muted">
+        {total > 0 ? `${ltr(String(c.hits))} من ${fmtCount(total, PRODUCTS)} لم تحتج قراءة، و${ltr(String(c.misses))} قُرئت لأول مرة.` : "لا توجد منتجات في هذه الفترة."}
+      </p>
+    </Card>
+  );
+}
+
 /* ------------------------------------------------------------ recent runs */
 
-type RunFilter = "all" | "problems" | "new";
+type RunFilter = "all" | "problems" | "new" | "edited";
 const RUN_FILTERS: Array<[RunFilter, string]> = [
   ["all", "الكل"],
-  ["problems", "فيها مشكلة"],
+  ["problems", "لم تنتهِ بكرتون واحد"],
   ["new", "فيها منتج جديد"],
+  ["edited", "صحّح الموظف بياناتها"],
 ];
+
+function matches(r: OrderRun, f: RunFilter) {
+  if (f === "problems") return r.status !== "box_found";
+  if (f === "new") return r.cacheMisses > 0;
+  if (f === "edited") return r.employeeAction === "edited";
+  return true;
+}
 
 function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openId: string | null; trace: Trace | null; onToggle: (id: string) => void }) {
   const [filter, setFilter] = useState<RunFilter>("all");
-  const shown = runs.filter((r) => filter === "all" || (filter === "problems" ? r.status !== "box_found" : r.cacheMisses > 0));
+  const shown = runs.filter((r) => matches(r, filter));
   const details = (r: OrderRun) => (openId === r.id ? trace ? <TraceView trace={trace} /> : <p className="text-sm text-muted">جارٍ تحميل التفاصيل…</p> : null);
 
   return (
-    <Card title="آخر الطلبات المجهّزة" hint="آخر 25 تجهيزاً. اضغط «التفاصيل» لترى المنتجات التي قرأتها رصّة، وتجربة كل كرتون، وتصحيحات الموظف.">
+    <Card title="آخر الطلبات المجهّزة" hint="آخر 25 تجهيزاً، الأحدث أولاً. اضغط «التفاصيل» لترى ما قرأته رصّة من المنتجات، وتجربة كل كرتون، والأزمنة، وتصحيحات الموظف.">
       <div className="mb-3 flex flex-wrap gap-2 text-sm" role="group" aria-label="تصفية الطلبات">
         {RUN_FILTERS.map(([f, label]) => (
           <button
@@ -723,7 +918,7 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
             aria-pressed={filter === f}
             className={`rounded-full border px-3 py-1 ${filter === f ? "border-brand bg-brand/10 font-bold text-brand" : "border-border text-muted hover:text-foreground"}`}
           >
-            {label}
+            {label} <span className="ltr-nums text-xs">({runs.filter((r) => matches(r, f)).length})</span>
           </button>
         ))}
       </div>
@@ -734,10 +929,10 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
         </EmptyState>
       ) : (
         <>
-          {/* Phones: one card per run. */}
-          <ul className="space-y-2 md:hidden">
+          {/* Phones and tablets: one card per run. */}
+          <ul className="space-y-2 lg:hidden">
             {shown.map((r) => (
-              <li key={r.id} className={`rounded-xl border p-3 text-sm ${openId === r.id ? "border-brand" : "border-border"}`}>
+              <li key={r.id} className={`rounded-xl border p-3 text-sm ${openId === r.id ? "border-2 border-brand" : "border-border"}`}>
                 <div className="flex items-center gap-2">
                   <Link href={`/orders/${r.orderId}`} className="ltr-nums font-bold hover:text-brand">
                     #{r.orderId}
@@ -747,10 +942,15 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                     {fmtClock(r.createdAt)}
                   </span>
                 </div>
-                <p className="mt-1.5 text-xs text-muted">
-                  {r.cartonId ? `كرتون ${r.cartonId} · ` : ""}
-                  {fmtMs(r.totalMs)} · {productsText(r)} · {EMPLOYEE_ACTION[r.employeeAction]}
-                </p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                  <Kv k="الكرتون" v={r.cartonId ?? "—"} />
+                  <Kv k="مدة التجهيز" v={fmtMs(r.totalMs)} />
+                  <Kv k="المنتجات" v={productsText(r)} />
+                  <Kv k="ما فعله الموظف" v={EMPLOYEE_ACTION[r.employeeAction]} />
+                  <div className="col-span-2">
+                    <Kv k="مصدر المقاسات" v={sourcesText(r)} />
+                  </div>
+                </dl>
                 <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} id={r.id} />
                 {openId === r.id && (
                   <div id={`run-${r.id}`} className="mt-3 border-t border-border pt-3">
@@ -761,31 +961,32 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
             ))}
           </ul>
 
-          {/* Wider screens: a table, details open under the row. */}
-          <table className="hidden w-full text-sm md:table [&_td]:px-2 [&_td]:py-2.5 [&_th]:px-2 [&_th]:py-2">
+          {/* Wide screens: a table, details open under the row. */}
+          <table className="hidden w-full text-sm lg:table [&_td]:px-2 [&_td]:py-2.5 [&_th]:px-2 [&_th]:py-2">
             <thead className="text-xs text-muted">
               <tr className="border-b border-border">
                 <th className="text-start font-medium">الوقت</th>
-                <th className="text-start font-medium">الطلب</th>
+                <th className="text-start font-medium">رقم الطلب</th>
                 <th className="text-start font-medium">النتيجة</th>
                 <th className="text-start font-medium">الكرتون</th>
-                <th className="text-start font-medium">المدة</th>
+                <th className="text-start font-medium">مدة التجهيز</th>
                 <th className="text-start font-medium">المنتجات</th>
-                <th className="text-start font-medium">الموظف</th>
-                <th className="text-start font-medium">
+                <th className="text-start font-medium">مصدر المقاسات</th>
+                <th className="text-start font-medium">ما فعله الموظف</th>
+                <th>
                   <span className="sr-only">التفاصيل</span>
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="tabular-nums">
               {shown.map((r) => (
                 <Fragment key={r.id}>
-                  <tr className={`border-b border-border ${openId === r.id ? "bg-brand/5" : ""}`}>
+                  <tr className={`border-b border-border hover:bg-background ${openId === r.id ? "bg-brand/10" : ""}`}>
                     <td className="whitespace-nowrap text-xs text-muted" title={fmtTime(r.createdAt)}>
                       {fmtClock(r.createdAt)}
                     </td>
                     <td>
-                      <Link href={`/orders/${r.orderId}`} className="ltr-nums font-bold hover:text-brand">
+                      <Link href={`/orders/${r.orderId}`} className="ltr-nums font-bold hover:text-brand hover:underline">
                         #{r.orderId}
                       </Link>
                     </td>
@@ -795,14 +996,15 @@ function RecentRuns({ runs, openId, trace, onToggle }: { runs: OrderRun[]; openI
                     <td>{r.cartonId ?? "—"}</td>
                     <td className="whitespace-nowrap">{fmtMs(r.totalMs)}</td>
                     <td className="text-xs">{productsText(r)}</td>
-                    <td className="text-xs text-muted">{EMPLOYEE_ACTION[r.employeeAction]}</td>
+                    <td className="text-xs">{sourcesText(r)}</td>
+                    <td className="text-xs">{EMPLOYEE_ACTION[r.employeeAction]}</td>
                     <td className="text-end">
                       <DetailsButton open={openId === r.id} onClick={() => onToggle(r.id)} id={r.id} />
                     </td>
                   </tr>
                   {openId === r.id && (
-                    <tr className="border-b border-border bg-brand/5">
-                      <td colSpan={8} id={`run-${r.id}`} className="!px-4 !pb-4">
+                    <tr className="border-b-2 border-brand bg-brand/5">
+                      <td colSpan={9} id={`run-${r.id}`} className="!px-4 !pb-5">
                         {details(r)}
                       </td>
                     </tr>
@@ -822,13 +1024,20 @@ function productsText(r: OrderRun): string {
   return parts.length ? parts.join(" · ") : "—";
 }
 
+function sourcesText(r: OrderRun): string {
+  const parts = Object.entries(r.unitSources)
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => `${SOURCE_LABEL[k as keyof typeof SOURCE_LABEL]} ${ltr(String(v))}`);
+  return parts.length ? parts.join(" · ") : "—";
+}
+
 function DetailsButton({ open, onClick, id }: { open: boolean; onClick: () => void; id: string }) {
   return (
     <button
       onClick={onClick}
       aria-expanded={open}
       aria-controls={`run-${id}`}
-      className="mt-2 rounded-lg border border-border px-2.5 py-1 text-xs font-medium hover:border-brand hover:text-brand md:mt-0"
+      className={`mt-2 rounded-lg border px-2.5 py-1 text-xs font-medium lg:mt-0 ${open ? "border-brand text-brand" : "border-border hover:border-brand hover:text-brand"}`}
     >
       {open ? "إخفاء التفاصيل" : "التفاصيل"}
     </button>
@@ -840,20 +1049,27 @@ function TraceView({ trace }: { trace: Trace }) {
   const name = (id: string) => trace.names?.[id] ?? id;
   return (
     <div className="space-y-4 text-sm">
+      <h3 className="font-bold">
+        تفاصيل تجهيز الطلب <span className="ltr-nums">#{r.orderId}</span>
+        <span className="ms-2 text-xs font-normal text-muted">{fmtTime(r.createdAt)}</span>
+      </h3>
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Kv k="النتيجة" v={STATUS_LABEL[r.status] ?? r.status} />
-        <Kv k="الكرتون" v={r.cartonId ?? "—"} />
-        <Kv k="المدة الكلية" v={fmtMs(r.totalMs)} />
-        <Kv k="منها قراءة المنتجات" v={r.extractMs > 0 ? fmtMs(r.extractMs) : "لم تحتج"} />
+        <Kv k="الكرتون المختار" v={r.cartonId ?? "—"} />
+        <Kv k="المدة الكلية للتجهيز" v={fmtMs(r.totalMs)} />
+        <Kv k="منها قراءة المنتجات الجديدة" v={r.extractMs > 0 ? fmtMs(r.extractMs) : "لم تحتج"} />
         <Kv k="تكلفة الذكاء الاصطناعي" v={fmtAiSar(r.costUsd)} />
       </dl>
 
       {r.attempts.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold">تجربة كل كرتون</h3>
+          <h4 className="text-sm font-bold">نتيجة تجربة كل كرتون</h4>
           <ul className="mt-1 flex flex-wrap gap-1.5 text-xs">
             {r.attempts.map((a) => (
-              <li key={a.cartonId} className={`rounded border px-2 py-0.5 ${a.cartonId === r.cartonId ? "border-ok bg-ok-soft text-ok" : a.outcome === "packed" ? "border-ok/50" : "border-border text-muted"}`}>
+              <li
+                key={a.cartonId}
+                className={`rounded border px-2 py-0.5 ${a.cartonId === r.cartonId ? "border-ok bg-ok-soft text-ok" : a.outcome === "packed" ? "border-ok/50" : "border-border text-muted"}`}
+              >
                 <b>{a.cartonId}</b>: {OUTCOME_LABEL[a.outcome] ?? a.outcome}
                 {a.cartonId === r.cartonId && <b> · المختار</b>}
               </li>
@@ -863,17 +1079,17 @@ function TraceView({ trace }: { trace: Trace }) {
       )}
 
       <div>
-        <h3 className="text-sm font-bold">المنتجات التي قرأتها رصّة في هذا التجهيز</h3>
+        <h4 className="text-sm font-bold">المنتجات الجديدة التي قرأتها رصّة ({ltr(String(trace.extractions.length))})</h4>
         {trace.extractions.length === 0 ? (
-          <p className="mt-1 text-xs text-muted">لا شيء: كل منتجات الطلب كانت معروفة مسبقاً.</p>
+          <p className="mt-1 text-xs text-muted">كل منتجات هذا الطلب كانت معروفة مسبقاً، فلم تحتج إلى قراءة جديدة.</p>
         ) : (
           <ul className="mt-1 space-y-1 text-xs">
             {trace.extractions.map((e) => (
               <li key={e.id} className="flex flex-wrap gap-x-2 rounded border border-border px-2 py-1.5">
                 <span className="font-medium">{name(e.productId)}</span>
-                <span className={e.status === "ok" ? "text-ok" : "text-critical"}>{e.status === "ok" ? "نجحت" : `فشلت: ${EXTRACTION_STATUS_LABEL[e.status] ?? e.status}`}</span>
+                <span className={e.status === "ok" ? "text-ok" : "text-critical"}>{e.status === "ok" ? "نجحت القراءة" : `فشلت: ${EXTRACTION_STATUS_LABEL[e.status] ?? e.status}`}</span>
                 <span className="text-muted">{fmtMs(e.latencyMs)}</span>
-                {e.dimsSource && <span className="text-muted">المقاس: {SOURCE_LABEL[e.dimsSource]}</span>}
+                {e.dimsSource && <span className="text-muted">مقاسه: {SOURCE_LABEL[e.dimsSource]}</span>}
               </li>
             ))}
           </ul>
@@ -882,7 +1098,7 @@ function TraceView({ trace }: { trace: Trace }) {
 
       {trace.corrections.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold">تصحيحات الموظف</h3>
+          <h4 className="text-sm font-bold">تصحيحات الموظف ({ltr(String(trace.corrections.length))})</h4>
           <ul className="mt-1 space-y-0.5 text-xs">
             {trace.corrections.map((c) => (
               <li key={c.id}>
@@ -926,7 +1142,7 @@ function Kv({ k, v }: { k: string; v: string }) {
   return (
     <div>
       <dt className="text-xs text-muted">{k}</dt>
-      <dd className="break-all font-medium">{v}</dd>
+      <dd className="break-words font-medium">{v}</dd>
     </div>
   );
 }

@@ -18,7 +18,7 @@
 | 2 | Back → **1002** | Perfume 50 ml has **no dimensions on its page**. Gemini inferred them ("تقديري" badge, evidence quote). The engine added a 15% safety margin and padding, kept it upright, and put it on top. Show the numbered instructions and the 3D step slider. |
 | 3 | On 1002 → "تعديل" on the perfume → change height → save | "If the packer corrects the AI, it is recorded. That correction rate is our main AI-quality metric (M1)." |
 | 4 | **1020** | "≈20.5 kg: no single carton can hold it, and Rassah says so instead of inventing a layout. Then it splits the order into several cartons, each one packed and checked like a normal order, numbered 1/4 … 4/4." |
-| 5 | `/monitoring` | Walk the health list at the top: each row shows the result, its limit and a verdict (read accuracy M1, product-page reads M6, speed M5). Under "آخر الطلبات المجهّزة" press "التفاصيل" on a run → the trace opens under the row (products read by name, each carton tried, corrections; tokens and versions under "تفاصيل تقنية"). |
+| 5 | `/monitoring` | The health list at the top says what is over its limit. Then walk 3 tiles: M1 correction rate, M6 read failures (causes in "أسباب فشل قراءة المنتجات"), M5 p95 for known vs new products; each shows its limit and case count. Under "آخر الطلبات المجهّزة" press "التفاصيل" on a run → the trace opens under the row (products read by name, each carton tried, timings, corrections; tokens under "تفاصيل تقنية"). |
 
 ## Outage story (≈ 30 s, during Q&A if asked)
 
