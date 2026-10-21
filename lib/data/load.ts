@@ -1,5 +1,6 @@
-// Loads and validates the synthetic dataset from data/. For scripts (seed, evals, validation),
-// not for request-time app code, which reads from Supabase.
+// Loads and validates the synthetic dataset from data/. Used by the scripts (seed, evals, validation)
+// and by the local memory backend (lib/db/local.ts, DATA_BACKEND=memory), which loads it once per
+// server process. With Supabase configured, the app reads from the database instead.
 
 import fs from "node:fs";
 import path from "node:path";

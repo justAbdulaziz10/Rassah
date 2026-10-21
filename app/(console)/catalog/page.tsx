@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import CatalogTable, { type CatalogRow } from "@/components/CatalogTable";
+import type { Product, StoredFacts } from "@/lib/db/types";
 import { appEnv } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { Notice, PageHeader, TableSkeleton } from "@/components/PageHeader";
@@ -29,7 +30,13 @@ async function Catalog() {
       <Notice tone="warn">قاعدة البيانات غير جاهزة، فلا يمكن عرض المنتجات. أخبر مسؤول النظام.</Notice>
     );
   }
-  const [products, facts] = await Promise.all([repo.listProducts(), repo.listFacts()]);
+  let products: Product[];
+  let facts: StoredFacts[];
+  try {
+    [products, facts] = await Promise.all([repo.listProducts(), repo.listFacts()]);
+  } catch {
+    return <Notice tone="critical">تعذّر تحميل المنتجات. حدّث الصفحة بعد قليل، وإن تكرر الأمر فأبلغ مسؤول النظام.</Notice>;
+  }
   const byId = new Map(facts.map((f) => [f.productId, f]));
   const rows: CatalogRow[] = products.map((p) => {
     const f = byId.get(p.id);

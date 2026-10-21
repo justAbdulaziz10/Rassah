@@ -2,6 +2,8 @@
 // Usage: npm run demo:morning [-- --reset]    BASE_URL defaults to https://rassah.vercel.app
 // Does not clear product facts and does not call the admin extract endpoint.
 
+import { MOCK_ORDER_TAG } from "../lib/demo/mock-data";
+import type { DashboardData } from "../lib/monitoring/dashboard";
 import { hasSupabaseEnv, scriptSupabase } from "./_supabase";
 import { resetEvents } from "./reset-events";
 
@@ -79,12 +81,12 @@ async function main() {
   await step("open alerts", async () => {
     const { status, body } = await getJson("/api/monitoring/metrics");
     if (status !== 200) throw new Error(`http ${status}`);
-    const alerts = (body.alerts ?? body.openAlerts ?? []) as Array<Record<string, unknown>>;
-    const open = alerts.filter((a) => !a.resolvedAt && a.status !== "resolved");
-    const list = `${open.length} open: ${open.map((a) => String(a.rule ?? a.ruleId ?? a.id)).join(", ")}`;
+    // The dashboard returns the open alerts (resolvedAt is null), one per rule.
+    const open = (body as unknown as DashboardData).alerts.filter((a) => !a.resolvedAt);
+    const list = `${open.length} open: ${open.map((a) => a.rule).join(", ")}`;
     // The mock history (npm run demo:data) breaks some rules on purpose, so its alerts are expected.
     const mock = hasSupabaseEnv()
-      ? (await scriptSupabase().from("orders").select("*", { count: "exact", head: true }).eq("demo", "mock")).count
+      ? (await scriptSupabase().from("orders").select("*", { count: "exact", head: true }).eq("demo", MOCK_ORDER_TAG)).count
       : 0;
     if (open.length && mock) return `${list} (expected: mock history loaded)`;
     if (open.length) throw new Error(list);

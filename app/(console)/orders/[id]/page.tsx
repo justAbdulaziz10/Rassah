@@ -9,9 +9,11 @@ import { isOrderId } from "@/lib/ids";
 
 export const metadata: Metadata = { title: "نتيجة الطلب" };
 
-// The order existence check runs before any <Suspense> boundary so an unknown order gets a real
-// HTTP 404 (a notFound() after streaming starts keeps status 200). That check is request-time
-// data, so navigations into this page are allowed to block.
+// The real HTTP 404 for unknown order numbers comes from proxy.ts: Cache Components serves this
+// route as a prerendered shell with status 200, so a notFound() here cannot change the status in
+// production. The checks below still show the not-found page for numbers the proxy lets through
+// (the store range) that are not in the database. They read request-time data before any
+// <Suspense> boundary, so navigations into this page are allowed to block.
 export const instant = false;
 
 export default async function OrderResultPage(props: PageProps<"/orders/[id]">) {
