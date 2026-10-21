@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { isLocalBackend } from "@/lib/env";
 import { repoOrError } from "@/lib/http";
 import { loadEval, type EvalView } from "@/lib/monitoring/evaluation";
-import { CardSkeleton, EmptyState, PageHeader } from "@/components/PageHeader";
+import { EmptyState, Notice, PageHeader, TableSkeleton } from "@/components/PageHeader";
 import { fmtMs, fmtTime, ltr } from "@/lib/ui/format";
 
 export const metadata: Metadata = { title: "الدقة" };
@@ -49,11 +49,13 @@ export default function EvaluationPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="الدقة">
-        نتائج اختبار رصّة على حالات نعرف إجابتها الصحيحة مسبقاً، وهو منفصل عن العمل اليومي. <strong>البيانات اصطناعية</strong> كتبها
-        الفريق بأسلوب صفحات المتاجر السعودية. والإجابات الصحيحة صاغها الذكاء الاصطناعي من الأوصاف، ولم تكتمل مراجعتها المستقلة من عضو
-        آخر في الفريق.
+        نتائج اختبار رصّة على حالات نعرف إجابتها الصحيحة مسبقاً، وهو منفصل عن العمل اليومي.
       </PageHeader>
-      <Suspense fallback={<CardSkeleton />}>
+      <Notice tone="info">
+        <strong>البيانات اصطناعية.</strong> كتبها الفريق بأسلوب صفحات المتاجر السعودية. والإجابات الصحيحة صاغها الذكاء الاصطناعي من
+        الأوصاف، ولم تكتمل مراجعتها المستقلة من عضو آخر في الفريق.
+      </Notice>
+      <Suspense fallback={<TableSkeleton rows={8} />}>
         <Evals />
       </Suspense>
     </div>
@@ -100,8 +102,8 @@ function EvalCard(props: {
   const { view } = props;
   if (!view.latest) {
     return (
-      <section className="rounded-lg border border-border bg-surface p-4">
-        <h2 className="font-bold">{props.title}</h2>
+      <section className="panel p-4 sm:p-5">
+        <h2 className="text-lg font-bold leading-7">{props.title}</h2>
         <div className="mt-3">
           <EmptyState title="لم يُجرَ هذا الاختبار بعد">
             يشغّله الفريق التقني بالأمر <code className="ltr-nums rounded bg-background px-1">{props.command}</code>.
@@ -117,12 +119,12 @@ function EvalCard(props: {
   const failed = view.results.filter((r) => r.passed === false);
 
   return (
-    <section className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="font-bold">{props.title}</h2>
-      <p className="mt-1 text-xs text-muted">آخر اختبار: {fmtTime(view.latest.createdAt)}</p>
-      <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-sm [&_td]:px-3 [&_td]:py-2.5 [&_th]:px-3 [&_th]:py-2">
-          <thead className="bg-background/60 text-xs text-muted">
+    <section className="panel p-4 sm:p-5">
+      <h2 className="text-lg font-bold leading-7">{props.title}</h2>
+      <p className="mt-1 text-sm text-muted">آخر اختبار: {fmtTime(view.latest.createdAt)}</p>
+      <div className="table-scroll mt-4 rounded-lg border border-border">
+        <table className={`w-full text-sm ${holdout || previous ? "min-w-[460px]" : ""} [&_td]:px-3 [&_td]:py-3 [&_th]:px-3 [&_th]:py-2.5`}>
+          <thead className="bg-background text-xs text-muted">
             <tr className="border-b border-border">
               <th className="text-start font-medium">ما الذي نقيسه</th>
               <th className="text-start font-medium">نتيجة آخر اختبار</th>
@@ -137,8 +139,8 @@ function EvalCard(props: {
           <tbody>
             {props.rows.map(([key, label, f]) => (
               <tr key={key} className="border-b border-border last:border-0">
-                <td className="leading-6">{label}</td>
-                <td className="whitespace-nowrap font-medium">{fmt(latest[key], f)}</td>
+                <td className="min-w-[10rem] max-w-[13.5rem] leading-6 sm:max-w-[28rem]">{label}</td>
+                <td className="whitespace-nowrap text-base font-bold">{fmt(latest[key], f)}</td>
                 {holdout && <td className="whitespace-nowrap">{fmt(holdout[key], f)}</td>}
                 {previous && <td className="whitespace-nowrap text-muted">{fmt(previous[key], f)}</td>}
               </tr>
@@ -150,7 +152,7 @@ function EvalCard(props: {
         <summary className="cursor-pointer text-muted">
           الحالات التي لم تنجح (<span className="ltr-nums">{failed.length}</span> من <span className="ltr-nums">{view.results.length}</span>)
         </summary>
-        <ul className="mt-2 space-y-1 text-xs">
+        <ul className="mt-2 space-y-1.5 text-xs">
           {failed.length === 0 && <li className="text-muted">لا توجد حالات فاشلة.</li>}
           {failed.map((r) => (
             <li key={r.caseId} className="ltr-nums rounded border border-border p-2" dir="ltr">

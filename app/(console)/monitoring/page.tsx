@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import MonitoringDashboard from "@/components/MonitoringDashboard";
-import { CardSkeleton, PageHeader } from "@/components/PageHeader";
+import { DashboardSkeleton, PageHeader } from "@/components/PageHeader";
 
 export const metadata: Metadata = { title: "الأداء" };
 
@@ -11,7 +11,7 @@ export default function MonitoringPage(props: PageProps<"/monitoring">) {
       <PageHeader title="الأداء">
         كيف تعمل رصّة على طلباتك: سرعة التجهيز، ودقة قراءة المنتجات، وتكلفة كل طلب. طلبات الاختبار التجريبية لا تدخل في هذه الأرقام.
       </PageHeader>
-      <Suspense fallback={<CardSkeleton />}>
+      <Suspense fallback={<DashboardSkeleton />}>
         <Dashboard searchParams={props.searchParams} />
       </Suspense>
     </div>

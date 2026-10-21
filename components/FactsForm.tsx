@@ -59,11 +59,11 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
   }
 
   return (
-    <form onSubmit={submit} className="grid gap-3 rounded-md border border-border bg-background p-3 text-sm">
+    <form onSubmit={submit} className="grid gap-4 rounded-xl border border-border bg-background p-4 text-sm">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {NUM_FIELDS.map((f) => (
           <label key={f.key} className="grid content-start gap-1">
-            <span className="text-muted">{f.label}</span>
+            <span className="font-medium text-muted">{f.label}</span>
             <input
               type="number"
               inputMode="decimal"
@@ -73,12 +73,12 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
               dir="ltr"
               value={values[f.key] ?? ""}
               onChange={(e) => setValues({ ...values, [f.key]: e.target.value === "" ? null : Number(e.target.value) })}
-              className="rounded border border-border bg-surface px-2 py-1.5"
+              className="h-10 rounded-lg border border-border bg-surface px-2.5"
             />
           </label>
         ))}
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
         {(
           [
             ["fragile", "قابل للكسر"],
@@ -86,19 +86,23 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
             ["sensitive", "حساس"],
           ] as const
         ).map(([k, label]) => (
-          <label key={k} className="flex items-center gap-2">
-            <input type="checkbox" checked={values[k]} onChange={(e) => setValues({ ...values, [k]: e.target.checked })} />
+          <label key={k} className="flex items-center gap-2 py-1">
+            <input type="checkbox" className="size-4 accent-[var(--brand)]" checked={values[k]} onChange={(e) => setValues({ ...values, [k]: e.target.checked })} />
             {label}
           </label>
         ))}
       </div>
-      {error && <p className="text-critical">{error}</p>}
+      {error && (
+        <p role="alert" className="font-medium text-critical">
+          {error}
+        </p>
+      )}
       <div className="flex gap-2">
-        <button type="submit" disabled={busy} className="rounded bg-brand px-3 py-1.5 text-brand-contrast disabled:opacity-50">
+        <button type="submit" disabled={busy} className="rounded-lg bg-brand px-4 py-2 font-bold text-brand-contrast hover:opacity-90 disabled:opacity-50">
           {busy ? "جارٍ الحفظ…" : submitLabel}
         </button>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded border border-border px-3 py-1.5">
+          <button type="button" onClick={onCancel} className="rounded-lg border border-border px-4 py-2 hover:border-brand">
             إلغاء
           </button>
         )}
