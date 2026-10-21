@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import MonitoringDashboard from "@/components/MonitoringDashboard";
 import { DashboardSkeleton, PageHeader } from "@/components/PageHeader";
-import { isUuid } from "@/lib/http";
+import { isUuid } from "@/lib/ids";
 
 export const metadata: Metadata = { title: "الأداء" };
 

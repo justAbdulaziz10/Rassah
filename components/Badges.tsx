@@ -18,7 +18,7 @@ export function SourceBadge({ source, title }: { source: DataSource; title?: str
 
 /** Handling flags, in the order they are shown everywhere. */
 export const FLAGS = ["fragile", "liquid", "sensitive"] as const;
-export type Flag = (typeof FLAGS)[number];
+type Flag = (typeof FLAGS)[number];
 
 export const FLAG_LABEL: Record<Flag, string> = {
   fragile: "قابل للكسر",

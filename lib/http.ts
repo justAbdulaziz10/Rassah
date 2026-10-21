@@ -33,5 +33,3 @@ export function log(entry: Record<string, unknown>) {
   // One structured line per stage, searchable in Vercel logs by runId.
   console.log(JSON.stringify({ app: "rassah", ...entry }));
 }
-
-export { isUuid } from "@/lib/ids";
