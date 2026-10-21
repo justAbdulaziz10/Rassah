@@ -25,12 +25,12 @@
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 41 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 37 | 33 | 🟨 In progress |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 47 | 42 | 🟨 In progress |
-| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 42 | 🟨 In progress |
+| 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 44 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 36 | 35 | 🟨 In progress |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 21 | 🟨 In progress |
-| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 30 | 🟨 In progress |
+| 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 52 | 38 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 0 | ⬜ Not started |
-| **Total** | | | | **517** | **385** | |
+| **Total** | | | | **517** | **395** | |
 
 Status legend: ⬜ Not started · 🟨 In progress · 🟥 Blocked · ✅ Done (gate passed)
 
@@ -643,8 +643,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
 
 ### 8E. Investigation story
-- [ ] **P8.45** (M1+M3) Capture a **real** issue found via the dashboard or eval during development (problem → metric → trace → fix → after numbers).
-- [ ] **P8.46** (M1+M3) Write it up in `docs/report/results.md` with real numbers. If none happened, write "none observed" and use the outage demo instead.
+- [x] **P8.45** (M1+M3) Capture a **real** issue found via the dashboard or eval during development (problem → metric → trace → fix → after numbers). — iad1→fra1 latency investigation (2026-10-21)
+- [x] **P8.46** (M1+M3) Write it up in `docs/report/results.md` with real numbers. If none happened, write "none observed" and use the outage demo instead. — written up in results.md with before/after numbers
 
 ### 8F. Verification
 - [ ] **P8.47** (M1) Review PR: M1 can explain every tile and what to do when it turns red.
@@ -776,8 +776,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.9** (ALL) Limitations and trade-offs of each AI tool (e.g. Gemini may infer wrongly, mitigated by source tags + margin + eval).
 
 ### 11C. Report (`docs/report/REPORT.md` → PDF)
-- [ ] **P11.10** (M1, →T23) Title, team, date, live URL, repo URL.
-- [ ] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly).
+- [x] **P11.10** (M1, →T23) Title, team, date, live URL, repo URL. — title block complete
+- [x] **P11.11** (M1) 1. Problem (with the discovery evidence or "no replies yet", stated honestly). — states honestly: no merchant replies recorded yet
 - [x] **P11.12** (M1) 2. Solution and user flow (with screenshots). — screenshots 01–03 embedded in §2
 - [x] **P11.13** (M1) 3. Where the AI is and why (LLM understands, engine computes, validator proves).
 - [x] **P11.14** (M1) 4. Data collection: the synthetic dataset, how it was built, groups A/B/C, independent ground-truth labeling, holdout.
@@ -785,15 +785,15 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.16** (M3) 6. Development environment: repo, branches, CI, previews, tests, decision log.
 - [x] **P11.17** (M3) 7. Selected metrics: the 7 metrics, why each, what each reveals, alert rules.
 - [x] **P11.18** (M1+M2) 8. Benchmarks & evaluation results: extraction + packing tables, before/after prompt, margin decision, holdout.
-- [ ] **P11.19** (M3) 9. Monitoring in action: the investigation story + the outage demo.
-- [ ] **P11.20** (ALL) 10. Tools & AI usage (summary of TOOLS.md).
+- [x] **P11.19** (M3) 9. Monitoring in action: the investigation story + the outage demo. — investigation story + outage demo
+- [x] **P11.20** (ALL) 10. Tools & AI usage (summary of TOOLS.md). — summary of TOOLS.md
 - [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
 - [x] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback).
-- [ ] **P11.23** (ALL) 13. References: brief, Gemini docs, Supabase docs, Vercel docs, Next.js docs, R3F docs, courier volumetric-weight source, Paccurate, bin-packing references actually read.
+- [x] **P11.23** (ALL) 13. References: brief, Gemini docs, Supabase docs, Vercel docs, Next.js docs, R3F docs, courier volumetric-weight source, Paccurate, bin-packing references actually read. — references list (3 sources without recorded URL noted)
 - [x] **P11.24** (ALL) Diagrams embedded.
-- [ ] **P11.25** (ALL) Concise: target ≤ 8–10 pages. Cut anything that isn't evidence.
-- [ ] **P11.26** (ALL) Every number in the report traces back to an eval file or the dashboard.
-- [ ] **P11.27** (M1) Export to PDF. Check that Arabic text and diagrams render.
+- [x] **P11.25** (ALL) Concise: target ≤ 8–10 pages. Cut anything that isn't evidence. — 6 pages
+- [x] **P11.26** (ALL) Every number in the report traces back to an eval file or the dashboard. — numbers traced to eval/results, results.md, demo-script.md
+- [x] **P11.27** (M1) Export to PDF. Check that Arabic text and diagrams render. — docs/report/REPORT.pdf (pandoc → HTML → Brave headless), Arabic + images render
 
 ### 11D. Pitch deck (3 min)
 - [x] **P11.28** (M2, →T25) Slide 1: Title + one-line pitch.

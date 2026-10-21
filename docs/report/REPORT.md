@@ -2,9 +2,10 @@
 
 **Project 1: AI Product Development and Monitoring** · Tuwaiq Academy × Startupbootcamp × Meta · 22 October 2026
 **Team:** M1 (AI & Data) · M2 (Engine & UI) · M3 (Platform & Monitoring)
+**Date:** 2026-10-22
 **Live demo:** https://rassah.vercel.app · **Repository:** https://github.com/justAbdulaziz10/Rassah
 
-> Status: **draft**. Items marked ⏳ wait on the deployed environment or outside inputs. Every number comes from `eval/results/*.json` or the dashboard.
+> Every number comes from `eval/results/*.json`, `docs/report/results.md`, `docs/demo-script.md` or the dashboard.
 
 ---
 
@@ -16,7 +17,7 @@ Merchants who ship multi-item orders choose cartons by eye. Three things go wron
 2. **Fragile items break and liquids leak.** A new packer puts a book on a perfume bottle, or lays an oil bottle flat.
 3. **The data that would fix this doesn't exist.** Professional cartonization tools assume clean product dimensions in a warehouse system. Small Saudi merchants only have free-text product pages in Arabic and English.
 
-**Validation status:** merchant outreach is in `docs/discovery.md`. ⏳ Report replies honestly. The problem size is a hypothesis we have not measured.
+**Validation status:** merchant outreach: no replies recorded yet (`docs/discovery.md` does not exist yet). The problem size is a hypothesis we have not measured.
 
 ## 2. Solution and user flow
 
@@ -51,7 +52,7 @@ If a value has no basis, the order stops with "needs measurement" (the packer me
   - **Group A (15):** dimensions and weight stated, in varied formats (Arabic-Indic digits, inches/lb, "الطول/العرض/الارتفاع", buried mid-paragraph).
   - **Group B (12):** clues only (50 ml, 400 pages, 12 pieces).
   - **Group C (3):** no usable information.
-- **Ground truth** per product (outer box, natural upright orientation, flags, expected source). It must be reviewed by a member other than the description author (⏳ CHECKLIST P3.12). **10-product holdout** is excluded from prompt tuning.
+- **Ground truth** per product (outer box, natural upright orientation, flags, expected source). Independent review by a member other than the description author is still open (CHECKLIST P3.12), so the ground truth is AI-drafted and unreviewed. **10-product holdout** is excluded from prompt tuning.
 - **20 orders** (incl. 3 demo orders, needs-measurement and impossible cases), **5 cartons**, synthetic shipping rates.
 - **60 packing fixtures** from a seeded generator: 20 known-feasible (guillotine cuts of a carton, so a witness layout exists), 20 impossible (oversize / overweight / liquid too tall), 20 random.
 - All data files are schema-validated in CI (`npm run validate-data`).
@@ -72,7 +73,7 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 107 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Branch → PR → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 140 tests) + **Vercel preview** per PR → teammate review → merge → production deploy → smoke test → dashboard. Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (517 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
 *Figure 2. Development flow: branch → CI + Vercel preview → review → main → production → monitoring → issue.*
@@ -135,15 +136,21 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 ## 9. Monitoring in action
 
-- **Investigation (real):** the packing eval and its fixture trace led to the scoring fix above. A regression test guards it.
-- **Live demo:** a simulated Gemini outage (demo toggle) turns uncached products into "needs measurement" while cached ones still pack. M6 crosses 10% → critical banner "(عطل تجريبي)". The run trace shows `simulated_outage`. The alert resolves after clean runs.
-- ⏳ Add any live-dashboard finding from the deployed app.
+- **Investigation 1: slow cached orders (2026-10-21).**
+  - *Problem:* after the first production deploy, a smoke test of all 20 orders looked slow.
+  - *Metric:* the M5 latency chart on `/monitoring` showed cached orders taking **358-1896 ms** server-side.
+  - *Trace:* the `x-vercel-id` response header showed the functions running in `iad1` (US East), while Supabase is in `eu-central-1` (Frankfurt). Every DB query crossed the Atlantic.
+  - *Fix:* `vercel.json` `"regions": ["fra1"]`, pushed the same day (logged in `docs/decisions.md`).
+  - *After:* cached orders **119-234 ms**. One uncached order (Gemini call): **1589 ms** total, of which extraction 1205 ms. The drop is visible in the screenshot below.
+- **Investigation 2: Gemini quota.** `rate_limited` events (429 QuotaFailure) showed the Flash models' free tier is 20 requests/day/model. We switched to `gemini-3.5-flash-lite` (500/day); see `docs/decisions.md`.
+- **Investigation 3 (offline):** the packing eval and its fixture trace led to the scoring fix in section 8. A regression test guards it.
+- **Live demo:** a simulated Gemini outage (demo toggle) turns uncached products into "needs measurement" while cached ones still pack. M6 crosses 10% and shows a critical banner "(عطل تجريبي)". The run trace shows `simulated_outage`. The alert resolves after clean runs.
 
 ![Monitoring dashboard on the deployed app](screens/04-monitoring.png)
 
 ## 10. Tools and AI usage
 
-Summary of `docs/report/TOOLS.md`: Gemini is the runtime AI feature. Claude (Claude Code) generated most code drafts, the docs and the synthetic data, all reviewed by the team and verified by tests, CI, evals, an end-to-end API run and screenshots. Every member walks through code they didn't write (CHECKLIST P11.44–P11.49).
+Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI feature. Claude Code (Anthropic), including its subagents on 2026-10-20/21, generated most code drafts, the docs and the synthetic data. Google AI Studio was used for the key and manual prompt trials. Everything was reviewed by the team and verified by tests, CI, evals, an end-to-end API run and screenshots. Every member walks through code they didn't write (CHECKLIST P11.44–P11.49).
 
 ## 11. Limitations
 
@@ -155,11 +162,14 @@ Pilot with one merchant (100 real orders, packer vs Rassah: carton spend, courie
 
 ## 13. References
 
-- Project 1 brief (Tuwaiq Academy × Startupbootcamp × Meta), October 2026.
-- Google Gen AI SDK for JavaScript (`@google/genai`) and the Gemini API docs (structured output, pricing). Pricing as of 2026-10-21.
-- Next.js 16 documentation (Route Handlers, Cache Components), bundled in `node_modules/next/dist/docs/`.
-- Supabase docs (Postgres, RLS, JS client). Vercel docs (deployments, function limits).
-- Paccurate API documentation: existing cartonization product (positioning).
-- py3dbp (github.com/enzoruiz/3dbinpacking, MIT): reference for the naive first-fit baseline idea. Our code is independent TypeScript.
-- Courier volumetric-weight divisor: ⏳ cite the courier page used for 5000.
-- ⏳ Any 3D bin-packing paper the team actually reads (cite only what was read).
+- Project 1 brief (Tuwaiq Academy × Startupbootcamp × Meta), October 2026 (no URL in the repository).
+- Gemini API docs: https://ai.google.dev/gemini-api/docs
+- Gemini API pricing (as of 2026-10-21): https://ai.google.dev/gemini-api/docs/pricing
+- Supabase docs: https://supabase.com/docs
+- Vercel docs: https://vercel.com/docs
+- Next.js docs: https://nextjs.org/docs (the version used is also bundled in `node_modules/next/dist/docs/`)
+- React Three Fiber: https://r3f.docs.pmnd.rs
+- Paccurate API documentation (existing cartonization product, used for positioning). No URL is recorded in the repository.
+- py3dbp (`enzoruiz/3dbinpacking`, MIT): reference for the naive first-fit baseline idea. Our code is independent TypeScript. No URL is recorded in the repository.
+- Courier volumetric-weight divisor 5000 cm³/kg: described in `docs/PLAN.md` as "commonly 5000" and configurable (`VOLUMETRIC_DIVISOR`). No courier page has been cited yet.
+- Bin-packing papers: none read or cited.

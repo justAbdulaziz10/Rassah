@@ -64,4 +64,8 @@ Diagnosis that led to the last change: fixture `feasible-05` (3 items) failed be
 
 ## Investigation story
 
-_Pending (CHECKLIST P8.45–P8.46). The packing iteration above is a real eval-driven investigation and can be used if no live-dashboard story happens._
+**Slow cached orders (2026-10-21).** Problem: after the first production deploy, the M5 latency chart on `/monitoring` showed cached orders taking 358-1896 ms server-side (smoke test of all 20 orders). Trace: the `x-vercel-id` response header showed functions in `iad1` (US East) while Supabase is in `eu-central-1` (Frankfurt), so every DB query crossed the Atlantic. Fix: `vercel.json` `"regions": ["fra1"]` (see `docs/decisions.md`). After: cached orders 119-234 ms; uncached order 1589 ms total, of which Gemini extraction 1205 ms (`docs/demo-script.md`). Screenshot: `docs/report/screens/04-monitoring.png`.
+
+**Gemini quota.** `rate_limited` events (429 QuotaFailure) showed a free tier of 20 requests/day/model for the Flash models; switched to `gemini-3.5-flash-lite` (500/day), see `docs/decisions.md`.
+
+**Offline investigation.** The packing iteration above (fixture `feasible-05`) is also a real eval-driven investigation.
