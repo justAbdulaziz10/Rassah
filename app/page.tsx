@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
+  { href: "/store", label: "المتجر" },
   { href: "/orders", label: "الطلبات" },
   { href: "/notifications", label: "الإشعارات" },
   { href: "/catalog", label: "المنتجات" },
@@ -190,15 +191,20 @@ export default function LandingPage() {
             <h2 id="cta-title" className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold leading-tight">
               جرّبها على طلباتك.
             </h2>
-            <p className="mt-3 max-w-lg leading-8 text-[var(--on-deep-muted)]">افتح قائمة الطلبات، واختر أي طلب، وشاهد رصّة تجهّزه خلال لحظات.</p>
+            <p className="mt-3 max-w-lg leading-8 text-[var(--on-deep-muted)]">اطلب من المتجر، ثم افتح الطلب في لوحة الطلبات وشاهد رصّة تجهّزه خلال لحظات.</p>
           </div>
-          <Link
-            href="/orders"
-            className={`inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--tape)] px-7 py-4 text-lg font-bold text-[#12211e] shadow-[0_2px_0_#b8902f] transition-transform hover:-translate-y-0.5 ${ringOnDeep}`}
-          >
-            افتح الطلبات
-            <ArrowForwardIcon className="size-5" />
-          </Link>
+          <div className="flex shrink-0 flex-wrap items-center gap-4">
+            <Link
+              href="/store"
+              className={`inline-flex items-center gap-2 rounded-lg bg-[var(--tape)] px-7 py-4 text-lg font-bold text-[#12211e] shadow-[0_2px_0_#b8902f] transition-transform hover:-translate-y-0.5 ${ringOnDeep}`}
+            >
+              اطلب من المتجر
+              <ArrowForwardIcon className="size-5" />
+            </Link>
+            <Link href="/orders" className={`rounded text-[var(--on-deep)] underline underline-offset-8 ${ringOnDeep}`}>
+              افتح الطلبات
+            </Link>
+          </div>
         </div>
       </section>
 

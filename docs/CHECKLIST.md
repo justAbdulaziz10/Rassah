@@ -23,14 +23,14 @@
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
 | 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
-| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 38 | 38 | ✅ Done (gate passed) |
+| 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 39 | 39 | ✅ Done (gate passed) |
 | 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 56 | 56 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
 | 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **527** | **459** | |
+| **Total** | | | | **528** | **460** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -514,6 +514,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P6.36** (ALL) **If the gate fails:** apply the cut list now and record it in Blockers. — n/a: the gate passed (all 20 orders matched on production, P6.33), so no cut-list item was applied
 - [x] **P6.37** (M3) Update the dashboard. **Gate G6 check.** — G6 passed (verified, on production rather than a preview)
 - [x] **P6.38** (M3) Read-only order integration with the separate demo store (`feat/mock-store` merged): the pack route can read an order from the store's API, and refuses products that are not in Rassah's catalog. — `lib/integrations/store.ts`, `tests/pipeline/external-order.test.ts`; set `STORE_API_URL` / `STORE_API_KEY` to turn it on
+- [x] **P6.39** (M3) Built-in store at `/store` (متجر الواحة) on the same domain and the same database: cart → required customer name → order 5001+ in Rassah's `orders` table (`demo='store'`, name in `expect`, no schema change) → shows in `/orders` with the customer's name and packs like any order. The separate `store/` app is removed; the external Orders API client stays for Salla. — `app/store`, `app/api/store/checkout`, `tests/api/store-checkout.test.ts`; browser run 2026-10-21 at 1440 and 390 px (name required, 5001/5002 created, in queue, order page opens)
 
 ---
 

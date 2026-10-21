@@ -163,7 +163,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
       try {
         const ext = await req.externalOrders(req.orderId);
         if (ext) {
-          order = { id: ext.id, demo: null, lines: ext.lines };
+          order = { id: ext.id, demo: null, customerName: null, lines: ext.lines };
           response.orderSource = ext.source;
         }
       } catch (err) {

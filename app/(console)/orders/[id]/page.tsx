@@ -19,10 +19,12 @@ export default async function OrderResultPage(props: PageProps<"/orders/[id]">) 
   if (!/^\d{1,10}$/.test(id)) notFound();
 
   const repo = repoOrError();
+  let customerName: string | null = null;
   if (!(repo instanceof Response)) {
     // A DB error is not "not found": let the pack call report it on the page.
     const order = await repo.getOrder(id).catch(() => undefined);
     if (order === null) notFound();
+    customerName = order?.customerName ?? null;
   }
 
   return (
@@ -31,13 +33,13 @@ export default async function OrderResultPage(props: PageProps<"/orders/[id]">) 
         ← كل الطلبات
       </Link>
       <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-border/50" />}>
-        <Runner id={id} searchParams={props.searchParams} />
+        <Runner id={id} customerName={customerName} searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function Runner({ id, searchParams }: { id: string } & Pick<PageProps<"/orders/[id]">, "searchParams">) {
+async function Runner({ id, customerName, searchParams }: { id: string; customerName: string | null } & Pick<PageProps<"/orders/[id]">, "searchParams">) {
   const sp = await searchParams;
-  return <PackRunner key={id} orderId={id} simulateOutage={sp.outage === "1"} />;
+  return <PackRunner key={id} orderId={id} customerName={customerName} simulateOutage={sp.outage === "1"} />;
 }

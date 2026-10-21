@@ -56,3 +56,5 @@ export function rateLimitOrNull(limiter: RateLimiter, request: Request): Respons
 // a loop from burning the Gemini quota.
 export const packLimiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
 export const extractLimiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
+/** Store checkout writes an order to the database: enough for a live demo, not for a flood. */
+export const storeLimiter = createRateLimiter({ limit: 10, windowMs: 60_000 });

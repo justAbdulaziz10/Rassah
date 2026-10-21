@@ -72,11 +72,11 @@ It never clears facts or calls the admin extract endpoint. Packing writes a few 
 4. Open `http://127.0.0.1:3000/orders`, pack **1001** and **1002** (facts are seeded from `data/ground_truth.json`, labelled "بيانات تجريبية"); `/api/health` shows `status: degraded, offline: true`.
 5. Stop with Ctrl+C; verified 2026-10-21 (result, 3D and `/monitoring` render; Gemini is never called).
 
-## Optional: connected demo store (branch `feat/mock-store`, only if merged and deployed)
+## Store → packer (≈ 40 s)
 
-Shows the integration story: "once connected to a store, the packer only types the order number."
+Shows the full path: "a customer orders, the packer sees it and packs it."
 
-1. Open the store (separate URL, `store/README.md`) → add **عطر أو دو بارفان 50 مل**, **رواية ساق البامبو**, **شاحن جداري سريع 20W** → **إتمام الطلب** → a new number appears (e.g. **5001**).
-2. Say: "This is a separate store with its own database, standing in for Salla. Rassah has never seen this order."
-3. Open Rassah → type **5001** → carton + instructions + 3D. The order was read from the store's Orders API (read-only). Nothing was copied into Rassah's tables.
-4. If the store is down, Rassah says "Could not reach the store's orders API". Fall back to the seeded orders (1001–1020).
+1. Open **https://rassah.vercel.app/store** (متجر الواحة) → add **عطر أو دو بارفان 50 مل**, **رواية ساق البامبو**, **شاحن جداري سريع 20W** → type the customer's name (required) → **إتمام الطلب** → a new number appears (e.g. **5001**).
+2. Click **جهّزه في رصّة**, or open `/orders`: the order is in the queue as "جديد" with the customer's name.
+3. Carton + instructions + 3D, as for any order. Store orders live in Rassah's own `orders` table (`demo = 'store'`, customer name in `expect`); numbers start at 5001.
+4. `scripts/reset-events.ts` does not delete store orders. To remove them: Supabase SQL editor → `delete from orders where demo = 'store';` (order_items cascade).

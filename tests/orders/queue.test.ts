@@ -3,7 +3,7 @@ import type { OrderRun, OrderSummary, StoredFacts } from "@/lib/db/types";
 import { buildQueue, countQueue, needsMeasuring, nextOrder, sortQueue } from "@/lib/orders/queue";
 
 function order(id: string, productIds: string[] = ["p-01"]): OrderSummary {
-  return { id, demo: null, expect: null, lineCount: productIds.length, unitCount: productIds.length, productIds };
+  return { id, demo: null, expect: null, customerName: null, createdAt: null, lineCount: productIds.length, unitCount: productIds.length, productIds };
 }
 
 function run(orderId: string, at: string, over: Partial<OrderRun> = {}): OrderRun {
@@ -133,5 +133,23 @@ describe("order queue", () => {
     expect(countQueue(entries)).toEqual({ new: 1, ready: 1, attention: 1, done: 1, remaining: 3, total: 4 });
     expect(nextOrder(entries, "1010")).toBe("1003");
     expect(nextOrder(entries.filter((e) => e.state === "done"), "1001")).toBeNull();
+  });
+});
+
+describe("buildQueue: store orders", () => {
+  it("ignores runs saved for the number before the store order was placed", () => {
+    const store: OrderSummary = { ...order("5001"), customerName: "سارة", createdAt: "2026-10-21T12:00:00Z" };
+    const seeded = order("1001");
+    const runs = [
+      run("5001", "2026-10-21T11:00:00Z", { status: "error" }), // someone typed 5001 before it existed
+      run("5001", "2026-10-21T10:00:00Z", { employeeAction: "confirmed" }),
+      run("1001", "2026-10-21T11:00:00Z", { status: "error" }),
+    ];
+    const q = buildQueue([store, seeded], runs, new Map());
+    expect(q.find((e) => e.order.id === "5001")).toMatchObject({ state: "new", lastPreparedAt: null });
+    expect(q.find((e) => e.order.id === "1001")).toMatchObject({ state: "attention", reason: "error" });
+
+    const later = buildQueue([store], [...runs, run("5001", "2026-10-21T12:05:00Z")], new Map());
+    expect(later[0]).toMatchObject({ state: "ready", lastPreparedAt: "2026-10-21T12:05:00Z" });
   });
 });

@@ -15,13 +15,19 @@ import type {
   Product,
   StoredFacts,
 } from "@/lib/db/types";
+import { STORE_FIRST_ORDER_ID, STORE_ORDER_TAG } from "@/lib/db/types";
 import type { Carton, ShippingRates } from "@/lib/engine/types";
+
+const customerOf = (o: { demo: string | null; expect: string | null }) => (o.demo === STORE_ORDER_TAG ? o.expect : null);
 
 export class MemoryRepo implements Repo {
   products = new Map<string, Product>();
   cartons: Carton[] = [];
   rates: ShippingRates = { baseSar: 18, perKgSar: 3, volumetricDivisor: 5000 };
-  orders = new Map<string, { id: string; demo: string | null; expect: string | null; lines: Array<{ productId: string; qty: number }> }>();
+  orders = new Map<
+    string,
+    { id: string; demo: string | null; expect: string | null; createdAt?: string; lines: Array<{ productId: string; qty: number }> }
+  >();
   facts = new Map<string, StoredFacts>();
   extractionEvents: ExtractionEvent[] = [];
   orderRuns: OrderRun[] = [];
@@ -49,6 +55,8 @@ export class MemoryRepo implements Repo {
       id: o.id,
       demo: o.demo,
       expect: o.expect,
+      customerName: customerOf(o),
+      createdAt: o.createdAt ?? null,
       lineCount: o.lines.length,
       unitCount: o.lines.reduce((s, l) => s + l.qty, 0),
       productIds: [...new Set(o.lines.map((l) => l.productId))],
@@ -56,7 +64,15 @@ export class MemoryRepo implements Repo {
   }
   async getOrder(id: string) {
     const o = this.orders.get(id);
-    return o ? { id: o.id, demo: o.demo, lines: o.lines } : null;
+    return o ? { id: o.id, demo: o.demo, customerName: customerOf(o), lines: o.lines } : null;
+  }
+  async createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>) {
+    this.guard("createStoreOrder");
+    const unknown = lines.find((l) => !this.products.has(l.productId));
+    if (unknown) throw new Error(`createStoreOrder: unknown product ${unknown.productId}`); // the FK in Supabase
+    const id = String(Math.max(STORE_FIRST_ORDER_ID - 1, ...[...this.orders.keys()].map(Number)) + 1);
+    this.orders.set(id, { id, demo: STORE_ORDER_TAG, expect: customerName, createdAt: this.stamp(), lines: lines.map((l) => ({ ...l })) });
+    return { id };
   }
   async listProducts() {
     return [...this.products.values()];

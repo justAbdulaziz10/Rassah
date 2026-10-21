@@ -4,7 +4,7 @@
 
 A packer types an order number. Rassah reads each product's page with an LLM (Gemini), extracts dimensions and weight, and flags whether the product is fragile, liquid or sensitive. A constrained 3D packing engine then picks the cheapest carton that holds the order safely. The packer gets the carton, step-by-step packing instructions and a 3D view of the layout. Every step is logged to Supabase and shown on a monitoring dashboard.
 
-**Live:** https://rassah.vercel.app
+**Live:** https://rassah.vercel.app · store (place an order, then pack it in /orders): https://rassah.vercel.app/store
 
 **Pages:** `/` is now a landing page (its hero replays a real engine result for order 1016); the working screens are `/orders`, `/catalog`, `/monitoring` and `/evaluation`.
 

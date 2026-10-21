@@ -2,7 +2,8 @@ import "server-only";
 import { z } from "zod";
 import type { ExternalOrder } from "@/lib/pipeline/pack";
 
-// Read-only client for a connected store's orders API (today: the demo store in store/; later: Salla).
+// Read-only client for an external store's orders API (e.g. Salla). The built-in store at /store
+// writes straight to Rassah's orders table and does not use this.
 // Rassah never copies the order into its own tables: it reads it when the packer types the number.
 // Off unless both STORE_API_URL and STORE_API_KEY are set, so production is unchanged by default.
 

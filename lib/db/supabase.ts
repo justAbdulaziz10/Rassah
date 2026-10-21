@@ -16,8 +16,11 @@ import type {
   Product,
   StoredFacts,
 } from "./types";
+import { STORE_FIRST_ORDER_ID, STORE_ORDER_TAG } from "./types";
 
 type Row = Record<string, unknown>;
+
+const ORDERS_PAGE = 1000;
 
 export class DbError extends Error {
   constructor(op: string, message: string) {
@@ -32,6 +35,8 @@ function check<T>(op: string, res: { data: T; error: { message: string } | null 
 }
 
 const num = (v: unknown): number | null => (v === null || v === undefined ? null : Number(v));
+
+const customerOf = (r: Row): string | null => (r.demo === STORE_ORDER_TAG ? ((r.expect as string) ?? null) : null);
 
 // ---- row mappers (snake_case <-> camelCase) ----
 
@@ -248,13 +253,24 @@ export class SupabaseRepo implements Repo {
   }
 
   async listOrders(): Promise<OrderSummary[]> {
-    const rows = check("listOrders", await this.db.from("orders").select("id, demo, expect, order_items(product_id, qty)").order("id")) as Row[];
+    // Paged: the API returns at most 1,000 rows per request, and store orders keep adding rows.
+    const rows: Row[] = [];
+    for (let from = 0; ; from += ORDERS_PAGE) {
+      const page = check(
+        "listOrders",
+        await this.db.from("orders").select("id, demo, expect, created_at, order_items(product_id, qty)").order("id").range(from, from + ORDERS_PAGE - 1),
+      ) as Row[];
+      rows.push(...page);
+      if (page.length < ORDERS_PAGE) break;
+    }
     return rows.map((r) => {
       const items = (r.order_items as Array<{ product_id: string; qty: number }>) ?? [];
       return {
         id: r.id as string,
         demo: (r.demo as string) ?? null,
         expect: (r.expect as string) ?? null,
+        customerName: customerOf(r),
+        createdAt: (r.created_at as string) ?? null,
         lineCount: items.length,
         unitCount: items.reduce((s, i) => s + i.qty, 0),
         productIds: [...new Set(items.map((i) => i.product_id))],
@@ -265,7 +281,7 @@ export class SupabaseRepo implements Repo {
   async getOrder(orderId: string): Promise<OrderWithLines | null> {
     const rows = check(
       "getOrder",
-      await this.db.from("orders").select("id, demo, order_items(product_id, qty)").eq("id", orderId).limit(1),
+      await this.db.from("orders").select("id, demo, expect, order_items(product_id, qty)").eq("id", orderId).limit(1),
     ) as Row[];
     if (rows.length === 0) return null;
     const r = rows[0];
@@ -273,8 +289,34 @@ export class SupabaseRepo implements Repo {
     return {
       id: r.id as string,
       demo: (r.demo as string) ?? null,
+      customerName: customerOf(r),
       lines: items.map((i) => ({ productId: i.product_id, qty: i.qty })).sort((a, b) => a.productId.localeCompare(b.productId)),
     };
+  }
+
+  async createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>) {
+    // Next number after the newest store order (5001 for the first). Two checkouts at the same moment
+    // can pick the same number: the primary key rejects the second one, which retries with the next.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const latest = check(
+        "createStoreOrder",
+        await this.db.from("orders").select("id").eq("demo", STORE_ORDER_TAG).order("created_at", { ascending: false }).limit(1),
+      ) as Row[];
+      const last = Number(latest[0]?.id);
+      const id = String(Math.max(STORE_FIRST_ORDER_ID - 1, Number.isFinite(last) ? last : 0) + 1 + attempt);
+      const ins = await this.db.from("orders").insert({ id, demo: STORE_ORDER_TAG, expect: customerName });
+      if (ins.error) {
+        if ((ins.error as { code?: string }).code === "23505") continue; // number taken meanwhile
+        throw new DbError("createStoreOrder", ins.error.message);
+      }
+      const items = await this.db.from("order_items").insert(lines.map((l) => ({ order_id: id, product_id: l.productId, qty: l.qty })));
+      if (items.error) {
+        const undo = await this.db.from("orders").delete().eq("id", id); // no half-written order in the queue
+        throw new DbError("createStoreOrder", `${items.error.message}${undo.error ? `; order ${id} left without items: ${undo.error.message}` : ""}`);
+      }
+      return { id };
+    }
+    throw new DbError("createStoreOrder", "no free order number after 5 attempts");
   }
 
   async listProducts() {

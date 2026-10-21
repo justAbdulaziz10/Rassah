@@ -188,6 +188,8 @@ function OrderCard({ entry, snap }: { entry: QueueEntry; snap: QueueSnapshot }) 
         </span>
       </div>
 
+      {order.customerName && <p className="-mt-1 text-sm text-muted">العميل: {order.customerName}</p>}
+
       <p className={`line-clamp-2 text-sm leading-6 ${done ? "text-muted" : ""}`}>
         {names.slice(0, 2).join("، ")}
         {names.length > 2 && <span className="text-muted"> و{fmtCount(names.length - 2, { one: "منتج آخر", two: "منتجان آخران", few: "منتجات أخرى", many: "منتجاً آخر" })}</span>}

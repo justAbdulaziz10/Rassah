@@ -48,7 +48,9 @@ async function main() {
     const out: string[] = [];
     const bad: string[] = [];
     for (const [table, n, op] of want) {
-      const { count, error } = await db.from(table).select("*", { count: "exact", head: true });
+      const q = db.from(table).select("*", { count: "exact", head: true });
+      // Seeded orders only: orders placed in the built-in store (demo = 'store') come and go.
+      const { count, error } = await (table === "orders" ? q.or("demo.is.null,demo.neq.store") : q);
       if (error) throw new Error(`${table}: ${error.message}`);
       out.push(`${table}=${count}`);
       if (count === null || (op === "eq" ? count !== n : count < n)) bad.push(`${table} expected ${op === "eq" ? "" : ">="}${n}, got ${count}`);

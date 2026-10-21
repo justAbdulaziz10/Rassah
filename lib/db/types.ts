@@ -13,10 +13,21 @@ export interface Product {
   sourceHash: string;
 }
 
+/**
+ * Orders placed in the built-in store (/store) live in the same `orders` table as the seeded ones.
+ * No schema change: `demo` = "store" marks them and `expect` holds the customer's name.
+ * Their numbers start at 5001 so they never collide with the seeded orders (1001–1020).
+ */
+export const STORE_ORDER_TAG = "store";
+export const STORE_FIRST_ORDER_ID = 5001;
+
 export interface OrderSummary {
   id: string;
   demo: string | null;
   expect: string | null;
+  /** Set for orders placed in the built-in store. */
+  customerName: string | null;
+  createdAt: string | null;
   lineCount: number;
   unitCount: number;
   /** Distinct products in the order. */
@@ -26,6 +37,7 @@ export interface OrderSummary {
 export interface OrderWithLines {
   id: string;
   demo: string | null;
+  customerName: string | null;
   lines: Array<{ productId: string; qty: number }>;
 }
 

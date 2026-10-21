@@ -57,7 +57,10 @@ export function buildQueue(orders: OrderSummary[], runs: OrderRun[], facts: Map<
   }
 
   return orders.map((order) => {
-    const orderRuns = (byOrder.get(order.id) ?? []).sort((a, b) => time(b.createdAt) - time(a.createdAt));
+    // A store order's number may have been typed into Rassah before the order existed (an error run is
+    // saved for unknown numbers). Only runs from after the order was placed belong to it.
+    const placedAt = order.customerName !== null ? time(order.createdAt) : 0;
+    const orderRuns = (byOrder.get(order.id) ?? []).filter((r) => time(r.createdAt) >= placedAt).sort((a, b) => time(b.createdAt) - time(a.createdAt));
     const latest = orderRuns[0];
     const confirmedRun = orderRuns.find((r) => r.employeeAction === "confirmed");
     const unmeasured = order.productIds.filter((id) => needsMeasuring(facts.get(id)));

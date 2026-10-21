@@ -24,6 +24,8 @@ export interface Repo {
   // Mock store
   listOrders(): Promise<OrderSummary[]>;
   getOrder(orderId: string): Promise<OrderWithLines | null>;
+  /** Places an order from the built-in store; returns its new number (5001, 5002, …). Product ids must exist. */
+  createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>): Promise<{ id: string }>;
   listProducts(): Promise<Product[]>;
   getProducts(ids: string[]): Promise<Product[]>;
   listCartons(): Promise<Carton[]>;

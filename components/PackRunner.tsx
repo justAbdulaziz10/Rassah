@@ -40,7 +40,7 @@ async function postJson(url: string, body: unknown, method = "POST") {
   return { ok: res.ok, status: res.status, data };
 }
 
-export default function PackRunner({ orderId, simulateOutage }: { orderId: string; simulateOutage: boolean }) {
+export default function PackRunner({ orderId, customerName = null, simulateOutage }: { orderId: string; customerName?: string | null; simulateOutage: boolean }) {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [confirmed, setConfirmed] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
@@ -149,6 +149,7 @@ export default function PackRunner({ orderId, simulateOutage }: { orderId: strin
               <StatusPill status={d.status} label={STATUS_LABEL[d.status] ?? d.status} />
             )}
           </div>
+          {customerName && <p className="mt-0.5 text-sm text-muted">العميل: {customerName}</p>}
           {split && (
             <>
               <p className="mt-2 text-3xl font-bold text-brand">يُغلَّف في {fmtCartons(split.boxes.length)}</p>
