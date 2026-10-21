@@ -205,8 +205,6 @@ body {
     --ink-3: #9bada8;
     --paper: #0c1413;
     --panel: #121b1a;
-    --deep: #0b3b36;
-    --deep-2: #0e4a43;
     --bad-ink: #f87171;
   }
 }
@@ -215,7 +213,7 @@ body {
 .parcel-label {
   --ink: #12211e;
   background: #ffffff;
-  color: #12211e;
+  color: var(--ink);
 }
 
 @media (prefers-reduced-motion: reduce) {
