@@ -4,7 +4,7 @@
 
 A packer types an order number. Rassah reads each product's page with an LLM (Gemini), extracts dimensions and weight, and flags whether the product is fragile, liquid or sensitive. A constrained 3D packing engine then picks the cheapest carton that holds the order safely. The packer gets the carton, step-by-step packing instructions and a 3D view of the layout. Every step is logged to Supabase and shown on a monitoring dashboard.
 
-> Status: **planning**. The implementation follows [`docs/PLAN.md`](docs/PLAN.md).
+> Status: **MVP live** at https://rassah.vercel.app. Repository: https://github.com/justAbdulaziz10/Rassah. The implementation follows [`docs/PLAN.md`](docs/PLAN.md).
 > Built for *Project 1: AI Product Development and Monitoring* (Tuwaiq Academy × Startupbootcamp × Meta). Demo day: **Thursday 22 October 2026**.
 
 ## Getting started

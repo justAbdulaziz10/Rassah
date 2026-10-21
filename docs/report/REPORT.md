@@ -2,7 +2,7 @@
 
 **Project 1: AI Product Development and Monitoring** · Tuwaiq Academy × Startupbootcamp × Meta · 22 October 2026
 **Team:** M1 (AI & Data) · M2 (Engine & UI) · M3 (Platform & Monitoring)
-**Live demo:** _<Vercel URL>_ · **Repository:** https://github.com/justAbdulaziz10/Rassah
+**Live demo:** https://rassah.vercel.app · **Repository:** https://github.com/justAbdulaziz10/Rassah
 
 > Status: **draft**. Items marked ⏳ wait on the Gemini key or the deployed environment. Every number comes from `eval/results/*.json` or the dashboard.
 
