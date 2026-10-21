@@ -79,7 +79,7 @@ async function Queue({ searchParams }: Pick<PageProps<"/orders">, "searchParams"
             <p className="flex items-baseline gap-2.5 text-lg">
               <span className="ltr-nums font-display text-5xl font-bold leading-none text-brand">{counts.remaining}</span>
               <span>
-                {counts.remaining === 1 ? "طلب ينتظر" : "طلبات تنتظر"} التغليف
+                {waitingLabel(counts.remaining)} التغليف
                 <span className="block text-sm text-muted">من أصل {fmtCount(counts.total, { one: "طلب واحد", two: "طلبين", few: "طلبات", many: "طلباً" })}</span>
               </span>
             </p>
@@ -217,4 +217,13 @@ function OrderCard({ entry, snap }: { entry: QueueEntry; snap: QueueSnapshot }) 
       </div>
     </Link>
   );
+}
+
+/** Label after the big number: 1 طلب ينتظر، 2 طلبان ينتظران، 3-10 طلبات تنتظر، 11+ طلباً ينتظر. */
+function waitingLabel(n: number): string {
+  if (n === 0) return "طلبات تنتظر";
+  if (n === 1) return "طلب ينتظر";
+  if (n === 2) return "طلبان ينتظران";
+  if (n >= 3 && n <= 10) return "طلبات تنتظر";
+  return "طلباً ينتظر";
 }

@@ -51,6 +51,9 @@ export async function updateProductFacts(params: {
   const [product] = await repo.getProducts([productId]);
   if (!product) throw new FactsError(`Product ${productId} not found`, 404);
   const prior = (await repo.getFacts([productId])).get(productId) ?? null;
+  // A run whose save failed (monitoring.saved=false) has no row; linking to it would break the foreign key
+  // after the facts were already written, so keep the corrections and drop the link instead.
+  const runId = params.runId && (await repo.getOrderRun(params.runId)) ? params.runId : null;
 
   const base: StoredFacts = prior ?? {
     productId,
@@ -79,7 +82,10 @@ export async function updateProductFacts(params: {
     if (!(next.lengthCm && next.widthCm && next.heightCm)) {
       throw new FactsError("Length, width and height are all required", 400);
     }
-    next.dimsSource = "manual";
+    // One measured side does not make the other two guesses exact: an inferred source keeps its safety
+    // margin and "check it fits" note until all three sides are measured.
+    const allMeasured = (["lengthCm", "widthCm", "heightCm"] as const).every((k) => k in changes);
+    if (allMeasured || base.dimsSource !== "inferred") next.dimsSource = "manual";
   }
   if ("weightG" in changes) next.weightSource = "manual";
   next.origin = base.origin === "ai" || base.origin === "ai_corrected" ? "ai_corrected" : "manual";
@@ -92,7 +98,7 @@ export async function updateProductFacts(params: {
     const newValue = changes[key];
     if (oldValue === newValue) continue;
     corrections.push({
-      runId: params.runId,
+      runId,
       productId,
       field: FIELD_COLUMNS[key],
       oldValue: oldValue === null || oldValue === undefined ? null : String(oldValue),

@@ -9,7 +9,7 @@ import { packUnits, type PackOptions } from "./packer";
 import type { Carton, CostEstimate, PackSuccess, Placement, Unit } from "./types";
 import { volume } from "./geometry";
 
-export interface SplitBox {
+interface SplitBox {
   carton: Carton;
   placements: Placement[];
   units: Unit[];

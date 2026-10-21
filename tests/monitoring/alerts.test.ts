@@ -92,4 +92,39 @@ describe("syncAlerts", () => {
     await syncAlerts(repo, evaluateRules({ ...base, extractions: real }), { webhookUrl: "https://hook.example", fetchFn });
     expect(fetchFn).toHaveBeenCalledTimes(1);
   });
+
+  it("two checks at the same moment open one alert and post one webhook", async () => {
+    const repo = new MemoryRepo();
+    const fetchFn = vi.fn(async () => new Response("ok"));
+    const failing = evaluateRules({ ...base, runs: [run({ validatorRejections: 1 })] });
+    const opts = { webhookUrl: "https://hook.example", fetchFn };
+    await Promise.all([syncAlerts(repo, failing, opts), syncAlerts(repo, failing, opts)]);
+    expect(await repo.listOpenAlerts()).toHaveLength(1);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves a duplicate open alert left by another server instance", async () => {
+    const repo = new MemoryRepo();
+    const failing = evaluateRules({ ...base, runs: [run({ validatorRejections: 1 })] });
+    const [m3] = failing.filter((e) => e.breached);
+    for (let i = 0; i < 2; i++) await repo.insertAlert({ ...m3, resolvedAt: null });
+    expect(await syncAlerts(repo, failing)).toHaveLength(1);
+  });
+
+  it("gives up on a webhook that does not answer instead of holding the request", async () => {
+    vi.useFakeTimers();
+    try {
+      const repo = new MemoryRepo();
+      const fetchFn = vi.fn(
+        (_url: string | URL | Request, init?: RequestInit) =>
+          new Promise<Response>((_, reject) => init?.signal?.addEventListener("abort", () => reject(init.signal!.reason))),
+      );
+      const failing = evaluateRules({ ...base, runs: [run({ validatorRejections: 1 })] });
+      const done = syncAlerts(repo, failing, { webhookUrl: "https://hook.example", fetchFn: fetchFn as typeof fetch });
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(await done).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

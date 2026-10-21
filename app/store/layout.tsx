@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BoxIcon } from "@/components/Icons";
 
 export const metadata: Metadata = {
   title: { default: "متجر الواحة", template: "%s · متجر الواحة" },
@@ -15,7 +16,11 @@ export default function StoreLayout({ children }: LayoutProps<"/store">) {
           <Link href="/store" className="font-display text-2xl font-bold text-brand">
             متجر الواحة
           </Link>
-          <Link href="/orders" className="text-sm text-muted underline-offset-4 hover:text-foreground hover:underline">
+          <Link
+            href="/orders"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:border-brand hover:text-brand"
+          >
+            <BoxIcon className="size-4" />
             لوحة الطلبات
           </Link>
         </div>

@@ -5,7 +5,7 @@ import "server-only";
 // and a cold start resets the counters. That is an accepted limit for the demo (docs/decisions.md);
 // a shared limit would need a DB or KV counter.
 
-export type RateLimitResult = { ok: true; remaining: number } | { ok: false; retryAfterSec: number };
+type RateLimitResult = { ok: true; remaining: number } | { ok: false; retryAfterSec: number };
 
 export type RateLimiter = {
   check(key: string, now?: number): RateLimitResult;

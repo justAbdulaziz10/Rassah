@@ -112,7 +112,7 @@ export function evaluateRules(input: AlertInput): RuleEvaluation[] {
   });
 
   // M5: latency p95 over the last 20 runs, split cached/uncached.
-  const recentRuns = runs.slice(0, t.m5Last);
+  const recentRuns = runs.filter((r) => r.status !== "error").slice(0, t.m5Last); // same rule as the M5 tile
   const cachedP95 = percentile(recentRuns.filter((r) => r.cacheMisses === 0).map((r) => r.totalMs), 95);
   const uncachedP95 = percentile(recentRuns.filter((r) => r.cacheMisses > 0).map((r) => r.totalMs), 95);
   const nCached = recentRuns.filter((r) => r.cacheMisses === 0).length;
@@ -174,10 +174,39 @@ export interface SyncOptions {
   fetchFn?: typeof fetch;
 }
 
+const WEBHOOK_TIMEOUT_MS = 3000;
+const SYNC_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limit = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`alert check took longer than ${ms} ms`)), ms);
+  });
+  return Promise.race([work, limit]).finally(() => clearTimeout(timer));
+}
+
+// Every pack, action and dashboard load re-checks the rules. Run those checks one at a time in this
+// instance so two of them cannot both see "no open alert" and open the same alert twice.
+let queue: Promise<unknown> = Promise.resolve();
+
 /** Opens alerts for newly breached rules (one open alert per rule) and resolves recovered ones. */
-export async function syncAlerts(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOptions = {}): Promise<Alert[]> {
+export function syncAlerts(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOptions = {}): Promise<Alert[]> {
+  // Bounded, so one hung database call cannot hold up every later request on this instance.
+  const next = queue.then(() => withTimeout(syncOnce(repo, evaluations, opts), SYNC_TIMEOUT_MS));
+  queue = next.catch(() => {});
+  return next;
+}
+
+async function syncOnce(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOptions): Promise<Alert[]> {
   const open = await repo.listOpenAlerts();
-  const openByRule = new Map(open.map((a) => [a.rule, a]));
+  const openByRule = new Map<string, Alert>();
+  for (const a of open) {
+    if (!openByRule.has(a.rule)) openByRule.set(a.rule, a);
+    else if (a.id) {
+      // Another server instance opened the same alert at the same moment: keep one, resolve the rest.
+      await repo.resolveAlert(a.id);
+    }
+  }
 
   for (const ev of evaluations) {
     const existing = openByRule.get(ev.rule);
@@ -195,8 +224,10 @@ export async function syncAlerts(repo: Repo, evaluations: RuleEvaluation[], opts
       await repo.insertAlert(alert);
       if (opts.webhookUrl && !ev.simulated) {
         try {
+          // Bounded: a slow webhook must not hold up the pack response or the dashboard.
           await (opts.fetchFn ?? fetch)(opts.webhookUrl, {
             method: "POST",
+            signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ content: `[Rassah] ${ev.severity.toUpperCase()} ${ev.rule}: ${ev.message}` }),
           });

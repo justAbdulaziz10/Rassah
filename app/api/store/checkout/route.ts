@@ -20,11 +20,10 @@ export async function POST(request: Request) {
   if (repo instanceof Response) return repo;
 
   const ids = [...new Set(body.data.items.map((i) => i.productId))];
-  const known = new Set((await repo.getProducts(ids)).map((p) => p.id).filter((id) => PRICE_SAR[id] !== undefined)); // sold in the store
-  const cart = normalizeCart(body.data.items, known);
-  if (!cart.ok) return jsonError(400, cart.error);
-
   try {
+    const known = new Set((await repo.getProducts(ids)).map((p) => p.id).filter((id) => PRICE_SAR[id] !== undefined)); // sold in the store
+    const cart = normalizeCart(body.data.items, known);
+    if (!cart.ok) return jsonError(400, cart.error);
     const { id } = await repo.createStoreOrder(body.data.customerName, cart.lines);
     log({ stage: "store_checkout", orderId: id, lines: cart.lines.length });
     return Response.json({ orderId: id }, { status: 201 });

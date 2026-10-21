@@ -80,17 +80,21 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
   const [trace, setTrace] = useState<Trace | null>(null);
 
   // State is only set after the await, never synchronously inside the effect.
+  // Only the newest request may update the screen: a slow reply for an old window must not overwrite the selected one.
+  const seq = useRef(0);
   const load = useCallback(async (w: Win) => {
+    const mine = ++seq.current;
     try {
       const res = await fetch(`/api/monitoring/metrics?window=${w}`, { cache: "no-store" });
       const json = await res.json();
+      if (mine !== seq.current) return;
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
       setData(json as DashboardData);
       setError(null);
     } catch (e) {
-      setError((e as Error).message);
+      if (mine === seq.current) setError((e as Error).message);
     } finally {
-      setRefreshing(false);
+      if (mine === seq.current) setRefreshing(false);
     }
   }, []);
 
@@ -112,7 +116,9 @@ export default function MonitoringDashboard({ initialRun }: { initialRun: string
       .then((j) => {
         if (!cancelled) setTrace(j as Trace | null);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setTrace(null); // never leave the previous run's trace under a new selection
+      });
     return () => {
       cancelled = true;
     };

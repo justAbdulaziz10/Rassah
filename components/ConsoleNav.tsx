@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fmtCount } from "@/lib/ui/format";
-import { BellIcon, CrossIcon } from "./Icons";
+import { BagIcon, BellIcon, CrossIcon } from "./Icons";
 
 interface QueueSummary {
   counts: { new: number; ready: number; attention: number; done: number; remaining: number; total: number };
@@ -91,9 +91,17 @@ export default function ConsoleNav() {
   const alertsCount = c ? c.attention + summary.alertsOpen : 0;
 
   useEffect(() => {
-    const base = document.title.replace(/^\(\d+\)\s*/, "");
-    document.title = alertsCount > 0 ? `(${alertsCount}) ${base}` : base;
-  }, [alertsCount, pathname]);
+    // Next rewrites <title> after client navigation, so re-apply the "(N)" prefix whenever the title changes.
+    const apply = () => {
+      const base = document.title.replace(/^\(\d+\)\s*/, "");
+      const want = alertsCount > 0 ? `(${alertsCount}) ${base}` : base;
+      if (document.title !== want) document.title = want;
+    };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.head, { subtree: true, childList: true, characterData: true });
+    return () => observer.disconnect();
+  }, [alertsCount]);
 
   return (
     <>
@@ -130,6 +138,13 @@ export default function ConsoleNav() {
             تعذّر تحديث الأرقام
           </span>
         )}
+        <Link
+          href="/store"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:border-brand hover:text-brand"
+        >
+          <BagIcon className="size-4" />
+          المتجر
+        </Link>
       </nav>
 
       {arrived.length > 0 && (

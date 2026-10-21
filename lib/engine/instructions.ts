@@ -30,6 +30,8 @@ export function buildInstructions(
     if (u.fragile) notes.push(AR.fragile(paddingCm));
     if (u.liquid) notes.push(AR.liquid);
     if (u.sensitive && !u.fragile) notes.push(AR.sensitive(paddingCm));
+    // dims are sorted largest first, so lying flat means its smallest side is the vertical one.
+    if (!u.liquid && p.dz > u.dims[2] + eps) notes.push(AR.onEdge(Math.round(p.dz * 10) / 10));
     if (u.estimated) notes.push(AR.estimated);
     steps.push({ step: steps.length + 1, unitId: u.unitId, text, notes });
   }

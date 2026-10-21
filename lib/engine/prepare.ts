@@ -18,6 +18,10 @@ export function prepareUnits(
   facts: Map<string, ProductFacts>,
   config: EngineConfig,
 ): PrepareResult {
+  // Callers validate quantities, but NaN, negative or fractional ones would slip past the sum checks below.
+  if (lines.some((l) => !Number.isInteger(l.qty) || l.qty < 1)) {
+    return { ok: false, kind: "invalid_input", message: "every quantity must be a whole number of at least 1" };
+  }
   const totalUnits = lines.reduce((s, l) => s + l.qty, 0);
   if (totalUnits < 1) return { ok: false, kind: "invalid_input", message: "order has no items" };
   if (totalUnits > config.maxUnits) {

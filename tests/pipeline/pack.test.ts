@@ -145,6 +145,31 @@ describe("corrections and actions", () => {
     expect(corrections.every((c) => c.priorOrigin === "none")).toBe(true);
   });
 
+  it("measuring one side of a guessed size keeps the other two marked as guesses", async () => {
+    const { repo } = setup();
+    repo.facts.set("p-02", {
+      productId: "p-02", lengthCm: 20, widthCm: 10, heightCm: 10, weightG: 300, dimsSource: "inferred", weightSource: "inferred",
+      fragile: false, liquid: false, sensitive: false, confidence: "low", evidence: null, origin: "ai", sourceHash: "h-p-02",
+      model: "m", promptVersion: "v1", extractedAt: null, updatedAt: "2026-10-21T00:00:00Z",
+    });
+    const one = await updateProductFacts({ repo, productId: "p-02", changes: { lengthCm: 25 }, runId: null });
+    expect(one.facts).toMatchObject({ lengthCm: 25, dimsSource: "inferred" });
+    const all = await updateProductFacts({ repo, productId: "p-02", changes: { lengthCm: 25, widthCm: 11, heightCm: 9 }, runId: null });
+    expect(all.facts.dimsSource).toBe("manual");
+  });
+
+  it("keeps the corrections, without the run link, when the run itself was never saved", async () => {
+    const { repo } = setup();
+    const { corrections } = await updateProductFacts({
+      repo,
+      productId: "p-02",
+      changes: { lengthCm: 10, widthCm: 8, heightCm: 5, weightG: 200 },
+      runId: "00000000-0000-4000-8000-000000000000",
+    });
+    expect(corrections.length).toBeGreaterThan(0);
+    expect(repo.corrections.map((c) => c.runId)).toEqual(corrections.map(() => null));
+  });
+
   it("rejects a partial dimension measurement for an unknown product", async () => {
     const { repo } = setup();
     await expect(updateProductFacts({ repo, productId: "p-02", changes: { lengthCm: 10 }, runId: null })).rejects.toThrow(/all required/);

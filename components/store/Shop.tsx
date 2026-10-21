@@ -14,10 +14,10 @@ export interface ShopProduct {
   priceSar: number;
 }
 
-function Stepper({ qty, onChange, canAdd, name }: { qty: number; onChange: (d: number) => void; canAdd: boolean; name: string }) {
+function Stepper({ qty, onChange, canAdd, name, idPrefix }: { qty: number; onChange: (d: number) => void; canAdd: boolean; name: string; idPrefix?: string }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface p-1">
-      <button type="button" aria-label={`أنقص ${name}`} onClick={() => onChange(-1)} className="grid size-8 place-items-center rounded-md hover:bg-background">
+      <button type="button" id={idPrefix && `${idPrefix}-dec`} aria-label={`أنقص ${name}`} onClick={() => onChange(-1)} className="grid size-8 place-items-center rounded-md hover:bg-background">
         <MinusIcon />
       </button>
       <span className="ltr-nums w-6 text-center font-bold" aria-live="polite">
@@ -25,6 +25,7 @@ function Stepper({ qty, onChange, canAdd, name }: { qty: number; onChange: (d: n
       </span>
       <button
         type="button"
+        id={idPrefix && `${idPrefix}-inc`}
         aria-label={`زِد ${name}`}
         onClick={() => onChange(1)}
         disabled={!canAdd}
@@ -46,6 +47,17 @@ export default function Shop({ products, maxUnits, maxPerLine }: { products: Sho
   const [cartInView, setCartInView] = useState(false);
   const cartRef = useRef<HTMLElement>(null);
   const byId = useMemo(() => new Map(products.map((p) => [p.id, p])), [products]);
+  // "أضف للسلة" and the stepper replace each other, so move focus to the control that took the clicked one's place.
+  const focusNext = useRef<string[] | null>(null);
+  useEffect(() => {
+    const ids = focusNext.current;
+    if (!ids) return;
+    focusNext.current = null;
+    for (const id of ids) {
+      const el = document.getElementById(id) as HTMLButtonElement | null;
+      if (el && !el.disabled) return el.focus();
+    }
+  });
 
   // The phone shortcut bar to the cart hides once the cart itself is on screen, so it never covers checkout.
   useEffect(() => {
@@ -128,11 +140,24 @@ export default function Shop({ products, maxUnits, maxPerLine }: { products: Sho
                     <span className="ltr-nums">{p.priceSar}</span> <span className="text-sm font-normal">ر.س</span>
                   </span>
                   {qty ? (
-                    <Stepper qty={qty} name={p.name} onChange={(d) => change(p.id, d)} canAdd={canAdd(p.id)} />
+                    <Stepper
+                      qty={qty}
+                      name={p.name}
+                      idPrefix={`card-${p.id}`}
+                      onChange={(d) => {
+                        if (d < 0 && qty === 1) focusNext.current = [`card-${p.id}-add`];
+                        change(p.id, d);
+                      }}
+                      canAdd={canAdd(p.id)}
+                    />
                   ) : (
                     <button
                       type="button"
-                      onClick={() => change(p.id, 1)}
+                      id={`card-${p.id}-add`}
+                      onClick={() => {
+                        focusNext.current = [`card-${p.id}-inc`, `card-${p.id}-dec`];
+                        change(p.id, 1);
+                      }}
                       disabled={!canAdd(p.id)}
                       className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-brand px-3 text-sm font-bold text-brand hover:bg-brand hover:text-brand-contrast disabled:opacity-40"
                     >
@@ -147,7 +172,7 @@ export default function Shop({ products, maxUnits, maxPerLine }: { products: Sho
       </section>
 
       <aside id="cart" ref={cartRef} aria-label="السلة" className="panel scroll-mt-20 space-y-4 p-4 lg:sticky lg:top-20">
-        <h2 className="flex items-center gap-2 text-lg font-bold">
+        <h2 id="cart-heading" tabIndex={-1} className="flex items-center gap-2 text-lg font-bold outline-none">
           <BagIcon /> السلة
           {units > 0 && <span className="ltr-nums rounded-full bg-brand px-2 text-sm text-brand-contrast">{units}</span>}
         </h2>
@@ -164,7 +189,15 @@ export default function Shop({ products, maxUnits, maxPerLine }: { products: Sho
                       <span className="block leading-6">{p?.name}</span>
                       <span className="ltr-nums text-muted">{(p?.priceSar ?? 0) * q}</span> <span className="text-muted">ر.س</span>
                     </span>
-                    <Stepper qty={q} name={p?.name ?? id} onChange={(d) => change(id, d)} canAdd={canAdd(id)} />
+                    <Stepper
+                      qty={q}
+                      name={p?.name ?? id}
+                      onChange={(d) => {
+                        if (d < 0 && q === 1) focusNext.current = ["cart-heading"];
+                        change(id, d);
+                      }}
+                      canAdd={canAdd(id)}
+                    />
                   </li>
                 );
               })}

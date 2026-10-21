@@ -121,6 +121,23 @@ describe("property: every returned layout passes the independent validator", () 
   }, 30_000); // 200 full searches; slow CI runners exceed the 5 s default
 });
 
+describe("fragile items under existing ones", () => {
+  it("never slides a fragile item under a placed one, so a tight fragile order still packs first time", () => {
+    const F = { fragile: true };
+    const units = [
+      unit("u#0", [12, 6, 2], F),
+      unit("u#1", [15, 12, 6], F),
+      unit("u#2", [11, 8, 6], F),
+      unit("u#3", [16, 6, 5]),
+      unit("u#4", [10, 10, 6]),
+      unit("u#5", [14, 12, 10], F),
+    ];
+    const r = packUnits(units, [carton("a", [22, 15, 19], 8000, 2)], { ...opts, now: () => 0 });
+    expect(r.validatorRejections).toBe(0);
+    expect(r.status).toBe("box_found");
+  });
+});
+
 describe("performance", () => {
   it("packs a 12-unit order within the search budget", () => {
     const units = Array.from({ length: 12 }, (_, i) =>

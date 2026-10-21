@@ -4,10 +4,8 @@ import { GenerateError, type ExtractDeps } from "./extractor";
 import { makeGeminiGenerate } from "./gemini";
 import { PROMPT_VERSION } from "./prompt";
 
-export { extractFacts, GenerateError, sanitize } from "./extractor";
-export type { ExtractDeps, ExtractOutcome, ExtractedFacts, GenerateFn } from "./extractor";
+export type { ExtractDeps } from "./extractor";
 export { getOrExtractFacts } from "./catalog";
-export { PROMPT_VERSION } from "./prompt";
 
 /**
  * Extraction dependencies for request-time use. When the Gemini key is missing, extraction

@@ -54,6 +54,11 @@ describe("buildInstructions", () => {
     expect(perfume.notes.join(" ")).toMatch(/تقديري/);
     expect(book.notes).toEqual([]);
   });
+
+  it("tells the packer to stand an item on its side when the layout needs that", () => {
+    const standing = buildInstructions(c, [place("book#1", 0, 0, 0, 20, 3, 15)], [units[0]], 1.5);
+    expect(standing.find((s) => s.unitId === "book#1")!.notes.join(" ")).toMatch(/واقفاً على جانبه.*15/);
+  });
 });
 
 describe("naive baseline", () => {

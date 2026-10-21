@@ -54,14 +54,15 @@ function isFresh(cached: StoredFacts, product: Product): boolean {
 
 export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogResult> {
   const nowIso = req.nowIso ?? (() => new Date().toISOString());
-  const [products, cached] = await Promise.all([req.repo.getProducts(req.productIds), req.repo.getFacts(req.productIds)]);
+  const productIds = [...new Set(req.productIds)]; // a repeated id must not call the model twice
+  const [products, cached] = await Promise.all([req.repo.getProducts(productIds), req.repo.getFacts(productIds)]);
   const byId = new Map(products.map((p) => [p.id, p]));
-  const missingProducts = req.productIds.filter((id) => !byId.has(id));
+  const missingProducts = productIds.filter((id) => !byId.has(id));
 
   const facts = new Map<string, StoredFacts>();
   const toExtract: Product[] = [];
   let cacheHits = 0;
-  for (const id of req.productIds) {
+  for (const id of productIds) {
     const product = byId.get(id);
     if (!product) continue;
     const c = cached.get(id);
@@ -76,11 +77,27 @@ export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogRes
   const outcomes = await mapLimit(toExtract, req.concurrency ?? 2, (p) => extractFacts(p, req.deps));
   const events: ExtractionEvent[] = [];
   let degraded = false;
+  // A packer may have saved a measurement while the model was reading (up to ~20 s). Check again so
+  // the AI result never replaces it.
+  let latest = new Map<string, StoredFacts>();
+  const extractedIds = toExtract.filter((_, i) => outcomes[i].facts).map((p) => p.id);
+  if (extractedIds.length > 0) {
+    try {
+      latest = await req.repo.getFacts(extractedIds);
+    } catch {
+      // Could not re-check: fall back to the first read (the write below still reports its own failure).
+    }
+  }
   for (let i = 0; i < toExtract.length; i++) {
     const product = toExtract[i];
     const { facts: extracted, event } = outcomes[i];
     events.push({ ...event, runId: req.runId, trigger: req.trigger });
     if (!extracted) continue; // failed: the product stays unknown for this request
+    const now = latest.get(product.id);
+    if (now && isAuthoritative(now)) {
+      facts.set(product.id, now);
+      continue;
+    }
     const stored: StoredFacts = {
       ...extracted,
       origin: "ai",

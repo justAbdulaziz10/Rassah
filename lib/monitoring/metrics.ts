@@ -13,7 +13,7 @@ export function windowSince(window: MetricWindow, nowMs: number): string | null 
   return hours === null ? null : new Date(nowMs - hours * 3600_000).toISOString();
 }
 
-export interface Metric<T = number | null> {
+interface Metric<T = number | null> {
   value: T;
   n: number;
   minN: number;
@@ -87,9 +87,11 @@ export function computeMetrics(input: MetricInput): Metrics {
   for (const r of noBox) for (const a of r.attempts) skipReasons[a.outcome] = (skipReasons[a.outcome] ?? 0) + 1;
   const m4 = { ...metric(packed.length ? noBox.length / packed.length : null, packed.length, 10), skipReasons };
 
-  // M5: latency percentiles, split by whether Gemini had to be called.
-  const cachedMs = runs.filter((r) => r.cacheMisses === 0).map((r) => r.totalMs);
-  const uncachedMs = runs.filter((r) => r.cacheMisses > 0).map((r) => r.totalMs);
+  // M5: latency percentiles, split by whether Gemini had to be called. Error runs (unknown order number,
+  // failed lookup) stop early with no cache misses, so they would make the cached figures look faster.
+  const timed = runs.filter((r) => r.status !== "error");
+  const cachedMs = timed.filter((r) => r.cacheMisses === 0).map((r) => r.totalMs);
+  const uncachedMs = timed.filter((r) => r.cacheMisses > 0).map((r) => r.totalMs);
   const m5 = {
     cached: metric({ p50: percentile(cachedMs, 50), p95: percentile(cachedMs, 95) }, cachedMs.length, 10),
     uncached: metric({ p50: percentile(uncachedMs, 50), p95: percentile(uncachedMs, 95) }, uncachedMs.length, 10),

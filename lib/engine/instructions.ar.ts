@@ -17,6 +17,8 @@ export const AR = {
     `قابل للكسر: لُفّه بغلاف فقاعي لا تقل سماكته عن ${ltr(fmt(paddingCm))} سم، ولا تضع فوقه أي شيء.`,
   liquid: "سائل: أبقِه واقفاً ولا تقلبه على جنبه، ويكون غطاؤه إلى الأعلى.",
   sensitive: (paddingCm: number) => `حسّاس: ضع حوله حشوة واقية سماكتها ${ltr(fmt(paddingCm))} سم من جميع الجهات.`,
+  // The layout needs the item standing on a side, not lying flat; `heightCm` includes any padding.
+  onEdge: (heightCm: number) => `ضعه واقفاً على جانبه، لا مسطّحاً: ارتفاعه في الكرتون ${ltr(fmt(heightCm))} سم.`,
   estimated: "⚠ مقاس هذه القطعة تقديري: تأكد أنها تدخل في الكرتون قبل إغلاقه.",
   voidFill: "املأ الفراغات بمادة حشو حتى لا تتحرك القطع، ثم أغلق الكرتون.",
   thisSideUp: "اكتب على الكرتون: «هذا الجانب للأعلى ↑».",

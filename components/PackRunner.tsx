@@ -372,6 +372,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
                 تصحيح «{itemsByProduct.get(editing)!.name}»: يُحفظ تصحيحك ويُستخدم في كل الطلبات القادمة.
               </p>
               <FactsForm
+                key={editing}
                 mode="edit"
                 submitLabel="احفظ التصحيح وأعد الحساب"
                 initial={{

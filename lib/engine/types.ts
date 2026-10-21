@@ -83,7 +83,8 @@ export interface ValidationResult {
   violations: Violation[];
 }
 
-export type SkipReason = "oversize" | "overweight" | "search_budget" | "no_layout" | "validator_rejected";
+// not_needed: not searched further because a cheaper carton already holds the order.
+type SkipReason = "oversize" | "overweight" | "search_budget" | "no_layout" | "validator_rejected" | "not_needed";
 
 export interface CartonAttempt {
   cartonId: string;
@@ -132,7 +133,7 @@ export interface PackNoBox {
   searchMs: number;
 }
 
-export interface PackNeedsMeasurement {
+interface PackNeedsMeasurement {
   status: "needs_measurement";
   productIds: string[];
 }

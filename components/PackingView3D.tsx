@@ -2,10 +2,11 @@
 
 import { Edges, Html, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
+import { ArrowBackIcon, ArrowForwardIcon } from "@/components/Icons";
 import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, type BoxPlacement } from "@/lib/ui/three";
 
-export interface View3DItem {
+interface View3DItem {
   unitId: string;
   name: string;
   fragile: boolean;
@@ -24,6 +25,9 @@ export default function PackingView3D({ inner, items }: Props) {
   const ordered = useMemo(() => placementOrder(items), [items]);
   const [step, setStep] = useState(ordered.length);
   const [hovered, setHovered] = useState<string | null>(null);
+  const stepId = useId(); // a split order shows one view per carton, so the slider id must be unique
+  const go = (n: number) => setStep(Math.max(0, Math.min(ordered.length, n)));
+  const current = step > 0 ? ordered[step - 1] : null;
   const size = cartonThreeSize(inner);
   const maxSide = Math.max(...inner);
 
@@ -75,22 +79,45 @@ export default function PackingView3D({ inner, items }: Props) {
         </Canvas>
       </div>
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 text-sm">
-        <label htmlFor="step" className="text-muted">
+        <label htmlFor={stepId} className="text-muted">
           الخطوة
         </label>
-        <input
-          id="step"
-          type="range"
-          min={0}
-          max={ordered.length}
-          value={step}
-          onChange={(e) => setStep(Number(e.target.value))}
-          className="w-48 accent-[var(--brand)]"
-          aria-valuetext={`${step} من ${ordered.length}`}
-        />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => go(step - 1)}
+            disabled={step === 0}
+            aria-label="الخطوة السابقة"
+            className="inline-flex h-9 items-center gap-1 rounded-lg border border-border bg-surface px-2.5 hover:border-brand disabled:opacity-40"
+          >
+            <ArrowBackIcon className="size-4" />
+            السابق
+          </button>
+          <input
+            id={stepId}
+            type="range"
+            min={0}
+            max={ordered.length}
+            value={step}
+            onChange={(e) => go(Number(e.target.value))}
+            className="w-36 accent-[var(--brand)] sm:w-48"
+            aria-valuetext={`${step} من ${ordered.length}`}
+          />
+          <button
+            type="button"
+            onClick={() => go(step + 1)}
+            disabled={step === ordered.length}
+            aria-label="الخطوة التالية"
+            className="inline-flex h-9 items-center gap-1 rounded-lg border border-brand bg-brand px-2.5 font-medium text-brand-contrast hover:opacity-90 disabled:border-border disabled:bg-surface disabled:text-muted disabled:opacity-40"
+          >
+            التالي
+            <ArrowForwardIcon className="size-4" />
+          </button>
+        </div>
         <span className="ltr-nums">
           {step} / {ordered.length}
         </span>
+        {current && <span className="basis-full text-muted sm:basis-auto">القطعة الحالية: {current.name}</span>}
         <span className="ms-auto flex flex-wrap gap-3 text-xs text-muted">
           <Legend color={KIND_COLOR.fragile} label="قابل للكسر" />
           <Legend color={KIND_COLOR.liquid} label="سائل" />

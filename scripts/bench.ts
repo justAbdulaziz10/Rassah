@@ -31,7 +31,8 @@ const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
 const opt = (name: string, def: number) => {
   const i = args.indexOf(`--${name}`);
-  return i >= 0 && args[i + 1] ? Number(args[i + 1]) : def;
+  // A following flag ("--random --write") is not a value: keep the default.
+  return i >= 0 && args[i + 1] && !args[i + 1].startsWith("--") ? Number(args[i + 1]) : def;
 };
 const RANDOM_N = opt("random", 200);
 const SEED = opt("seed", 20261022);

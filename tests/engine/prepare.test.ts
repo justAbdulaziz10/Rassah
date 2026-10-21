@@ -57,6 +57,14 @@ describe("prepareUnits", () => {
     expect(!r.ok && r.kind).toBe("invalid_input");
   });
 
+  it("rejects NaN, negative and fractional quantities instead of packing nothing or extra units", () => {
+    const f = new Map([["a", facts("a")], ["b", facts("b")]]);
+    for (const lines of [[line("a", NaN)], [line("a", -3), line("b", 5)], [line("a", 0.5), line("b", 0.5)]]) {
+      const r = prepareUnits(lines, f, CFG);
+      expect(!r.ok && r.kind).toBe("invalid_input");
+    }
+  });
+
   it("numbers units per product, so two lines of the same product never share an id", () => {
     const r = prepareUnits(
       [

@@ -11,7 +11,11 @@ export default function OrderLookup() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const n = value.trim().replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+    // Arabic-Indic digits → Latin, and "01002" → "1002" (order numbers never start with 0).
+    const n = value
+      .trim()
+      .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+      .replace(/^0+(?=\d)/, "");
     if (!/^\d{1,10}$/.test(n)) {
       setError("اكتب رقم الطلب بالأرقام فقط");
       return;

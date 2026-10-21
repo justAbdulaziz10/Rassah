@@ -47,12 +47,17 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
   async function call(productId: string, url: string, method: string, body?: unknown) {
     setBusy(productId);
     setMessage(null);
-    const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
-    const data = await res.json().catch(() => ({}));
-    setBusy(null);
-    if (!res.ok) return fmtApiError((data as { error?: string }).error ?? `HTTP ${res.status}`);
-    router.refresh();
-    return null;
+    try {
+      const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return fmtApiError((data as { error?: string }).error ?? `HTTP ${res.status}`);
+      router.refresh();
+      return null;
+    } catch {
+      return "تعذّر الاتصال. تأكد من الإنترنت ثم حاول مرة ثانية.";
+    } finally {
+      setBusy(null);
+    }
   }
 
   const filters: Array<[Filter, string]> = [

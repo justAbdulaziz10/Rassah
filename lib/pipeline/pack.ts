@@ -59,7 +59,7 @@ export interface PackResponse {
   split: PackSplitView | null;
 }
 
-export interface PackSplitView {
+interface PackSplitView {
   boxes: Array<{
     carton: { id: string; name: string; innerCm: [number, number, number] };
     items: PackItemView[];

@@ -16,6 +16,7 @@ function fakeDb(handle: (q: Q) => Res) {
       insert: (payload: unknown) => ((q.op = "insert"), (q.payload = payload), b),
       delete: () => ((q.op = "delete"), b),
       eq: (col: string, val: unknown) => (q.filters.push([col, val]), b),
+      gte: (col: string, val: unknown) => (q.filters.push([`${col}>=`, val]), b),
       order: () => b,
       limit: (n: number) => ((q.limit = n), b),
       range: (a: number, z: number) => ((q.range = [a, z]), b),
@@ -73,5 +74,18 @@ describe("SupabaseRepo.listOrders", () => {
     expect(orders).toHaveLength(2345);
     expect(orders.at(-1)).toMatchObject({ id: "7345", customerName: "سارة" });
     expect(calls.map((c) => c.range)).toEqual([[0, 999], [1000, 1999], [2000, 2999]]);
+  });
+});
+
+describe("SupabaseRepo.listOrderRuns", () => {
+  it("reads every run past the 1,000-row limit, so an order confirmed long ago stays done", async () => {
+    const all = Array.from({ length: 1500 }, (_, i) => ({ id: `run-${i}`, created_at: "2026-10-21T10:00:00Z", order_id: "1001", unit_sources: {} }));
+    // A row inserted mid-read shifts run-999 onto the second page too; it must appear once.
+    const { db, calls } = fakeDb((q) => ok(q.range![0] === 0 ? all.slice(0, 1000) : all.slice(999, 1500)));
+    const runs = await new SupabaseRepo(db).listOrderRuns("2026-10-20T00:00:00Z");
+    expect(runs).toHaveLength(1500);
+    expect(new Set(runs.map((r) => r.id)).size).toBe(1500);
+    expect(calls.map((c) => c.range)).toEqual([[0, 999], [1000, 1999]]);
+    expect(calls[0].filters).toEqual([["created_at>=", "2026-10-20T00:00:00Z"]]);
   });
 });

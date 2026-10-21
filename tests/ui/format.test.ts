@@ -37,6 +37,7 @@ describe("dates and errors", () => {
   it("formats dates in the Gregorian calendar with Latin digits", () => {
     expect(fmtTime("2026-10-21T13:40:37Z")).toMatch(/2026/);
     expect(fmtTime("2026-10-21T13:40:37Z")).not.toMatch(/١٤٤٨|١٤٤٧/);
+    expect(fmtTime("2026-10-21T13:40:37Z")).toMatch(/4:40:37/); // Riyadh is UTC+3 whatever the server's TZ
   });
 
   it("turns API errors into Arabic and passes Arabic through", () => {

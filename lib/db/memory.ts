@@ -121,6 +121,8 @@ export class MemoryRepo implements Repo {
   }
   async insertCorrections(rows: Correction[]) {
     this.guard("insertCorrections");
+    // Same rule as the database: corrections.run_id references order_runs(id).
+    for (const c of rows) if (c.runId && !this.orderRuns.some((r) => r.id === c.runId)) throw new Error(`corrections_run_id_fkey: ${c.runId}`);
     for (const c of rows) this.corrections.push({ ...c, id: randomUUID(), createdAt: c.createdAt ?? this.stamp() });
   }
   private since<T extends { createdAt?: string }>(rows: T[], sinceIso: string | null) {

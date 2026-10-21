@@ -45,6 +45,10 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
       }
       if (v !== initial[f.key] && v !== null) changes[f.key] = v;
     }
+    // Editing one side means the packer measured the item: send all three so the size counts as measured.
+    if (mode === "edit" && (["lengthCm", "widthCm", "heightCm"] as const).some((k) => k in changes)) {
+      for (const k of ["lengthCm", "widthCm", "heightCm"] as const) if (values[k] !== null) changes[k] = values[k];
+    }
     for (const k of ["fragile", "liquid", "sensitive"] as const) {
       if (values[k] !== initial[k] || mode === "measure") changes[k] = values[k];
     }
@@ -53,9 +57,14 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
       return;
     }
     setBusy(true);
-    const err = await onSubmit(changes);
-    setBusy(false);
-    if (err) setError(err);
+    try {
+      const err = await onSubmit(changes);
+      if (err) setError(err);
+    } catch {
+      setError("تعذّر الاتصال. تأكد من الإنترنت ثم حاول مرة ثانية.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

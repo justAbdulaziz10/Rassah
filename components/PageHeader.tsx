@@ -46,7 +46,7 @@ export function Notice({ tone, children }: { tone: "warn" | "critical" | "info";
 }
 
 /** Loading placeholder with the same radius and border as the cards it stands in for. */
-export function CardSkeleton({ className = "h-96" }: { className?: string }) {
+function CardSkeleton({ className = "h-96" }: { className?: string }) {
   return <div className={`animate-pulse rounded-xl border border-border bg-surface ${className}`} aria-hidden />;
 }
 

@@ -20,9 +20,30 @@ import { STORE_FIRST_ORDER_ID, STORE_ORDER_TAG } from "./types";
 
 type Row = Record<string, unknown>;
 
+// The API returns at most 1,000 rows per request, so anything that can grow past that is read in pages.
 const ORDERS_PAGE = 1000;
+const LIST_PAGE = 1000;
+const LIST_MAX_ROWS = 10_000;
 
-export class DbError extends Error {
+type PagedQuery = { range: (from: number, to: number) => PromiseLike<{ data: unknown; error: { message: string } | null }> };
+
+/** Newest-first rows, page by page, up to LIST_MAX_ROWS. A row inserted while paging can shift one into the next page, so ids are de-duplicated. */
+async function readPages(op: string, build: () => PagedQuery): Promise<Row[]> {
+  const rows: Row[] = [];
+  const seen = new Set<unknown>();
+  for (let from = 0; from < LIST_MAX_ROWS; from += LIST_PAGE) {
+    const page = (check(op, await build().range(from, from + LIST_PAGE - 1)) as Row[] | null) ?? [];
+    for (const r of page) {
+      if (seen.has(r.id)) continue;
+      seen.add(r.id);
+      rows.push(r);
+    }
+    if (page.length < LIST_PAGE) break;
+  }
+  return rows;
+}
+
+class DbError extends Error {
   constructor(op: string, message: string) {
     super(`${op}: ${message}`);
     this.name = "DbError";
@@ -400,21 +421,27 @@ export class SupabaseRepo implements Repo {
   }
 
   async listExtractionEvents(sinceIso: string | null) {
-    let q = this.db.from("extraction_events").select("*").order("created_at", { ascending: false }).limit(5000);
-    if (sinceIso) q = q.gte("created_at", sinceIso);
-    return (check("listExtractionEvents", await q) as Row[]).map(toExtraction);
+    const rows = await readPages("listExtractionEvents", () => {
+      const q = this.db.from("extraction_events").select("*").order("created_at", { ascending: false }).order("id");
+      return sinceIso ? q.gte("created_at", sinceIso) : q;
+    });
+    return rows.map(toExtraction);
   }
 
   async listOrderRuns(sinceIso: string | null) {
-    let q = this.db.from("order_runs").select("*").order("created_at", { ascending: false }).limit(5000);
-    if (sinceIso) q = q.gte("created_at", sinceIso);
-    return (check("listOrderRuns", await q) as Row[]).map(toRun);
+    const rows = await readPages("listOrderRuns", () => {
+      const q = this.db.from("order_runs").select("*").order("created_at", { ascending: false }).order("id");
+      return sinceIso ? q.gte("created_at", sinceIso) : q;
+    });
+    return rows.map(toRun);
   }
 
   async listCorrections(sinceIso: string | null) {
-    let q = this.db.from("corrections").select("*").order("created_at", { ascending: false }).limit(5000);
-    if (sinceIso) q = q.gte("created_at", sinceIso);
-    return (check("listCorrections", await q) as Row[]).map(toCorrection);
+    const rows = await readPages("listCorrections", () => {
+      const q = this.db.from("corrections").select("*").order("created_at", { ascending: false }).order("id");
+      return sinceIso ? q.gte("created_at", sinceIso) : q;
+    });
+    return rows.map(toCorrection);
   }
 
   async getRunTrace(runId: string) {

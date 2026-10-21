@@ -58,6 +58,25 @@ describe("getOrExtractFacts", () => {
     expect(repo.facts.get("p-02")!.heightCm).toBe(77);
   });
 
+  it("reads a product listed twice only once", async () => {
+    const { repo, generate, deps } = setup();
+    const r = await getOrExtractFacts({ repo, productIds: ["p-01", "p-01"], deps, trigger: "order", runId: null });
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(r).toMatchObject({ cacheHits: 0, cacheMisses: 1 });
+  });
+
+  it("keeps a measurement the packer saved while the model was still reading", async () => {
+    const { repo, generate, deps } = setup();
+    generate.mockImplementationOnce(async () => {
+      repo.facts.set("p-01", stored("p-01", { origin: "manual", heightCm: 10 })); // PATCH lands mid-extraction
+      return { text: JSON.stringify(RESPONSES.explicitPerfume), inputTokens: 1, outputTokens: 1, thinkingTokens: 0, blocked: false };
+    });
+    const r = await getOrExtractFacts({ repo, productIds: ["p-01"], deps, trigger: "order", runId: null });
+    expect(repo.facts.get("p-01")).toMatchObject({ origin: "manual", heightCm: 10 });
+    expect(r.facts.get("p-01")).toMatchObject({ origin: "manual", heightCm: 10 });
+    expect(r.events).toHaveLength(1); // the model call is still recorded
+  });
+
   it("writes nothing to the cache when extraction fails, but still records the event", async () => {
     const { repo, deps } = setup();
     const r = await getOrExtractFacts({ repo, productIds: ["p-01"], deps: { ...deps, simulateOutage: true }, trigger: "order", runId: "r" });

@@ -75,7 +75,8 @@ describe("computeMetrics", () => {
 
   it("M5: latency split by cached vs uncached", () => {
     const m = computeMetrics({
-      runs: [run({ totalMs: 200 }), run({ totalMs: 400 }), run({ cacheMisses: 1, totalMs: 3000 })],
+      // 5 ms error runs (unknown order number) must not count as fast cached orders.
+      runs: [run({ totalMs: 200 }), run({ totalMs: 400 }), run({ cacheMisses: 1, totalMs: 3000 }), run({ status: "error", totalMs: 5 }), run({ status: "error", totalMs: 5 })],
       extractions: [],
       corrections: [],
     });

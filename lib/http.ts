@@ -33,3 +33,10 @@ export function log(entry: Record<string, unknown>) {
   // One structured line per stage, searchable in Vercel logs by runId.
   console.log(JSON.stringify({ app: "rassah", ...entry }));
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Run ids are Postgres uuids; anything else would make the database throw instead of returning "not found". */
+export function isUuid(id: string): boolean {
+  return UUID.test(id);
+}

@@ -7,13 +7,13 @@ import type { ProductFacts } from "@/lib/engine/types";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompt";
 import { ModelFactsSchema, type ModelFacts } from "./schema";
 
-export interface GenerateRequest {
+interface GenerateRequest {
   system: string;
   user: string;
   signal: AbortSignal;
 }
 
-export interface GenerateResponse {
+interface GenerateResponse {
   text: string | undefined;
   inputTokens: number;
   outputTokens: number;
@@ -55,7 +55,7 @@ export interface ExtractedFacts extends ProductFacts {
   evidence: string;
 }
 
-export type ExtractionEventBody = Omit<ExtractionEvent, "runId" | "trigger">;
+type ExtractionEventBody = Omit<ExtractionEvent, "runId" | "trigger">;
 
 export interface ExtractOutcome {
   /** null when the call failed; the product is then treated as unknown. */

@@ -18,7 +18,7 @@ export interface HealthInput {
   promptVersion: string;
 }
 
-export type HealthStatus = "ok" | "degraded" | "error";
+type HealthStatus = "ok" | "degraded" | "error";
 
 export interface HealthBody {
   app: "ok";

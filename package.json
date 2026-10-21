@@ -21,7 +21,8 @@
     "eval:extraction": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/eval-extraction.ts",
     "eval:packing": "tsx --env-file-if-exists=.env.local scripts/eval-packing.ts",
     "bench": "tsx --env-file-if-exists=.env.local scripts/bench.ts",
-    "demo:morning": "tsx --env-file-if-exists=.env.local scripts/demo-morning.ts"
+    "demo:morning": "tsx --env-file-if-exists=.env.local scripts/demo-morning.ts",
+    "clear-facts": "tsx --env-file-if-exists=.env.local scripts/clear-facts.ts"
   },
   "dependencies": {
     "@google/genai": "2.30.0",

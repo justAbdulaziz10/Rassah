@@ -9,7 +9,7 @@ import "server-only";
 import type { GroundTruthItem } from "@/lib/data/schemas";
 import type { Product, StoredFacts } from "@/lib/db/types";
 
-export type SeedFactsSetting = "auto" | "true" | "false";
+type SeedFactsSetting = "auto" | "true" | "false";
 
 /**
  * MEMORY_SEED_FACTS: "true" always seeds, "false" never seeds, "auto" (default) seeds only when

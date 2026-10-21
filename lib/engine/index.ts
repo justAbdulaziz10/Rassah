@@ -7,16 +7,9 @@ import { prepareUnits } from "./prepare";
 import { splitPack, type SplitPlan } from "./split";
 import type { Carton, OrderLine, PackResult, ProductFacts, ShippingRates } from "./types";
 
-export { ENGINE_CONFIG, ENGINE_VERSION } from "./config";
+export { ENGINE_CONFIG } from "./config";
 export type { EngineConfig } from "./config";
-export { validateLayout } from "./validator";
-export { estimateCost } from "./cost";
-export { buildInstructions } from "./instructions";
 export type { InstructionStep } from "./instructions";
-export { prepareUnits } from "./prepare";
-export { packUnits } from "./packer";
-export { splitPack } from "./split";
-export type { SplitBox, SplitPlan } from "./split";
 export * from "./types";
 
 export type PackOrderResult =

@@ -85,12 +85,6 @@ export const AirIcon = (p: P) => (
     <path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8" />
   </Svg>
 );
-export const PrinterIcon = (p: P) => (
-  <Svg {...p}>
-    <path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" />
-    <path d="M7 14h10v7H7v-7Z" />
-  </Svg>
-);
 export const SearchIcon = (p: P) => (
   <Svg {...p}>
     <circle cx="11" cy="11" r="7" />
@@ -115,5 +109,12 @@ export const BagIcon = (p: P) => (
   <Svg {...p}>
     <path d="M6 7h12l-1 13H7L6 7Z" />
     <path d="M9 7a3 3 0 0 1 6 0" />
+  </Svg>
+);
+
+/** Points right: "back" in a right-to-left layout (pair with ArrowForwardIcon). */
+export const ArrowBackIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
   </Svg>
 );

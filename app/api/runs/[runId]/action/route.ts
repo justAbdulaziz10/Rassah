@@ -1,15 +1,13 @@
 import { connection } from "next/server";
-import { jsonError, log, readJson, repoOrError } from "@/lib/http";
+import { isUuid, jsonError, log, readJson, repoOrError } from "@/lib/http";
 import { applyRunAction, FactsError, RunActionSchema } from "@/lib/pipeline/facts";
 import { refreshAlerts } from "@/lib/pipeline/pack";
 import { appEnv } from "@/lib/env";
 
-const UUID = /^[0-9a-f-]{36}$/i;
-
 export async function POST(request: Request, ctx: RouteContext<"/api/runs/[runId]/action">) {
   await connection();
   const { runId } = await ctx.params;
-  if (!UUID.test(runId)) return jsonError(400, "Invalid run id");
+  if (!isUuid(runId)) return jsonError(400, "Invalid run id");
 
   const parsed = RunActionSchema.safeParse(await readJson(request));
   if (!parsed.success) return jsonError(400, "Invalid action", { issues: parsed.error.issues.map((i) => i.message) });

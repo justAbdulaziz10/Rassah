@@ -12,7 +12,7 @@ import { estimateCost } from "@/lib/engine/cost";
 import type { Carton, Placement, ShippingRates, Unit } from "@/lib/engine/types";
 
 /** One packed box returned by an engine, in our coordinates: x along carton length, y width, z up. */
-export interface BoxLayout {
+interface BoxLayout {
   carton: Carton;
   placements: Placement[];
 }

@@ -55,7 +55,7 @@ function removeOnce(dims: readonly number[], value: number): [number, number] {
   return [copy[0], copy[1]];
 }
 
-export function intervalOverlap(a0: number, a1: number, b0: number, b1: number): number {
+function intervalOverlap(a0: number, a1: number, b0: number, b1: number): number {
   return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
 }
 

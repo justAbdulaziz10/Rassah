@@ -46,7 +46,7 @@ const byBaseArea = (u: Unit) => u.dims[0] * u.dims[1];
 // Tried in order for every carton; the first strategy that yields a validated layout wins.
 // The "nothing on a fragile item" rule is enforced by the placement check in every strategy;
 // fragileLast only changes the order, which usually (not always) makes that rule easy to meet.
-export const STRATEGIES: Strategy[] = [
+const STRATEGIES: Strategy[] = [
   { name: "volume", key: byVolume, fragileLast: true, score: "lowest_top" },
   { name: "base_area", key: byBaseArea, fragileLast: true, score: "lowest_top" },
   { name: "weight", key: (u) => u.weightG, fragileLast: true, score: "lowest_top" }, // heavy at the bottom
@@ -60,7 +60,7 @@ export const STRATEGIES: Strategy[] = [
 
 const RESTART_SCORES: ScoreMode[] = ["lowest_top", "tight_x", "lowest_base", "tight_y"];
 
-export function orderUnits(units: Unit[], strategy: Strategy): Unit[] {
+function orderUnits(units: Unit[], strategy: Strategy): Unit[] {
   const byKey = (a: Unit, b: Unit) => strategy.key(b) - strategy.key(a) || a.unitId.localeCompare(b.unitId);
   if (!strategy.fragileLast) return [...units].sort(byKey);
   const normal = units.filter((u) => !u.fragile).sort(byKey);
@@ -111,11 +111,12 @@ function fitsInCarton(d: readonly number[], inner: readonly number[], eps: numbe
 
 /**
  * Placement check shared by both searches: R1 in bounds, R2 no overlap, R4 support and
- * R5 nothing on a fragile item. R6 (liquid upright) is guaranteed by rotations(). The
+ * R5 nothing on a fragile item (in either placement order). R6 (liquid upright) is guaranteed by rotations(). The
  * independent validator re-checks all of these on every finished layout.
  */
 function canPlace(
   cand: Placement,
+  candFragile: boolean,
   placed: Placement[],
   placedUnits: Unit[],
   carton: Carton,
@@ -138,6 +139,8 @@ function canPlace(
     }
     if (support + eps < minSupport * cand.dx * cand.dy) return false;
   }
+  // R5 the other way round: a fragile item may not slide in under one that is already placed.
+  if (candFragile) for (const p of placed) if (contactArea(p, cand, eps) > eps) return false;
   return true;
 }
 
@@ -161,7 +164,7 @@ function greedyPlace(
       for (const [dx, dy, dz] of rotations(unit)) {
         state.candidatesChecked++;
         const cand: Placement = { unitId: unit.unitId, x, y, z, dx, dy, dz };
-        if (!canPlace(cand, placed, placedUnits, carton, cfg)) continue;
+        if (!canPlace(cand, unit.fragile, placed, placedUnits, carton, cfg)) continue;
         const s = scoreOf(cand, mode);
         if (!bestScore || better(s, bestScore, eps)) {
           best = cand;
@@ -328,7 +331,7 @@ function anchorSearch(
       for (const [dx, dy, dz] of rots[i]) {
         state.candidatesChecked++;
         const cand: Placement = { unitId: u.unitId, x, y, z, dx, dy, dz };
-        if (!canPlace(cand, placed, placedUnits, carton, cfg, voids)) continue;
+        if (!canPlace(cand, u.fragile, placed, placedUnits, carton, cfg, voids)) continue;
         used[i] = true;
         placed.push(cand);
         placedUnits.push(u);
@@ -532,7 +535,7 @@ export function packUnits(units: Unit[], cartons: Carton[], opts: PackOptions): 
     if (packedWith) outcome.set(carton.id, { cartonId: carton.id, outcome: "packed", strategy: packedWith });
     else if (timedOut) outcome.set(carton.id, { cartonId: carton.id, outcome: "search_budget", strategy: null });
     else {
-      const code = rejected.has(carton.id) ? "validator_rejected" : "no_layout";
+      const code = rejected.has(carton.id) ? "validator_rejected" : worthIt ? "no_layout" : "not_needed";
       outcome.set(carton.id, { cartonId: carton.id, outcome: code, strategy: null });
     }
   }

@@ -5,7 +5,7 @@ import { z } from "zod";
 const positive = z.number().positive();
 const dims3 = z.tuple([positive, positive, positive]);
 
-export const ProductSchema = z.object({
+const ProductSchema = z.object({
   id: z.string().regex(/^p-\d{2}$/),
   group: z.enum(["A", "B", "C"]),
   name: z.string().min(1),
@@ -15,7 +15,7 @@ export const ProductSchema = z.object({
 });
 export const ProductsFileSchema = z.object({ _note: z.string(), products: z.array(ProductSchema).min(1) });
 
-export const GroundTruthItemSchema = z.object({
+const GroundTruthItemSchema = z.object({
   productId: z.string(),
   lengthCm: positive.nullable(),
   widthCm: positive.nullable(),
@@ -29,7 +29,7 @@ export const GroundTruthItemSchema = z.object({
 });
 export const GroundTruthFileSchema = z.object({ _note: z.string(), items: z.array(GroundTruthItemSchema) });
 
-export const CartonSchema = z.object({
+const CartonSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   inner: dims3,
@@ -43,7 +43,7 @@ export const CartonsFileSchema = z.object({
   cartons: z.array(CartonSchema).min(1),
 });
 
-export const OrderSchema = z.object({
+const OrderSchema = z.object({
   id: z.string().regex(/^\d{4}$/),
   demo: z.string().optional(),
   expect: z.string(),
@@ -64,7 +64,7 @@ const FixturePlacementSchema = z.object({
   x: z.number(), y: z.number(), z: z.number(),
   dx: positive, dy: positive, dz: positive,
 });
-export const PackingFixtureSchema = z.object({
+const PackingFixtureSchema = z.object({
   id: z.string(),
   group: z.enum(["known_feasible", "impossible", "random"]),
   cartonIds: z.array(z.string()).min(1),
@@ -78,9 +78,4 @@ export const PackingFixturesFileSchema = z.object({
   fixtures: z.array(PackingFixtureSchema),
 });
 
-export type ProductRow = z.infer<typeof ProductSchema>;
 export type GroundTruthItem = z.infer<typeof GroundTruthItemSchema>;
-export type CartonRow = z.infer<typeof CartonSchema>;
-export type CartonsFile = z.infer<typeof CartonsFileSchema>;
-export type OrderRow = z.infer<typeof OrderSchema>;
-export type PackingFixture = z.infer<typeof PackingFixtureSchema>;

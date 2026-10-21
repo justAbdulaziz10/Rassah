@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import MonitoringDashboard from "@/components/MonitoringDashboard";
 import { DashboardSkeleton, PageHeader } from "@/components/PageHeader";
+import { isUuid } from "@/lib/http";
 
 export const metadata: Metadata = { title: "الأداء" };
 
@@ -20,6 +21,6 @@ export default function MonitoringPage(props: PageProps<"/monitoring">) {
 
 async function Dashboard({ searchParams }: Pick<PageProps<"/monitoring">, "searchParams">) {
   const sp = await searchParams;
-  const run = typeof sp.run === "string" && /^[0-9a-f-]{36}$/i.test(sp.run) ? sp.run : null;
+  const run = typeof sp.run === "string" && isUuid(sp.run) ? sp.run : null;
   return <MonitoringDashboard initialRun={run} />;
 }

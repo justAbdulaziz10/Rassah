@@ -18,19 +18,19 @@
 | Phase | Name | Owner(s) | Target | Tasks | Done | Status |
 |---|---|---|---|---|---|---|
 | 0 | Accounts, access, credentials, decisions | M3 + ALL | Tue 20 Oct, evening | 30 | 13 | 🟨 In progress |
-| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 39 | 35 | 🟨 In progress |
+| 1 | Repository scaffold & dev environment | M3 | Tue 20 Oct, night | 40 | 36 | 🟨 In progress |
 | 2 | Database (Supabase) | M3 | Tue night | 30 | 30 | ✅ Done (gate passed) |
 | 3 | Synthetic dataset | M1 | Tue night → Wed morning | 31 | 28 | 🟨 In progress |
-| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 54 | 53 | 🟨 In progress |
+| 4 | Packing engine, validator, cost, instructions | M2 | Wed morning | 55 | 54 | 🟨 In progress |
 | 5 | AI extraction (Gemini) | M1 | Wed morning | 46 | 45 | 🟨 In progress |
 | 6 | Pack pipeline API & actions | M3 + M1 | Wed 13:00 ⛳ | 39 | 39 | ✅ Done (gate passed) |
-| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 56 | 56 | ✅ Done (gate passed) |
+| 7 | User interface (orders, result, catalog, 3D) | M2 | Wed afternoon | 59 | 59 | ✅ Done (gate passed) |
 | 8 | Monitoring & alerting | M3 | Wed afternoon | 49 | 48 | 🟨 In progress |
 | 9 | Offline evaluation | M1 + M2 | Wed evening | 40 | 39 | 🟨 In progress (gate passed) |
-| 10 | Deployment, security & hardening | M3 | Wed evening | 33 | 32 | 🟨 In progress |
+| 10 | Deployment, security & hardening | M3 | Wed evening | 34 | 33 | 🟨 In progress |
 | 11 | Deliverables: report, diagrams, tools log, deck | ALL | Wed night | 51 | 40 | 🟨 In progress |
 | 12 | Demo-day readiness | ALL | Thu 22 Oct, morning | 30 | 2 | 🟨 In progress |
-| **Total** | | | | **528** | **460** | |
+| **Total** | | | | **534** | **466** | |
 
 _Last updated: 2026-10-21 (counts recomputed from the boxes with the progress command below)._
 
@@ -215,6 +215,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P1.37** (M2) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — not verifiable by agent; needs M2 confirmation
 - [x] **P1.38** (M3) Fresh clone → `npm ci` → `npm run check` → `npm run dev` works. — fresh clone 2026-10-21: npm ci → check 152/152 → dev /orders 200
 - [ ] **P1.39** (M3) Update the progress dashboard. **Gate G1 check.** — gate G1 needs M1 and M2 fresh-clone confirmation (P1.36, P1.37); CI is green on `main`, production live
+- [x] **P1.40** (M3) Dead-code sweep: `npx knip` reports nothing unused (removed the unused barrel files `lib/db/index.ts` and `lib/monitoring/index.ts`, unused re-exports in `lib/engine/index.ts` and `lib/ai/index.ts`, an unused icon, unused type aliases and 20+ needless `export`s); `clear-facts` is now an npm script. — knip clean, tsc, lint and tests green, 2026-10-21
 
 ---
 
@@ -388,6 +389,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P4.52** (M1) Review PR: M1 can explain the overlap check, the support ratio and the strategies in their own words. — not verifiable by agent; walkthrough in `docs/team/walkthroughs.md`, needs M1 confirmation
 - [x] **P4.53** (M2) Record `MIN_SUPPORT` and `PADDING_CM` assumptions in `docs/decisions.md`.
 - [x] **P4.54** (M2) Update the dashboard. **Gate G4 check.** — G4 passed (verified 2026-10-21): `vitest run` 19 files / 157 tests green incl. the 200-order property test; P4.52 (M1 review) stays open
+- [x] **P4.55** (M2) Engine bug sweep (no invalid layout found in ~400 fuzzed orders): a fragile item can no longer be slid under an already placed one (wasted validator rejections, could force a split); measuring one side of a guessed size keeps the margin and "تقديري" note on the other two; NaN, negative or fractional quantities are rejected; cartons skipped because a cheaper one already fits say "لم يُجرَّب، وُجد كرتون أوفر" instead of "no layout"; a step says "ضعه واقفاً على جانبه" when the layout stands an item on its side; a repeated product id is read once; Gemini 502/504 are retried; `bench --random --write` keeps its default. — `tests/engine`, `tests/ai`, `tests/pipeline`; `eval:packing` unchanged (40/40 valid, 20/20 recall, 0 false claims), 2026-10-21
 
 ---
 
@@ -591,6 +593,9 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.54** (M2) "اطبع الخطوات" prints the packing steps on white paper (navigation, buttons and 3D view hidden). — print styles in `app/globals.css`; checked 2026-10-21
 - [x] **P7.55** (M2) Page polish: landing page (problem → 3 steps → measured proof → comparison with generic packing tools → call to action), console pages (summary panel, empty states, skeletons, phone-width tables), dark-mode contrast for status colors; order page shows a split order carton by carton. — screenshots at 375/1440 px, light and dark, checked 2026-10-21
 - [x] **P7.56** (M2) No demo wording on the site: removed "تجريبي/للعرض فقط", the student/team and synthetic-data notes, the outage checkbox (now `?outage=1` only), the GitHub footer link and filler sentences on the landing and console pages. — rendered-HTML sweep of 6 pages + screenshots, 2026-10-21
+- [x] **P7.57** (M2) 3D step view: "السابق" and "التالي" buttons beside the slider (disabled at the first and last step), plus the name of the current piece; split orders get one slider per carton with unique ids. — browser run 2026-10-21 at 1440 and 390 px
+- [x] **P7.58** (M2) The console header has an "المتجر" button to `/store`, and the store header has a "لوحة الطلبات" button back to `/orders`. — round trip checked in the browser at 1440 and 390 px, 2026-10-21
+- [x] **P7.59** (M2) UI bug sweep: the correction form follows the product you pick (it kept the previous product's values); times always in Riyadh time (server pages showed UTC); the "(N)" tab-title count survives navigation; "طلبان ينتظران / طلباً ينتظر" plurals; forms and catalog actions recover from a network error instead of staying on "جارٍ الحفظ…"; the monitoring window switch ignores late replies; keyboard focus stays on the cart control after add/remove; "01002" opens order 1002. — browser run 2026-10-21; `tests/ui/format.test.ts`
 
 ---
 
@@ -769,6 +774,7 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P10.31** (M3) All docs links work (no 404s in the GitHub UI). — all relative links/anchors checked, none broken
 - [x] **P10.32** (M3) No stray TODOs in critical paths (engine, validator, extractor, pack route).
 - [x] **P10.33** (M3) Update the dashboard. **Gate G10 check.** — G10 passed (verified 2026-10-21): CI green on main, production health ok, security items P10.1–P10.17 ticked, 20/20 smoke test; P10.18 (reset-events before the demo) stays open
+- [x] **P10.34** (M3) Server bug sweep: run, extraction and correction lists read past Supabase's 1,000-row cap (the queue lost "done" orders after 1,000 runs); one open alert per rule even when two checks race, and duplicates left by another instance are resolved; the alert webhook times out after 3 s instead of holding the pack response; a measurement saved while Gemini is reading is no longer overwritten; corrections for a run that was never saved keep their data without the broken link; strict uuid check on run routes (malformed ids gave 500); error runs no longer count as fast cached orders in M5; DB failures in checkout, metrics and trace return a JSON error. — `tests/db`, `tests/monitoring/alerts.test.ts`, `tests/ai/catalog.test.ts`, `tests/pipeline/pack.test.ts`, 2026-10-21
 
 ---
 

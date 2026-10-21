@@ -2,7 +2,7 @@
 
 import type { DataSource } from "@/lib/engine/types";
 
-export function fmtNum(n: number | null | undefined, digits = 1): string {
+function fmtNum(n: number | null | undefined, digits = 1): string {
   if (n === null || n === undefined || Number.isNaN(n)) return "—";
   return Number.isInteger(n) ? String(n) : n.toFixed(digits);
 }
@@ -78,9 +78,10 @@ export function fmtUsd(x: number | null | undefined): string {
   return ltr(x < 0.01 ? `$${x.toFixed(5)}` : `$${x.toFixed(3)}`);
 }
 
+/** Fixed to Riyadh time so server-rendered pages (Vercel runs in UTC) and client components show the same clock. */
 export function fmtTime(iso: string | null | undefined): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("ar-SA-u-ca-gregory-nu-latn", { dateStyle: "short", timeStyle: "medium" });
+  return new Date(iso).toLocaleString("ar-SA-u-ca-gregory-nu-latn", { dateStyle: "short", timeStyle: "medium", timeZone: "Asia/Riyadh" });
 }
 
 export const SOURCE_LABEL: Record<DataSource, string> = {
@@ -121,6 +122,7 @@ export const OUTCOME_LABEL: Record<string, string> = {
   search_budget: "انتهى وقت البحث قبل إيجاد ترتيب",
   no_layout: "لم نجد ترتيباً صالحاً",
   validator_rejected: "رفضه المدقّق",
+  not_needed: "لم يُجرَّب، وُجد كرتون أوفر",
 };
 
 /** Result of one Gemini call, as shown on the monitoring page. */
@@ -148,6 +150,7 @@ const API_ERRORS: Array<[RegExp, string]> = [
   [/Order number must be digits only/i, "رقم الطلب يجب أن يكون أرقاماً فقط."],
   [/Invalid (changes|action|request body|product id|run id)/i, "البيانات المرسلة غير صحيحة. راجع القيم وحاول مرة أخرى."],
   [/Could not save/i, "تعذّر الحفظ. حاول مرة أخرى."],
+  [/Could not load/i, "تعذّر تحميل البيانات. حاول مرة أخرى."],
   [/Database is not configured|Database unavailable/i, "قاعدة البيانات غير متاحة حالياً."],
   [/Not available/i, "هذه الميزة غير متاحة."],
   [/Too many requests|rate limit/i, "عدد الطلبات كبير. انتظر قليلاً ثم حاول مرة أخرى."],
