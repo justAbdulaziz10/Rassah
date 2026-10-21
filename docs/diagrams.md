@@ -2,7 +2,7 @@
 
 The brief requires two diagrams: **Development Flow** and **Monitoring Flow**. Both must reflect the real implementation. If the implementation changes, update these diagrams in the same commit.
 
-The diagrams are written in Mermaid, which GitHub renders natively. PNG exports live in `docs/report/` (`diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`), rendered with `@mermaid-js/mermaid-cli` (mmdc). Re-export them whenever a block changes.
+The diagrams are written in Mermaid, which GitHub renders natively. PNG exports live in `docs/report/` (`diagram-dev-flow.png`, `diagram-monitoring-flow.png`, `diagram-monitoring-sequence.png`, `diagram-architecture.png`), rendered with `@mermaid-js/mermaid-cli` (mmdc). Re-export them whenever a block changes. The PNGs were last exported on 2026-10-21 (commit `4128fcd`); the Mermaid blocks below have changed since (alert re-evaluation, notifications, store, multi-carton split), so the PNGs need a re-export.
 
 ---
 
@@ -48,18 +48,17 @@ How events move from the product to the monitoring components, how metrics are c
 
 ```mermaid
 flowchart TB
-    subgraph Product["Product request path (Vercel function)"]
+    subgraph Product["Product request path (Vercel function, lib/pipeline/pack.ts)"]
         U[Packer: POST /api/orders/:id/pack] --> R[Create run_id + start timer]
         R --> CL{Product facts<br/>in catalog cache?}
         CL -->|hit| PK
         CL -->|miss| GX[Gemini extraction]
-        GX --> EV1[[write extraction_event<br/>status · latency · tokens · cost<br/>source · confidence · error_code]]
+        GX --> EV1[[extraction_event per call<br/>status · latency · tokens · cost<br/>source · confidence · error_code]]
         GX --> PF[(product_facts)]
-        PF --> PK[Packing engine]
-        PK --> VA[Independent validator]
-        VA --> EV2[[write order_run<br/>status · carton · timings · cache hits<br/>violations · est. cost · tokens · engine_version]]
+        PF --> PK[Packing engine<br/>every layout checked by the<br/>independent validator ·<br/>split if no single carton fits]
+        PK --> EV2[[order_run<br/>status · carton · timings · cache hits<br/>violations · est. cost · tokens · engine_version]]
         EV2 --> RES[Result to packer]
-        RES --> ACT[Packer: Confirm / Edit]
+        RES --> ACT[Packer: Confirm / Edit / Measure]
         ACT --> EV3[[update order_run.employee_action<br/>write corrections rows]]
     end
 
@@ -76,10 +75,11 @@ flowchart TB
     EV3 --> T2
     EV3 --> T3
 
-    subgraph Compute["Metric computation (server, on dashboard load and after each run)"]
-        Q[SQL queries over a time window<br/>excluding trigger = 'eval'] --> MET[M1–M7 metric values<br/>+ sample sizes]
-        MET --> RULES{Alert rules<br/>threshold + min sample}
-        RULES -->|breach| T5
+    subgraph Compute["Computation (server, TypeScript)"]
+        Q[Read rows<br/>excluding trigger = 'eval'] --> MET[computeMetrics: M1–M7<br/>+ sample sizes, for the chosen window]
+        Q --> RULES{Alert rules<br/>rolling last N · min sample<br/>after each pack, each packer action<br/>and each dashboard load}
+        RULES -->|breach: open| T5
+        RULES -->|clean: resolve| T5
     end
 
     T1 --> Q
@@ -87,7 +87,7 @@ flowchart TB
     T3 --> Q
 
     MET --> DASH[/monitoring dashboard/]
-    T5 --> BAN[Alert banner on dashboard<br/>+ optional webhook]
+    T5 --> BAN[Status list on /monitoring<br/>/notifications · nav bell<br/>+ optional webhook]
     T4 --> EVP[/evaluation page/]
 ```
 
@@ -103,22 +103,22 @@ sequenceDiagram
     participant G as Gemini API
     participant E as Engine + Validator
 
-    P->>UI: Enter order #1045
+    P->>UI: Open order #1002
     UI->>API: POST pack
-    API->>DB: Load order items + cached product_facts
+    API->>DB: Load order, products, cartons, cached product_facts
     DB-->>API: 2 cached, 1 missing
     API->>G: generateContent(product text, JSON schema)
     G-->>API: JSON facts + usage tokens
-    API->>DB: insert extraction_event, upsert product_facts
-    API->>E: pack(items, cartons)
-    E-->>API: best layout per carton
-    API->>E: validate(layout)
-    E-->>API: valid / violations
-    API->>DB: insert order_run (timings, status, violations, cost)
+    API->>DB: upsert product_facts
+    API->>E: packOrder(items, facts, cartons)
+    E->>E: search; validate every layout
+    E-->>API: cheapest valid carton (or split, or no_box)
+    API->>DB: insert order_run + extraction_events
+    API->>DB: re-evaluate alert rules (open / resolve alerts)
     API-->>UI: carton + instructions + layout + run_id
     P->>UI: Confirm (or Edit a product)
     UI->>API: POST /api/runs/:runId/action
-    API->>DB: update order_run, insert corrections
+    API->>DB: update order_run, insert corrections, re-evaluate alerts
 ```
 
 ---
@@ -128,37 +128,48 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph Client["Browser"]
-        P1[Order page]
+        P0[Landing page]
+        P1[Orders queue]
         P2[Result page + 3D view]
+        P6[Notifications page]
         P3[Catalog page]
         P4[Monitoring page]
         P5[Evaluation page]
+        P7[Store /store]
     end
 
-    subgraph Vercel["Vercel: Next.js (Node runtime)"]
+    subgraph Vercel["Vercel: Next.js (Node runtime, fra1)"]
         RH[Route handlers /api/*]
-        PL[lib/pipeline<br/>pack orchestration · facts cache]
-        AI[lib/ai<br/>extractor · prompt · schema]
-        EN[lib/engine<br/>packer · validator · cost · instructions]
-        MO[lib/monitoring<br/>events · metrics · alerts]
-        DBL[lib/db<br/>Supabase server client]
+        PL[lib/pipeline<br/>pack orchestration · corrections]
+        AI[lib/ai<br/>extractor · prompt · schema · catalog cache]
+        EN[lib/engine<br/>packer · validator · split · cost · instructions]
+        MO[lib/monitoring<br/>metrics · alerts · dashboard · evaluation]
+        OR[lib/orders<br/>queue · notifications]
+        IN[lib/integrations<br/>external Orders API, optional]
+        DBL[lib/db<br/>Repo: Supabase adapter<br/>or memory backend]
     end
 
     GEM[(Gemini API)]
     SUP[(Supabase Postgres)]
+    EXT[(External store API<br/>optional, read-only)]
 
     EVS[scripts/eval-*<br/>+ lib/eval scoring]
 
-    P1 & P2 & P3 & P4 & P5 --> RH
+    P0 & P1 & P2 & P3 & P4 & P5 & P6 & P7 --> RH
     RH --> PL
+    RH --> OR
     PL --> AI --> GEM
     PL --> EN
     PL --> MO
+    PL --> IN --> EXT
     RH --> MO
     PL --> DBL
     MO --> DBL
+    OR --> DBL
     EVS --> AI
     EVS --> EN
     EVS --> DBL
     DBL --> SUP
 ```
+
+Pages are server components that read through `lib/` directly as well as calling the API routes; the arrows show the main data paths only.

@@ -34,13 +34,13 @@ Sources: Paccurate API types (npm `paccurate` 2.4.2, docs.paccurate.io), 3DBinPa
 - **Demo orders (18 of 20):** the real demo orders with true sizes. Orders 1006 and 1017 are left out because their products have no known size at all.
 - **Random orders (200 by default):** seeded (`--seed`), 1–4 different products, 1–3 of each, full carton catalog.
 
-## Tomorrow: how to run it against the vendors
+## How to run it against the vendors
 
 1. Get keys (the team, not the script, creates the accounts):
    - Paccurate: free key from sign-up at paccurate.io.
    - 3DBinPacking: 14-day trial at 3dbinpacking.com, then username + API key from the profile page.
 2. Put them in `.env.local` (gitignored; never in git or chat): `PACCURATE_API_KEY=…`, `BINPACKING_USERNAME=…`, `BINPACKING_API_KEY=…`.
-3. Run `npm run bench -- --write`. About 280 requests per vendor, sent one at a time with a short pause. Responses are cached in `eval/bench-cache/` (gitignored), so a re-run costs no quota. `--cache-only` re-scores without any network call.
+3. Run `npm run bench -- --write`. About 280 requests per vendor (one per case), sent one at a time with a short pause. Responses are cached in `eval/bench-cache/` (gitignored), so a re-run costs no quota. `--cache-only` re-scores without any network call.
 4. Check the first lines of the output for errors (a wrong key or a changed API shape shows there). The adapter tests show what shapes we expect.
 5. The report is written to `eval/results/bench-<date>.md`. Quote numbers only from that file.
 
@@ -54,4 +54,4 @@ From `eval/results/bench-2026-10-21.md` (engine-0.3), 258 feasible cases:
 - **Speed:** Rassah p50 0.5 ms, p95 81 ms per order on a laptop.
 - **Missing sizes:** with no sizes entered by the store, the vendor APIs can pack 0/20 demo orders; Rassah packs 18/20 with no data entry, and the other 2 after one measurement per product.
 
-What to watch tomorrow: both vendors also split orders, so the deciding numbers are the valid-layout rate (all rules, judged by the same validator) and the cost on orders both pack validly.
+What to watch in the vendor run: both vendors also split orders, so the deciding numbers are the valid-layout rate (all rules, judged by the same validator) and the cost on orders both pack validly.

@@ -102,6 +102,8 @@ In parallel and also blocking: `P2 schema` → `P2 seed`, and `P4 validator` →
 | `ENGINE_VERSION` | ✔ | ✔ | ✔ | ✔ | ✖ |
 | `PROMPT_VERSION` | ✔ | ✔ | ✔ | ✔ | ✖ |
 | `ALERT_WEBHOOK_URL` | ✔ | optional | optional | optional | ✖ |
+| `DATA_BACKEND`, `MEMORY_SEED_FACTS` | ✔ | optional (`memory` for offline) | ✖ | ✖ | ✖ |
+| `STORE_API_URL`, `STORE_API_KEY` | ✔ | optional | optional | optional | ✖ |
 
 CI needs **no** secrets because tests never call external services.
 
@@ -186,21 +188,21 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P1.18** (M3) `lib/env.ts`: reads and validates env vars with Zod at startup, with a clear error naming the missing variable. Server only.
 
 ### 1D. Scripts and quality tooling
-- [x] **P1.19** (M3) `package.json` scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `check`, `seed`, `eval:extraction`, `eval:packing`.
+- [x] **P1.19** (M3) `package.json` scripts: `dev`, `build`, `start`, `lint`, `typecheck`, `test`, `test:watch`, `test:coverage`, `check`, `seed`, `eval:extraction`, `eval:packing`. — now also `validate-data`, `gen-fixtures`, `bench`, `demo:morning`, `clear-facts`; full list in the README
 - [x] **P1.20** (M3) `vitest.config.mts` with the `@/*` alias and `environment: "node"`.
 - [x] **P1.21** (M3) One trivial passing test (`tests/smoke.test.ts`) so CI has something to run.
 - [x] **P1.22** (M3) Lint command works (`next lint` or `eslint .`, whichever the scaffold supports). Recorded in stack/08.
 - [x] **P1.23** (M3) `npm run check` passes locally.
 
 ### 1E. App shell
-- [x] **P1.24** (M3) `app/layout.tsx`: `<html lang="ar" dir="rtl">`, Arabic font via `next/font/google`, top nav: Orders · Catalog · Monitoring · Evaluation.
-- [x] **P1.25** (M3) Placeholder pages for `/orders`, `/catalog`, `/monitoring`, `/evaluation`. `/` redirects to `/orders`.
+- [x] **P1.24** (M3) `app/layout.tsx`: `<html lang="ar" dir="rtl">`, Arabic font via `next/font/google`, top nav: Orders · Catalog · Monitoring · Evaluation. — now: nav الطلبات · الإشعارات · المنتجات · الأداء · الدقة, plus an «المتجر» button
+- [x] **P1.25** (M3) Placeholder pages for `/orders`, `/catalog`, `/monitoring`, `/evaluation`. `/` redirects to `/orders`. — now: `/` is the landing page (no redirect, decisions.md)
 - [x] **P1.26** (M3) Tailwind: define the fixed color tokens (fragile amber, liquid blue, sensitive purple, estimated dashed) as CSS variables.
 - [x] **P1.27** (M3) `app/not-found.tsx` and `app/error.tsx` with friendly Arabic messages.
-- [x] **P1.28** (M3) `GET /api/health` returns `{ app: "ok", geminiKeyPresent, supabase: "ok" | "error" }`. Never return key values.
+- [x] **P1.28** (M3) `GET /api/health` returns `{ app: "ok", geminiKeyPresent, supabase: "ok" | "error" }`. Never return key values. — now: the field is `database`, plus `status` (`ok` / `degraded` / `error`, 503 on error) and `backend`
 
 ### 1F. CI
-- [x] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test.
+- [x] **P1.29** (M3, →T4) `.github/workflows/ci.yml`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → lint → typecheck → test. — now also `validate-data`, `build` and `eval:packing`
 - [x] **P1.30** (M3) Open a test PR. CI runs and passes.
 
 ### 1G. Vercel
@@ -224,18 +226,18 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M3 · **Target:** Tue night · **Gate:** G2 · **Spec:** [stack/04](stack/04-supabase.md)
 
 ### 2A. Schema
-- [x] **P2.1** (M3, →T5) Write `supabase/migrations/0001_init.sql` exactly per stack/04 (all 11 tables).
+- [x] **P2.1** (M3, →T5) Write `supabase/migrations/0001_init.sql` exactly per stack/04 (all 11 tables). — now 12 tables (`shipping_rates` added)
 - [x] **P2.2** (M3) Check constraints present: sources, statuses, triggers, severities, employee actions, `qty` 1–12.
 - [x] **P2.3** (M3) Indexes on `extraction_events(created_at desc)` and `order_runs(created_at desc)`.
 - [x] **P2.4** (M3) Add index `extraction_events(run_id)` and `corrections(run_id)` for the run trace.
 - [x] **P2.5** (M3) `gen_random_uuid()` available (the `pgcrypto` extension is enabled by default on Supabase. Verify). — verified on production: select gen_random_uuid() works
-- [x] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies.
+- [x] **P2.6** (M3) RLS **enabled on all 11 tables**, with no public policies. — now 12 tables
 - [x] **P2.7** (M3) Apply the migration (SQL editor or `supabase db push`). Record how in README. — applied via Supabase MCP apply_migration; README "Database setup"
 - [x] **P2.8** (M2) Review: the schema matches the API contract fields in stack/01 and the event fields in stack/06. — no schema mismatches; stale docs fixed (stack/01, stack/04)
 
 ### 2B. Access layer
 - [x] **P2.9** (M3) `lib/db/supabase.ts`: `import "server-only"`, a service-role client, `persistSession: false`.
-- [x] **P2.10** (M3) Define a small `Db` interface (the queries the app needs) so tests can use an in-memory fake.
+- [x] **P2.10** (M3) Define a small `Db` interface (the queries the app needs) so tests can use an in-memory fake. — as built: the interface is `Repo` (`lib/db/repo.ts`); the method names in P2.12–P2.18 differ slightly (`getOrder`, `getFacts` / `upsertFacts`, `setOrderRunAction`, `listOpenAlerts`, `latestEvalRuns`)
 - [x] **P2.11** (M3) Typed row types for each table in `lib/db/types.ts` (hand-written or generated with `supabase gen types`).
 - [x] **P2.12** (M3) Queries: `getOrderWithItems(orderId)`.
 - [x] **P2.13** (M3) Queries: `getProductFacts(productIds[])`, `upsertProductFacts(facts)`.
@@ -322,7 +324,7 @@ CI needs **no** secrets because tests never call external services.
 
 ### 4A. Types and geometry
 - [x] **P4.1** (M2, →T7) `types.ts`: `ProductFacts`, `Unit`, `Carton`, `Placement`, `Layout`, `PackResult` (statuses: `box_found`, `no_box`, `needs_measurement`), `Violation` (9 codes), `SkipReason`.
-- [x] **P4.2** (M2) `config.ts`: `MARGIN_INFERRED=0.15`, `PADDING_CM=1.5`, `MIN_SUPPORT=0.70`, `MAX_SEARCH_MS=1500`, `VOLUMETRIC_DIVISOR=5000`, `WALL_CM=0.5`, `EPS=1e-6`, `MAX_UNITS=12`, `ENGINE_VERSION`.
+- [x] **P4.2** (M2) `config.ts`: `MARGIN_INFERRED=0.15`, `PADDING_CM=1.5`, `MIN_SUPPORT=0.70`, `MAX_SEARCH_MS=1500`, `VOLUMETRIC_DIVISOR=5000`, `WALL_CM=0.5`, `EPS=1e-6`, `MAX_UNITS=12`, `ENGINE_VERSION`. — as built: camelCase fields (`marginInferred`, `paddingCm`, `minSupport`, `maxSearchMs`, `wallCm`, `eps`, `maxUnits`), `ENGINE_VERSION = "engine-0.3"`; the volumetric divisor is in `data/cartons.json`
 - [x] **P4.3** (M2) `geometry.ts`: `rotations(dims, liquid)` deduplicated (6 normal / 2 liquid).
 - [x] **P4.4** (M2) `geometry.ts`: interval overlap with EPS, box overlap, footprint contact area.
 
@@ -352,10 +354,10 @@ CI needs **no** secrets because tests never call external services.
 
 ### 4D. Packer
 - [x] **P4.25** (M2, →T8) Pre-checks per carton: single unit too large in all rotations → skip `oversize`. Total weight → skip `overweight`.
-- [x] **P4.26** (M2) `greedyPlace` over extreme points with the score (z, y, x).
+- [x] **P4.26** (M2) `greedyPlace` over extreme points with the score (z, y, x). — as built: candidate corners on a grid; "lowest top surface" is the default score (decisions.md)
 - [x] **P4.27** (M2) Enforces in bounds, no overlap, support, nothing on fragile, liquid rotations.
 - [x] **P4.28** (M2) Extreme-point generation + dedupe + drop out-of-carton points.
-- [x] **P4.29** (M2) 4 orderings (volume, base area, weight, longest side; all desc), with fragile units always last.
+- [x] **P4.29** (M2) 4 orderings (volume, base area, weight, longest side; all desc), with fragile units always last. — as built: 9 strategies (two let fragile items go anywhere) plus seeded restarts (decisions.md)
 - [x] **P4.30** (M2) Cartons tried in cost order. Candidate chosen by lowest estimated total cost, tie → smaller volume.
 - [x] **P4.31** (M2) Search budget `MAX_SEARCH_MS` enforced. Records `candidatesChecked` and per-carton skip reasons.
 - [x] **P4.32** (M2) Every candidate layout is passed through the validator. A rejected candidate is counted (`validatorRejections`) with its violations, the next strategy is tried, and the carton's outcome becomes `validator_rejected` if none passes.
@@ -525,7 +527,7 @@ CI needs **no** secrets because tests never call external services.
 **Owner:** M2 · **Reviewer:** M3 · **Target:** Wed afternoon · **Gate:** G7 · **Spec:** [stack/01](stack/01-nextjs-typescript.md), [stack/05](stack/05-3d-visualization.md)
 
 ### 7A. Shared UI
-- [x] **P7.1** (M2) `SourceBadge` (page / inferred "تقديري" / manual / unknown), with consistent colors.
+- [x] **P7.1** (M2) `SourceBadge` (page / inferred "تقديري" / manual / unknown), with consistent colors. — now labelled «تقدير»
 - [x] **P7.2** (M2) Flag chips: fragile, liquid, sensitive (fixed colors).
 - [x] **P7.3** (M2) Loading states (skeletons) and error states (Arabic messages + run id for support).
 - [x] **P7.4** (M2) Numbers in Western digits with units. Dimensions formatted "30 × 20 × 15 سم".
@@ -533,11 +535,11 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P7.6** (M2) Responsive at phone width (the packer may use a phone or tablet). — checked 2026-10-21 at 390 px (iPhone 12 Pro): all 5 pages, no horizontal overflow (screens/07-mobile-order-1002.png)
 
 ### 7B. Orders page (`/orders`)
-- [x] **P7.7** (M2, →T12) Input "رقم الطلب" + button "جهّز الطلب".
+- [x] **P7.7** (M2, →T12) Input "رقم الطلب" + button "جهّز الطلب". — the button now says «افتح»
 - [x] **P7.8** (M2) List of seeded orders with item count (click to pack).
 - [x] **P7.9** (M2) Demo orders highlighted (from P3.26).
-- [x] **P7.10** (M2) `DEMO_MODE` only: "Simulate Gemini outage" toggle, clearly labeled as a demo control.
-- [x] **P7.11** (M2) Calls the pack API, then navigates to the result page with `runId`.
+- [x] **P7.10** (M2) `DEMO_MODE` only: "Simulate Gemini outage" toggle, clearly labeled as a demo control. — replaced by `?outage=1` on the order page (P7.56)
+- [x] **P7.11** (M2) Calls the pack API, then navigates to the result page with `runId`. — as built: the form opens `/orders/[id]`, which runs the pack
 
 ### 7C. Result page (`/orders/[id]`)
 - [x] **P7.12** (M2) Header: carton id, name, inner dims, big and clear.
@@ -635,24 +637,24 @@ CI needs **no** secrets because tests never call external services.
 
 ### 8C. Dashboard page (`/monitoring`)
 - [x] **P8.27** (M3) Window selector + visible sample sizes.
-- [x] **P8.28** (M3) Alert banner(s): severity color, message, value vs threshold, n, "view events" link.
+- [x] **P8.28** (M3) Alert banner(s): severity color, message, value vs threshold, n, "view events" link. — as built: alerts sit in the status list at the top; no "view events" link (the run trace is under «التفاصيل» in recent runs)
 - [x] **P8.29** (M3) KPI tiles: M1, M6, M5 (p95 cached/uncached), M7 (cost + cache hit).
 - [x] **P8.30** (M3) Chart: M5 latency over time (cached vs uncached).
-- [x] **P8.31** (M3) Chart: M2 data-source mix (stacked bar).
-- [x] **P8.32** (M3) Chart: M6 failures by status (bar).
+- [x] **P8.31** (M3) Chart: M2 data-source mix (stacked bar). — now a bar list
+- [x] **P8.32** (M3) Chart: M6 failures by status (bar). — now a bar list
 - [x] **P8.33** (M3) Tile: M3 validator rejections (shows ✓ when 0, red when > 0, with violation codes).
-- [x] **P8.34** (M3) Tile: M4 no-carton rate + skip reasons.
+- [x] **P8.34** (M3) Tile: M4 no-carton rate + skip reasons. — now the outcomes card
 - [x] **P8.35** (M3) Recent runs table: time, order, status, carton, ms, source mix, action → click opens the run trace.
 - [x] **P8.36** (M3) Run trace view: order run fields + extraction events (evidence, tokens, latency, status) + corrections.
-- [x] **P8.37** (M3) "Insufficient data" state for metrics below min n.
+- [x] **P8.37** (M3) "Insufficient data" state for metrics below min n. — shown as «بيانات قليلة», with the value still visible
 - [x] **P8.38** (M3) Empty state when there are no events at all.
 - [x] **P8.39** (M3) Each tile has a one-line "what this tells us" tooltip (helps in Q&A).
 
 ### 8D. Fault injection demo
-- [x] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written.
+- [x] **P8.40** (M3) Toggle wired (P7.10) → pack with `simulateOutage` → `simulated_outage` events written. — the toggle is now `?outage=1` (P7.56)
 - [x] **P8.41** (M3) The M6 critical alert appears on the dashboard after enough failures (check the min sample: may need 2–3 attempts).
 - [x] **P8.42** (M3) Cached products in the same order still pack (verify and note for the demo). — production: order 1002 with simulateOutage and all facts cached → box_found L (374 ms)
-- [x] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves. — verified on production 2026-10-21: simulated outage → M6 critical alert → toggle off → one successful run → 0 open alerts
+- [x] **P8.43** (M3) Toggle off → successful run → the alert auto-resolves. — verified on production 2026-10-21: simulated outage → M6 critical alert → toggle off → one successful run → 0 open alerts (now: load the order without `?outage=1`)
 - [x] **P8.44** (M3) Write the 30-second outage demo script in `docs/demo-script.md`.
 
 ### 8E. Investigation story
@@ -808,8 +810,8 @@ CI needs **no** secrets because tests never call external services.
 - [x] **P11.18** (M1+M2) 8. Benchmarks & evaluation results: extraction + packing tables, before/after prompt, margin decision, holdout.
 - [x] **P11.19** (M3) 9. Monitoring in action: the investigation story + the outage demo. — investigation story + outage demo
 - [x] **P11.20** (ALL) 10. Tools & AI usage (summary of TOOLS.md). — summary of TOOLS.md
-- [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal).
-- [x] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback).
+- [x] **P11.21** (ALL) 11. Limitations (synthetic data, rigid items only, single carton, estimated costs, no live integration, heuristic not optimal). — now: multi-carton is a heuristic split, not a proven cheapest one
+- [x] **P11.22** (ALL) 12. Next steps (pilot with a merchant, Salla/Zid integration, multi-carton, manufacturer lookup, scale feedback). — now: a cheaper or optimal multi-carton split
 - [x] **P11.23** (ALL) 13. References: brief, Gemini docs, Supabase docs, Vercel docs, Next.js docs, R3F docs, courier volumetric-weight source, Paccurate, bin-packing references actually read. — references list (3 sources without recorded URL noted)
 - [x] **P11.24** (ALL) Diagrams embedded.
 - [x] **P11.25** (ALL) Concise: target ≤ 8–10 pages. Cut anything that isn't evidence. — 6 pages
@@ -867,7 +869,7 @@ CI needs **no** secrets because tests never call external services.
 - [ ] **P12.8** (M3) Gemini key valid (one admin re-extract on a group-A product succeeds).
 - [ ] **P12.9** (M3) Run 3–5 live orders so the dashboard window has fresh data.
 - [ ] **P12.10** (M3) Dashboard shows no unexpected open alerts. Resolve leftovers from the rehearsal.
-- [ ] **P12.11** (M3) `DEMO_MODE=true` on production. The outage toggle is visible.
+- [ ] **P12.11** (M3) `DEMO_MODE=true` on production. The outage toggle is visible. — now: no toggle; the outage is `/orders/<id>?outage=1` (P7.56)
 - [ ] **P12.12** (M2) Prepare one product with cleared facts for the live cache-miss moment (optional, only if Gemini latency is acceptable).
 
 ### 12C. Equipment
@@ -940,7 +942,7 @@ Never cut: **validator, event logging, tests, honesty about data.**
 - Real Salla/Zid integration (OAuth app, orders + products APIs)
 - Manufacturer-spec lookup for branded products (web search tool)
 - Similar-product estimation from the catalog (embeddings)
-- Multi-carton orders, deformable items, crush-strength / stacking-load rules
+- Cheapest multi-carton split (the current split is a heuristic), deformable items, crush-strength / stacking-load rules
 - Scale-weight feedback loop (compare actual vs expected weight to flag bad facts)
 - Real courier rate APIs instead of the synthetic tariff
 - Separate Supabase projects for preview and production

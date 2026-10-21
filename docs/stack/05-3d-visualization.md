@@ -16,32 +16,30 @@ The 3D view lets the packer (and the judges) **see** the decision: which carton,
 ```tsx
 "use client";
 // Props: carton inner dims + validated placements (from the API response)
-type Props = {
-  carton: { innerCm: [number, number, number] };
-  items: { unitId: string; name: string; placement: { x: number; y: number; z: number; dx: number; dy: number; dz: number };
-           fragile: boolean; liquid: boolean; sensitive: boolean; estimated: boolean }[];
-};
+interface Props {
+  inner: [number, number, number];
+  items: { unitId: string; name: string; fragile: boolean; liquid: boolean; sensitive: boolean;
+           estimated: boolean; placement: { x: number; y: number; z: number; dx: number; dy: number; dz: number } }[];
+}
 ```
 
+Pure helpers live in `lib/ui/three.ts` (`toThreePosition`, `toThreeSize`, `itemKind`, `KIND_COLOR`, `placementOrder`, `topViewRects`).
+
 Rendering rules:
-- **Axis mapping:** the engine uses z-up, three.js uses y-up. Map engine `(x, y, z)` to three `(x, z, y)` in one helper function and test it.
+- **Axis mapping:** the engine uses z-up, three.js uses y-up. `toThreePosition` maps engine `(x, y, z)` to three `(x, z, y)` and centres the carton on the floor.
 - A box's position in three.js is its **center**: `center = origin + size / 2`.
-- Carton: wireframe edges only (transparent), so items stay visible.
-- Item colors (same meaning everywhere in the app): fragile = amber, liquid = blue, sensitive = purple, other = neutral gray-teal. Estimated items get a **dashed outline** and a label suffix "(تقديري)".
-- Labels: a short name via drei `<Html>` on hover, or on tap for mobile.
-- Camera: fits the carton on load. `OrbitControls` lets the user rotate and zoom.
-- **Step slider:** "Step 1…N" reveals items in placement order (bottom to top), matching the written instructions. Cheap to build and very clear in a live demo.
+- Carton: edges only (invisible faces), so items stay visible.
+- Item colors (same meaning everywhere in the app): fragile = amber, liquid = blue, sensitive = purple, other = gray-teal. Estimated items are drawn **more transparent**; the legend says "الشفاف: مقاس تقديري" and the label adds "(تقديري)".
+- Labels: the item name via drei `<Html>` on hover, or on tap for mobile.
+- Camera: placed from the carton size on load. `OrbitControls` lets the user rotate and zoom (no pan).
+- **Step slider** with «السابق» / «التالي» buttons: reveals items in placement order (bottom to top), matching the written instructions. A split order shows one view per carton.
 
 ## Next.js integration
 
-- Load with `next/dynamic` and `{ ssr: false }`, because WebGL needs the browser.
-- Show a plain fallback (the text instructions) while loading or if WebGL is unavailable.
+- `components/PackRunner.tsx` loads it with `next/dynamic` and `{ ssr: false }`, because WebGL needs the browser, and shows "جارٍ تحميل الشكل المجسّم…" while loading.
+- `components/Safe3D.tsx` checks for WebGL and catches render errors. Without WebGL it shows `components/TopView2D.tsx` (a top view drawn from the same placements) with a note that the written steps are complete.
 
 ## Testing
 
-- Unit-test the pure helpers (`toThreePosition`, color mapping, step filtering) with Vitest.
-- Visual check on the Vercel preview for 3 fixture orders (simple, fragile + liquid, estimated item) before merging.
-
-## Cut-list fallback
-
-If time runs out: replace with two SVG projections (top view and side view) drawn from the same placements. Same data, no WebGL.
+- `tests/ui/three.test.ts` covers the pure helpers (axis mapping, sizes, color mapping, placement order, top-view rectangles).
+- The 3D view itself is checked by eye on the deployed app.

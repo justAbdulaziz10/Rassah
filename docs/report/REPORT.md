@@ -19,7 +19,7 @@ Merchants who ship multi-item orders choose cartons by eye. Three things go wron
 
 ## 2. Solution and user flow
 
-`/` is now a landing page (its hero replays a real engine result for order 1016); the working screens are `/orders`, `/catalog`, `/monitoring` and `/evaluation`.
+`/` is a landing page (its hero replays a real engine result for order 1016). The working screens are `/orders`, `/notifications`, `/catalog`, `/monitoring` and `/evaluation`. `/store` is a built-in demo store on the same domain and database: an order placed there appears in the `/orders` queue.
 
 The packer types an order number. Rassah:
 
@@ -41,7 +41,7 @@ If a value has no basis, the order stops with "needs measurement" (the packer me
 | Step | Technique | Why |
 |---|---|---|
 | Understand product pages | **LLM (Gemini)** with a JSON schema and honesty rules | Free-form Arabic/English text, mixed units, Arabic-Indic digits, implicit fragility ("كريستال") defeat rules |
-| Arrange items | **Search** (classical AI): corner-grid candidates × rotations × 9 orderings/scores + 40 seeded restarts | An LLM cannot guarantee collision-free, supported coordinates |
+| Arrange items | **Search** (classical AI): corner-grid candidates × rotations × 9 fixed orderings/scores, then 40 seeded restarts, then a backtracking anchor search | An LLM cannot guarantee collision-free, supported coordinates |
 | Prove validity | Independent validator (plain geometry) | Correctness checked by code that shares nothing with the search |
 
 *"The LLM understands, the engine computes, the validator proves."* The instructor confirmed that using AI APIs meets the brief and that no fine-tuning is needed.
@@ -73,7 +73,7 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 195 tests) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (525 tasks, 13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 219 tests, build, packing eval) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
 *Figure 2. Development flow as planned (branch → PR → preview → review → merge). The process actually used is the paragraph above and `docs/decisions.md`; the figure was not redrawn.*
@@ -86,9 +86,9 @@ Agents work in git worktrees → local merge → **local CI gate** (`agent-ship 
 | M2 | Data-source mix of packed units | Missing store data | > 30% unknown in 24 h, info |
 | M3 | Validator rejections of engine layouts | Engine bugs (must be 0) | any in 24 h, **critical** |
 | M4 | No-carton rate + skip reasons | Catalog/margin mismatch | > 15% of last 20, warning |
-| M5 | p50/p95 latency, cached vs uncached | Slow Gemini vs slow engine/DB | p95 > 8 s uncached / 2 s cached |
+| M5 | p50/p95 latency, cached vs uncached | Slow Gemini vs slow engine/DB | p95 > 8 s uncached / 2 s cached over the last 20 runs, warning |
 | M6 | Gemini failure rate by status | Key, quota, outage, bad output | > 10% of last 20, **critical** |
-| M7 | Cost per order + cache-hit rate | Cache broken, prompt bloat | (shown) |
+| M7 | Cost per order + cache-hit rate | Cache broken, prompt bloat | none (shown on the dashboard only) |
 
 Every metric shows its sample size and says "insufficient data" below its minimum. Eval traffic is excluded. Alerts open once per rule, auto-resolve, and post to a webhook (never for simulated faults). Each run has a trace (Gemini calls, tokens, timings, corrections).
 
@@ -141,7 +141,7 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 **Prompt iteration:** none. Tuning-set failures were limited to estimate error on inferred products (no extraction failures), so the prompt stays `v1` and there is no before/after row.
 
-**Margin decision:** inferred dim MAPE over all 12 inferred products is 12.9%, rounded up to 15%, so `MARGIN_INFERRED` stays 0.15. The holdout MAPE (16.1%, 4 products) is above 15%. With so few inferred products this is noisy, and the instructions already say "check the fit". A real-merchant pilot should re-measure it before the margin is trusted or raised.
+**Margin decision:** inferred dim MAPE over all 12 inferred products is 12.9%, rounded up to 15%, so `marginInferred` stays 0.15. The holdout MAPE (16.1%, 4 products) is above 15%. With so few inferred products this is noisy, and the instructions already say "check the fit". A real-merchant pilot should re-measure it before the margin is trusted or raised.
 
 **Model:** `gemini-3.5-flash-lite` ($0.30 in / $2.50 out per 1M tokens, 2026-10-21). The faster-tier models had a free quota of 20 requests/day, too low for a 30-call eval.
 
@@ -155,7 +155,7 @@ Every metric shows its sample size and says "insufficient data" below its minimu
   - *After:* cached orders **119-234 ms**. One uncached order (Gemini call): **1589 ms** total, of which extraction 1205 ms. The drop is visible in the screenshot below.
 - **Investigation 2: Gemini quota.** `rate_limited` events (429 QuotaFailure) showed the Flash models' free tier is 20 requests/day/model. We switched to `gemini-3.5-flash-lite` (500/day); see `docs/decisions.md`.
 - **Investigation 3 (offline):** the packing eval and its fixture trace led to the scoring fix in section 8. A regression test guards it.
-- **Live demo:** a simulated Gemini outage (demo toggle) turns uncached products into "needs measurement" while cached ones still pack. M6 crosses 10% and shows a critical banner "(عطل تجريبي)". The run trace shows `simulated_outage`. The alert resolves after clean runs.
+- **Live demo:** a simulated Gemini outage (`/orders/<id>?outage=1`, honoured only with `DEMO_MODE=true`) turns uncached products into "needs measurement" while cached ones still pack. M6 crosses 10% and opens a critical alert marked "(عطل تجريبي)". The run trace shows `simulated_outage`. A simulated alert resolves as soon as the next extraction succeeds.
 
 ![Monitoring dashboard on the deployed app](screens/04-monitoring.png)
 
@@ -165,7 +165,7 @@ Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI fe
 
 ## 11. Limitations
 
-Synthetic data. Rigid box-shaped products only (no clothing). Multi-carton splits are heuristic (not the cheapest possible split). Illustrative costs. No live Salla/Zid integration. Time-bounded heuristic (not globally optimal, although all 20/20 exact-fill fixtures are found). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
+Synthetic data. Rigid box-shaped products only (no clothing). Multi-carton splits are heuristic (not the cheapest possible split). Illustrative costs. No live Salla/Zid integration (a read-only client for an external store's Orders API exists, off unless `STORE_API_URL` and `STORE_API_KEY` are set). Time-bounded heuristic (not globally optimal, although all 20/20 exact-fill fixtures are found). No crush/stacking-load or void-fill modeling. The 70% support and 1.5 cm padding are assumptions.
 
 ## 12. Next steps
 
@@ -182,5 +182,5 @@ Run the head-to-head benchmark against the commercial APIs with trial keys. Test
 - React Three Fiber: https://r3f.docs.pmnd.rs
 - Paccurate API documentation (existing cartonization product, used for positioning). No URL is recorded in the repository.
 - py3dbp (`enzoruiz/3dbinpacking`, MIT): reference for the naive first-fit baseline idea. Our code is independent TypeScript. No URL is recorded in the repository.
-- Courier volumetric-weight divisor 5000 cm³/kg: described in `docs/PLAN.md` as "commonly 5000" and configurable (`VOLUMETRIC_DIVISOR`). No courier page has been cited yet.
+- Courier volumetric-weight divisor 5000 cm³/kg: described in `docs/PLAN.md` as "commonly 5000"; set in `data/cartons.json` (`shipping.volumetricDivisor`). No courier page has been cited yet.
 - Bin-packing papers: none read or cited.

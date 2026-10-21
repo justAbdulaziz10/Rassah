@@ -31,7 +31,7 @@ Slide 5 (extraction honesty rules) is a Q&A backup, or 10 s inside M1 only if M1
 
 | Time | Click | Say |
 |---|---|---|
-| 1:00-1:15 | `/orders` -> type **1001** -> "جهّز الطلب" | Quick success: one book, dimensions on the page, smallest suitable carton (FLAT in the production smoke test). |
+| 1:00-1:15 | `/orders` -> type **1001** -> "افتح" (the order packs as soon as it opens) | Quick success: one book, dimensions on the page, smallest suitable carton (FLAT in the production smoke test). |
 | 1:15-1:50 | Back -> **1002** | Fragile + liquid + estimated: a 50 ml perfume with **no dimensions on its page**, a novel and a charger. Gemini inferred the perfume's size ("تقديري" badge, evidence quote); the engine added a 15% margin and padding, kept it upright and put it on top. Show the numbered instructions and the 3D step slider. |
 
 Skip in the pitch (keep for Q&A): the edit/correction click (step 3), order 1020 (step 4), and the `/monitoring` tour (step 5, M3 covers it from slide 8).
@@ -41,12 +41,12 @@ Skip in the pitch (keep for Q&A): the edit/correction click (step 3), order 1020
 ## M3 (2:20-3:00): monitoring, limits, ask
 
 - **2:20-2:40 (slide 8)** Seven metrics (M1-M7), each tied to a failure it reveals; red means a critical alert rule. One-line investigation: slow cached orders (358-1896 ms), traced to functions in `iad1` vs a Frankfurt database, fixed with `fra1`, now 119-234 ms.
-- **2:40-2:55 (slide 9)** Limits plainly: synthetic data, no live Salla/Zid integration, one carton per order, no savings claim yet. The ask: **one merchant, 100 real orders**, so the savings claim can be measured instead of assumed.
+- **2:40-2:55 (slide 9)** Limits plainly: synthetic data, no live Salla/Zid integration, no savings claim yet. The ask: **one merchant, 100 real orders**, so the savings claim can be measured instead of assumed.
 - **2:55-3:00 (slide 11)** Thank the judges; repo and live URL (https://rassah.vercel.app) on screen.
 
 ## Optional: the outage story (about 30 s, Q&A only)
 
-Steps are in `demo-script.md`: on `/catalog` clear p-16's cache, tick "محاكاة تعطل Gemini" on `/orders`, run **1002**, repeat until the M6 rule has at least 5 recent events with more than 10% failures, then show the critical banner on `/monitoring`; untick the toggle and rerun 1002 to recover. Say: "In a real outage the status would be `api_error` or `rate_limited` and the webhook would notify the team. Simulated alerts never notify."
+Steps are in `demo-script.md`: on `/catalog` press "حذف البيانات المحفوظة" on p-16, open **`/orders/1002?outage=1`** (needs `DEMO_MODE=true`), repeat until the M6 rule has at least 5 recent events with more than 10% failures, then show the critical banner on `/monitoring`; open `/orders/1002` without the flag to recover. Say: "In a real outage the status would be `api_error` or `rate_limited` and the webhook would notify the team. Simulated alerts never notify."
 
 ## Fallback (10 seconds)
 

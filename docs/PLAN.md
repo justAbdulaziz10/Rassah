@@ -1,6 +1,6 @@
 # Rassah: Master Plan
 
-> Owner: the whole team (3 members). Last updated: 20 Oct 2026. Demo: Thu 22 Oct 2026 (3-minute pitch + 10-minute Q&A).
+> Owner: the whole team (3 members). Written 20 Oct 2026; "As built" notes added 21 Oct 2026 where the build differs from the plan (reasons in [decisions.md](decisions.md)). Demo: Thu 22 Oct 2026 (3-minute pitch + 10-minute Q&A).
 > Every member must be able to explain **every** section of this plan, not only their own part. Judges may ask any member about any component.
 > **Progress is tracked only in [CHECKLIST.md](CHECKLIST.md).** This plan explains the what and why. The checklist tracks what is done.
 
@@ -45,7 +45,7 @@ Target segment for the MVP: stores that sell **rigid, box-shaped products**: per
 
 | # | Feature | Why it exists |
 |---|---|---|
-| F1 | **Mock store** in Supabase: ~30 synthetic products modeled on Salla product pages, ~20 orders, 5 carton types | We have no live store integration. The data shape mirrors a commerce platform so a real integration can replace it later. |
+| F1 | **Mock store** in Supabase: ~30 synthetic products modeled on Salla product pages, ~20 orders, 5 carton types | We have no live store integration. The data shape mirrors a commerce platform so a real integration can replace it later. *As built:* 30 products, 20 orders, 5 cartons, plus a built-in store at `/store` whose orders (from 5001) go into the same tables, and an optional read-only client for an external store's Orders API. |
 | F2 | **AI extraction** (Gemini): dimensions, weight, fragile, liquid, sensitive, the source of each value, confidence | The core AI step. Replaces manual data entry. |
 | F3 | **Fallback chain**: page value → inferred from other text (e.g. "100 مل") → manual measurement. Never invent a value silently. | Most product pages lack dimensions. The system has to keep working without pretending. |
 | F4 | **Catalog cache**: each product is extracted once; later orders reuse the stored facts | Cuts cost and latency. Gives us the cache-hit metric. |
@@ -59,15 +59,19 @@ Target segment for the MVP: stores that sell **rigid, box-shaped products**: per
 
 Live Salla/Zid integration, scraping live websites, multi-carton orders, clothing and deformable items, pallets, manufacturer-spec web lookup, learning from scale weights, mobile app, authentication, real courier rate APIs.
 
+*As built:* multi-carton orders were added after all: when no single carton fits, engine-0.3 proposes a validated split into up to 4 cartons (a heuristic, not a proven cheapest split). Live Salla/Zid integration is still out of scope; only a read-only Orders API client exists, off unless configured.
+
 ### 4.3 Definition of done
 
 - [ ] Any seeded order → carton + instructions + 3D view on the deployed Vercel URL.
 - [ ] Every displayed layout has passed the independent validator.
-- [ ] If no carton fits, the app says **"No valid carton found within the search budget"** and never fabricates a layout.
+- [ ] If no carton fits, the app says **"No valid carton found within the search budget"** and never fabricates a layout. *(As built: it first proposes a validated multi-carton split; only when none works does it say no carton fits.)*
 - [ ] Products with no usable data are blocked with a "measure this product" prompt, not guessed.
 - [ ] Every extraction and every order run writes an event to Supabase. The dashboard shows real events with the time window and sample size.
-- [ ] CI is green on `main`: lint, type-check, unit tests.
+- [ ] CI is green on `main`: lint, type-check, unit tests. *(As built, CI also runs data validation, the build and the packing eval.)*
 - [ ] Evaluation results (extraction + packing) are stored and appear on the Evaluation page and in the report.
+
+Status of these items is tracked in [CHECKLIST.md](CHECKLIST.md) (phase gates).
 
 ## 5. Architecture
 
@@ -76,9 +80,10 @@ Browser (Next.js pages, RTL Arabic UI)
    │  POST /api/orders/{id}/pack
    ▼
 Next.js Route Handlers on Vercel (Node.js runtime, server-only code)
+   ├── lib/pipeline  → pack orchestration (run_id, events) and corrections   [as built]
    ├── lib/ai        → Gemini API (@google/genai)       [only for uncached products]
    ├── lib/engine    → packer → validator → cost → instructions   [pure TypeScript, no I/O]
-   ├── lib/monitoring→ events, metrics, alert rules
+   ├── lib/monitoring→ metrics, alert rules, dashboard data
    └── lib/db        → Supabase Postgres (service-role key, server only)
    ▼
 Supabase: mock store tables, product_facts cache, event tables, eval tables, alerts
@@ -95,7 +100,7 @@ Detailed diagrams: [diagrams.md](diagrams.md).
 
 | Decision | Choice | Alternative considered | Why |
 |---|---|---|---|
-| Hosting | Vercel | Streamlit Cloud | Team decision. Gives preview deployments per PR, which strengthens the dev-environment story. Streamlit cannot run on Vercel. |
+| Hosting | Vercel | Streamlit Cloud | Team decision. Gives preview deployments per PR, which strengthens the dev-environment story (*as built:* previews were not used; production deploys from `main`). Streamlit cannot run on Vercel. |
 | Language | TypeScript end to end | Next.js + Python functions | One language, one repo, one deploy. **Risk:** the team is stronger in Python (mitigation in §12). |
 | LLM | Gemini Flash-tier via `@google/genai` | Claude, GPT | Team has access to Gemini. Flash tier is fast and cheap for short extraction. Model name is an env var. |
 | Database | Supabase Postgres | SQLite | Persists across serverless invocations. Vercel functions have no durable local disk. |
@@ -108,49 +113,32 @@ Each choice is detailed in `docs/stack/`.
 
 ## 7. Monitoring summary
 
-Seven metrics, each tied to a failure it reveals. Full spec in [stack/06-monitoring.md](stack/06-monitoring.md).
-
-| # | Metric | Category | Reveals |
-|---|---|---|---|
-| M1 | Packer correction rate on AI-extracted products | AI quality | Wrong extractions, weak prompt |
-| M2 | Data-source mix (page / inferred / manual / unknown) | Data quality | Product pages missing data, so accuracy will drop |
-| M3 | Validator rejections by reason | Engine correctness | Engine bugs (should be 0; any > 0 is critical) |
-| M4 | No-carton rate | Engine / catalog fit | Carton catalog doesn't fit the products, or margins too large |
-| M5 | Order latency p50/p95 (cached vs uncached) | Performance | Slow Gemini calls, cache not working |
-| M6 | Gemini failure rate (API errors, schema/parse failures) | Health | Bad key, quota/rate limits, outage, malformed output |
-| M7 | Cost per order (tokens → USD) and cache-hit rate | Cost | Cache disabled, prompt too long |
+Seven metrics, each tied to a failure it reveals: M1 packer correction rate on AI-extracted products, M2 data-source mix, M3 validator rejections, M4 no-carton rate, M5 order latency p50/p95 (cached vs uncached), M6 Gemini failure rate, M7 cost per order and cache-hit rate. Formulas, alert rules and the dashboard: [stack/06-monitoring.md](stack/06-monitoring.md).
 
 ## 8. Evaluation summary
 
-Full spec in [stack/07-evaluation.md](stack/07-evaluation.md).
-
-| Evaluation | Dataset | Headline number |
-|---|---|---|
-| Extraction, explicit dimensions | 15 products whose text states dimensions | % of dimensions within ±1 cm; weight within ±10% |
-| Extraction, inferred dimensions | 15 products with dimensions removed from the text | Mean absolute % error. **This number justifies the safety margin.** |
-| Handling classification | All 30 products, hand-labeled | Fragile **recall** (missing a glass item is the costly error), precision, liquid accuracy |
-| Honesty | Products with no usable info | % where the model returned `unknown` instead of inventing a value |
-| Packing | 60 generated fixtures: 20 known-feasible, 20 impossible, 20 random | Known-feasible recall, false claims on impossible cases (must be 0), validator rejections of the naive baseline, p95 runtime |
+Extraction is scored against hand-labeled ground truth for 30 products (15 with stated dimensions, 12 inferable, 3 with no usable info): dimension and weight accuracy, inferred-dimension error (**this number justifies the safety margin**), fragile recall and precision, liquid accuracy and honesty. Packing is scored on 60 generated fixtures (20 known-feasible, 20 impossible, 20 random) against a naive baseline. Spec: [stack/07-evaluation.md](stack/07-evaluation.md); numbers: [report/results.md](report/results.md).
 
 > **Honesty note for the report:** the product dataset is **synthetic**, written by us in the style of Saudi store pages. Ground truth is defined by us. We say this in the report and in Q&A.
 
-## 9. Repository layout (target)
+## 9. Repository layout
 
 ```
 /
 ├── app/                      Next.js App Router pages + API route handlers
-├── components/               UI components (3D view, metric cards, charts)
+├── components/               UI components (result page, 3D view, dashboard)
 ├── lib/
-│   ├── ai/                   Gemini client, prompt, response schema, extractor
-│   ├── engine/               types, geometry, packer, baseline, validator, cost, instructions
-│   ├── db/                   Supabase server client + typed queries
-│   └── monitoring/           event writers, metric queries, alert rules
-├── data/                     synthetic products, orders, cartons, ground truth (JSON)
-├── scripts/                  seed.ts, eval-extraction.ts, eval-packing.ts
+│   ├── ai/                   Gemini call, prompt, response schema, extractor, catalog cache
+│   ├── engine/               types, geometry, packer, split, baseline, validator, cost, instructions
+│   ├── db/                   Repo interface, Supabase adapter, memory backend
+│   ├── monitoring/           metrics, alert rules, dashboard and evaluation data
+│   └── pipeline/, orders/, …  pack orchestration, order queue (as built; full list in stack/01)
+├── data/                     synthetic products, orders, cartons, ground truth, fixtures (JSON)
+├── scripts/                  seed, eval-extraction, eval-packing, bench, demo-morning, …
 ├── supabase/migrations/      SQL schema
 ├── tests/                    Vitest unit tests
-├── docs/                     this plan, diagrams, stack docs, report drafts
-└── .github/workflows/ci.yml  lint + typecheck + test on every PR
+├── docs/                     this plan, diagrams, stack docs, report
+└── .github/workflows/ci.yml  lint, typecheck, data validation, tests, build, packing eval
 ```
 
 ## 10. Team ownership (3 members)
@@ -174,7 +162,7 @@ Shared: report, pitch deck, rehearsal.
 | T1. Confirm AI requirement with the instructor | M3 | Written answer received |
 | T2. Create Gemini API key (Google AI Studio). Create Supabase project. Create Vercel project linked to the repo. | M3 | Keys stored in Vercel env + local `.env.local` |
 | T3. Scaffold Next.js + TS + Tailwind + ESLint + Vitest. Push to `main`. Vercel production deploy works. | M3 | Hello page live on Vercel |
-| T4. CI workflow (lint, typecheck, test) | M3 | Green check on a PR |
+| T4. CI workflow (lint, typecheck, test) | M3 | Green check on a PR *(as built: green on pushes to `main`; no PRs were used)* |
 
 ### Phase 1: Core build (Tue night → Wed midday)
 
@@ -188,7 +176,7 @@ Shared: report, pitch deck, rehearsal.
 | T10. `POST /api/orders/[id]/pack`: cache lookup → extract misses → pack → validate → events | M3 + M1 | T5, T8, T9 | Returns a full result JSON for every seeded order |
 | T11. Event writers + `run_id` tracing | M3 | T5 | Rows appear in `extraction_events` / `order_runs` |
 
-**Checkpoint (Wed ~13:00):** an order number returns a valid carton via the API on the Vercel preview. If not, apply the cut list (§13) immediately.
+**Checkpoint (Wed ~13:00):** an order number returns a valid carton via the API on the Vercel preview. If not, apply the cut list (§13) immediately. *(As built: checked on production; no preview deployments were used.)*
 
 ### Phase 2: Product surface (Wed afternoon)
 
@@ -197,8 +185,8 @@ Shared: report, pitch deck, rehearsal.
 | T12. Order page + result page (carton, instructions, source badges, Confirm/Edit) | M2 | Usable end to end |
 | T13. 3D view | M2 | Boxes render with fragile/liquid colors |
 | T14. Edit/measure form → `corrections` + `product_facts` update + re-pack | M2 + M1 | Correction rate moves on the dashboard |
-| T15. Monitoring dashboard (7 metrics, window selector, sample size, alert banner) | M3 | Shows live data |
-| T16. Alert rules + demo fault injection | M3 | Simulated outage raises the M6 alert |
+| T15. Monitoring dashboard (7 metrics, window selector, sample size, alert banner) | M3 | Shows live data *(as built: alerts appear in the status list at the top of `/monitoring` and on `/notifications`)* |
+| T16. Alert rules + demo fault injection | M3 | Simulated outage raises the M6 alert *(as built: `/orders/<id>?outage=1` with `DEMO_MODE=true`)* |
 
 ### Phase 3: Evaluation & hardening (Wed evening)
 
@@ -219,7 +207,7 @@ Shared: report, pitch deck, rehearsal.
 | T24. Diagrams exported as images for report/deck | M3 | PNGs in `docs/report/` |
 | T25. Pitch deck (3 min) | All (M2 leads) | Rehearsed twice, under 3:00 |
 | T26. Q&A drill: each member answers the question bank in §15 about **another member's** lane | All | Everyone passes |
-| T27. Offline backup: local `npm run dev` against the same Supabase + recorded demo video | M3 | Backup tested |
+| T27. Offline backup: local `npm run dev` against the same Supabase + recorded demo video | M3 | Backup tested *(as built: the offline backup is `DATA_BACKEND=memory`, which needs no network; see [demo-script.md](demo-script.md))* |
 
 ## 12. Risks and mitigations
 
@@ -230,7 +218,7 @@ Shared: report, pitch deck, rehearsal.
 | No Gemini key yet / free-tier rate limits | Extraction blocked or 429s during demo | Create key in T2. Concurrency limit 2, retry with backoff on 429. Pre-warm the catalog (T21) so demo orders don't call Gemini. |
 | Gemini invents dimensions | Wrong cartons | Prompt says "return null, never guess". Every value has a `source`. Inferred values get a margin. Eval measures honesty. |
 | Vercel function timeout on uncached orders | Failed request | Cache. Parallel extraction with a limit. Cap order size (≤ 12 units). Short Gemini output. |
-| Supabase unreachable | Dashboard empty | Pack still returns a result. The UI shows "monitoring degraded". Never claims events were saved. |
+| Supabase unreachable | Dashboard empty | Pack still returns a result. The UI says the run was not saved to the performance page. Never claims events were saved. |
 | Synthetic data criticized | Credibility | State it openly. Show the eval methodology. Ask for a pilot with a real merchant as next step. |
 | Scope overrun | Nothing works on Thursday | Cut list below. Checkpoint at Wed 13:00. |
 
@@ -245,28 +233,22 @@ Never cut: **validator, event logging, tests, honesty about data**.
 5. Packing strategies → one ordering instead of four
 6. Evaluation page → results only in the report
 
+*As built:* no cut was needed. A 2D top view exists only as the fallback when WebGL is unavailable.
+
 ## 14. Deliverables checklist (from the brief)
 
 | # | Deliverable | Where |
 |---|---|---|
 | 1 | Functional AI product MVP | Vercel production URL |
-| 2 | Development environment | Repo + README run steps + CI + Vercel previews + tests ([stack/08](stack/08-testing-quality.md), [stack/09](stack/09-vercel-ci.md)) |
+| 2 | Development environment | Repo + README run steps + CI + tests ([stack/08](stack/08-testing-quality.md), [stack/09](stack/09-vercel-ci.md)). Vercel previews were planned but not used. |
 | 3 | Monitoring dashboard connected to the product | `/monitoring` page backed by Supabase events |
 | 4 | GitHub repository | this repo |
 | 5 | Concise report: problem, solution, data collection, benchmarks, technical design, selected metrics, evaluation results, tools, diagrams, references | `docs/report/REPORT.md` → PDF |
-| 6 | Pitch deck | `docs/report/` (export) |
+| 6 | Pitch deck | `docs/report/deck.pptx` and `deck.pdf` |
 | — | Two technical diagrams | [diagrams.md](diagrams.md) |
-| — | AI tools & decisions log | `docs/report/TOOLS.md` (see below) |
+| — | AI tools & decisions log | [report/TOOLS.md](report/TOOLS.md) and [decisions.md](decisions.md) |
 
-### AI tools log (fill in as you go)
-
-The brief requires us to state which tools we used, what they did, why we chose them, which parts were generated vs written by hand, and how we verified them. Keep a running table in `docs/report/TOOLS.md`:
-
-| Tool | Used for | Generated / assisted / manual | How we verified |
-|---|---|---|---|
-| Claude (Claude Code) | Planning, research critique, code scaffolding | Assisted | Code review by a teammate, unit tests, eval runs |
-| Gemini API | Runtime product extraction | Product feature | Extraction eval against hand-labeled ground truth |
-| … | … | … | … |
+The brief requires us to state which tools we used, what they did, why we chose them, which parts were generated vs written by hand, and how we verified them. That log is [report/TOOLS.md](report/TOOLS.md).
 
 ## 15. Q&A preparation (question bank)
 
@@ -283,15 +265,8 @@ Every member must answer every question:
 9. What did AI tools generate, and how did you verify it?
 10. What happens if Gemini is down during packing? (Cached products still work. Uncached ones fail visibly and trigger the alert.)
 11. Why Supabase / Vercel / TypeScript?
-12. What is the next step after the camp? (Pilot with one merchant, real Salla integration, multi-carton.)
+12. What is the next step after the camp? (Pilot with one merchant, real Salla integration. Multi-carton splits exist now, but not the cheapest possible split.)
 
 ## 16. Pitch outline (3:00)
 
-| Time | Content |
-|---|---|
-| 0:00–0:30 | Problem: oversized cartons raise shipping cost (volumetric weight), and fragile items break. Merchants don't have dimension data. |
-| 0:30–1:00 | Before/After: packer guesses → packer types order number, gets carton + instructions |
-| 1:00–1:50 | **Live demo**: order with a perfume (inferred dims, fragile, liquid) + a book. Show source badges, instructions, 3D. |
-| 1:50–2:20 | Evaluation numbers (extraction accuracy, fragile recall, packing validity) |
-| 2:20–2:45 | Monitoring: dashboard + one investigation story (e.g. prompt fix that lowered correction rate) |
-| 2:45–3:00 | Limits stated honestly + next step: pilot with a real merchant |
+The pitch as delivered, with timings, is in [team/pitch-script.md](team/pitch-script.md). The live demo steps are in [demo-script.md](demo-script.md).

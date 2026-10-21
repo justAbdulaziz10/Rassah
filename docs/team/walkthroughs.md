@@ -13,12 +13,12 @@
 2. It takes the units, the carton and the placements, and returns a list of violations (or none).
 3. It deliberately imports only types (`validator.ts:7`); the header (`validator.ts:3-5`) says it must not import `packer.ts` or `geometry.ts`, so a bug in shared helpers cannot hide in both.
 4. It re-implements each rule in plain math: bounds, overlap, weight, gravity support, fragile, liquid, completeness.
-5. The packer calls it after every candidate layout (`packer.ts:447`), and rejections are counted (metric M3, must be 0).
+5. The packer calls it after every candidate layout (`packer.ts:450`), and rejections are counted (metric M3, must be 0).
 
 **3 key points to say**
 - *Independence:* "validator.ts imports nothing from the packer or geometry code" (`validator.ts:3-7`).
 - *Rules:* completeness (`:39-53`), rotation-only size (`:61`), liquid stays upright (`:70`), inside inner dims (`:79-84`), no overlap on all three axes (`:88-99`), weight including carton tare (`:101-109`), at least `minSupport` of the base supported and nothing on a fragile item (`:112-133`).
-- *Where it is used:* `packer.ts:447` runs it on every layout; on failure the layout is dropped and `validatorRejections` goes up, which feeds M3 and the critical alert in `alerts.ts:57-70`.
+- *Where it is used:* `packer.ts:450` runs it on every layout; on failure the layout is dropped and `validatorRejections` goes up, which feeds M3 and the critical alert in `alerts.ts:58-71`.
 
 **Likely judge questions**
 - *Why a second checker?* The LLM understands, the engine computes, the validator proves. Independent code means a geometry bug in the packer cannot also be in the checker.
@@ -59,12 +59,12 @@
 2. `packUnits` tries cartons from cheapest to most expensive, using extreme-point placement under several item orderings.
 3. If the quick passes fail on a carton, a backtracking anchor search (engine-0.2) tries harder within a node limit.
 4. Every candidate layout is checked by the independent validator before it can be chosen.
-5. Among valid layouts it returns the cheapest estimated total (carton plus shipping), or `no_box` with an honest reason.
+5. Among valid layouts it returns the cheapest estimated total (carton plus shipping), or `no_box` with an honest reason. When no single carton fits, `lib/engine/split.ts` (engine-0.3) proposes a split into several cartons, each validated the same way.
 
 **3 key points to say**
-- *Honest inputs (`prepare.ts:27-40`):* a missing or `unknown` size or weight returns `needs_measurement`; the engine never runs on guesses. Inferred dims get `(1 + marginInferred)` and fragile or sensitive items get padding on every side (`prepare.ts:45-50`). `marginInferred` is 0.15 and `paddingCm` is 1.5 (`config.ts`).
-- *Search (`packer.ts:49-59`, `:416-`):* cartons sorted by cost (`:429`), phase 1 fixed strategies and seeded restarts (`:467`), phase 2 backtracking anchor search only for cartons that could beat the current best (`:511`), all inside a 1500 ms budget (`config.ts`: `maxSearchMs`).
-- *Validator gate and honest failure:* each layout goes through `validateLayout` (`:447`); with no valid layout it returns "No valid carton found within the search budget" (`:547`). Final choice is the cheapest total, ties to the smaller carton (`:552-`).
+- *Honest inputs (`prepare.ts:31-44`):* a missing or `unknown` size or weight returns `needs_measurement`; the engine never runs on guesses. Inferred dims get `(1 + marginInferred)` and fragile or sensitive items get padding on every side (`prepare.ts:51-56`). `marginInferred` is 0.15 and `paddingCm` is 1.5 (`config.ts`).
+- *Search (`packer.ts:49-59`, `:419-`):* cartons sorted by cost (`:432`), phase 1 fixed strategies and seeded restarts (`:470`), phase 2 backtracking anchor search only for cartons that could beat the current best (`:514`), all inside a 1500 ms budget (`config.ts`: `maxSearchMs`).
+- *Validator gate and honest failure:* each layout goes through `validateLayout` (`:450`); with no valid layout it returns "No valid carton found within the search budget" (`:550`). Final choice is the cheapest total, ties to the smaller carton (`:555-`).
 
 **Likely judge questions**
 - *Is it optimal?* No. It is time-bounded search. On 20 exact-fill stress fixtures it finds 20 / 20 (engine-0.1 found 15 / 20); real orders have slack.
@@ -81,18 +81,18 @@
 1. `computeMetrics` is a pure function over event arrays and returns seven metrics, M1 to M7; each carries its sample size `n` and a minimum `minN` (`metrics.ts:16-25`).
 2. Evaluation traffic (`trigger = "eval"`) is always excluded (`metrics.ts:55-56`).
 3. `evaluateRules` in `alerts.ts` checks six rules (M3, M6, M1, M5, M4, M2) on rolling windows of recent events, with minimum samples.
-4. `syncAlerts` opens one alert per breached rule and resolves it when it recovers; it can POST to a webhook for non-simulated alerts (`alerts.ts:177-211`).
-5. Each metric is tied to a failure it reveals; the dashboard shows "insufficient data" under the minimum.
+4. `syncAlerts` opens one alert per breached rule and resolves it when it recovers; it can POST to a webhook for non-simulated alerts (`alerts.ts:193-243`).
+5. Each metric is tied to a failure it reveals; under the minimum the dashboard marks the metric "بيانات قليلة" instead of judging it.
 
 **3 key points to say**
-- *M1 correction rate* (`metrics.ts:58-70`): corrected AI products over reviewed AI products. This is the main AI-quality signal. Alert at above 20% over the last 30 products, warning (`alerts.ts:32-33`, `:91-111`).
-- *M3 and M6 are critical* (`alerts.ts:57-89`): any validator rejection in 24 h (threshold 0); Gemini failure rate above 10% over the last 20 calls, minimum 5 (`alerts.ts:29-31`).
-- *Simulated outage* (`alerts.ts:76-78`): marked `simulated`, resolves on the first successful call, and never sends the webhook (`alerts.ts:195`).
+- *M1 correction rate* (`metrics.ts:58-70`): corrected AI products over reviewed AI products. This is the main AI-quality signal. Alert at above 20% over the last 30 products, warning (`alerts.ts:33-35`, `:92-112`).
+- *M3 and M6 are critical* (`alerts.ts:58-90`): any validator rejection in 24 h (threshold 0); Gemini failure rate above 10% over the last 20 calls, minimum 5 (`alerts.ts:30-32`).
+- *Simulated outage* (`alerts.ts:77-79`): marked `simulated`, resolves on the first successful call, and never sends the webhook (`alerts.ts:225`).
 
 **Likely judge questions**
-- *Why a minimum sample?* One failed call out of two would be a 50% "failure rate"; minimums (for example `m6MinSample: 5`) avoid false alarms and the UI says "insufficient data".
+- *Why a minimum sample?* One failed call out of two would be a 50% "failure rate"; minimums (for example `m6MinSample: 5`) avoid false alarms, and the dashboard marks the metric "بيانات قليلة".
 - *Walk through an investigation.* The slow cached orders: M5 showed 358-1896 ms; the response header showed functions in `iad1` while the database is in Frankfurt; moving functions to `fra1` gave 119-234 ms (`results.md`, investigation story).
-- *Are thresholds tuned on real traffic?* No. They are starting values chosen by the team (`THRESHOLDS`, `alerts.ts:28-44`) and the data is synthetic.
+- *Are thresholds tuned on real traffic?* No. They are starting values chosen by the team (`THRESHOLDS`, `alerts.ts:29-45`) and the data is synthetic.
 
 ---
 
@@ -101,21 +101,21 @@
 **Presents: M2. Author: M3.**
 
 **Summary**
-1. The route validates the order number (digits only) and the body, rate-limits, and builds a `runId` (`route.ts:14-30`).
-2. It calls `runPack`, which loads the order, products, cartons and rates, then `getOrExtractFacts` (cache first, Gemini for misses), then `packOrder` (`pack.ts:128-165`).
+1. The route validates the order number (digits only) and the body, rate-limits, and builds a `runId` (`route.ts:15-31`).
+2. It calls `runPack`, which loads the order, products, cartons and rates, then `getOrExtractFacts` (cache first, Gemini for misses), then `packOrder` (`pack.ts:159-254`).
 3. `runPack` fills one `OrderRun` record as it goes: cache hits and misses, source mix, timings, tokens, cost, attempts, validator rejections, status.
-4. At the end it writes the run and the extraction events (`pack.ts:241-246`), then refreshes alerts (`pack.ts:249-253`).
+4. At the end it writes the run and the extraction events (`pack.ts:317-322`), then refreshes alerts (`pack.ts:325-329`).
 5. Monitoring writes never break the product: on failure the packer still gets the result, with `monitoring.saved = false`.
 
 **3 key points to say**
-- *Events with `run_id`:* one `runId` (`route.ts:30`) links the order run and its extraction events; `insertOrderRun` then `insertExtractionEvents` (`pack.ts:242-243`).
-- *Failure isolation:* the write is in try / catch (`pack.ts:241-246`) and alert evaluation is best effort (`pack.ts:249-253`); the result is returned either way. `refreshAlerts` re-evaluates the last 7 days (`pack.ts:259-267`).
-- *Demo fault injection:* `simulateOutage` is honored only when `DEMO_MODE` is true (`route.ts:28-29`); status codes are 404 not found, 500 error, else 200 (`route.ts:44`).
+- *Events with `run_id`:* one `runId` (`route.ts:31`) links the order run and its extraction events; `insertOrderRun` then `insertExtractionEvents` (`pack.ts:318-319`).
+- *Failure isolation:* the write is in try / catch (`pack.ts:317-322`) and alert evaluation is best effort (`pack.ts:325-329`); the result is returned either way. `refreshAlerts` re-evaluates the last 7 days (`pack.ts:335-343`).
+- *Demo fault injection:* `simulateOutage` is honored only when `DEMO_MODE` is true (`route.ts:29-30`); status codes are 404 not found, 500 error, else 200 (`route.ts:48`).
 
 **Likely judge questions**
-- *What happens if the database is down?* The order lookup fails inside the try block and the response status is `error` (`pack.ts:228-233`). If only the event writes fail, the pack result is still returned and `monitoring.saved` is false.
-- *What stops abuse of the route?* A rate limiter (`route.ts:16`), digits-only ids and a strict body schema. There is no authentication; that is out of scope (`PLAN.md` section 4.2).
-- *How long can it take?* `maxDuration = 60` (`route.ts:10`). Measured on production: cached 119-234 ms, uncached 1589 ms (`demo-script.md`).
+- *What happens if the database is down?* The order lookup fails inside the try block and the response status is `error` (`pack.ts:304-309`). If only the event writes fail, the pack result is still returned and `monitoring.saved` is false.
+- *What stops abuse of the route?* A rate limiter (`route.ts:17`), digits-only ids and a strict body schema. There is no authentication; that is out of scope (`PLAN.md` section 4.2).
+- *How long can it take?* `maxDuration = 60` (`route.ts:11`). Measured on production: cached 119-234 ms, uncached 1589 ms (`demo-script.md`).
 
 ---
 

@@ -1,6 +1,6 @@
 # Q&A flashcards
 
-> Short versions of `docs/qa.md` (≤ 3 lines each), grouped by lane. Numbers come from `docs/report/results.md`. `docs/qa.md` was brought in line with these numbers in the P11.42 sweep (40/40 layouts, recall 20/20, baseline failing 20/28, 152 tests). Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring.
+> Short versions of `docs/qa.md` (≤ 3 lines each), grouped by lane. Numbers come from `docs/report/results.md`. `docs/qa.md` was brought in line with these numbers in the P11.42 sweep (40/40 layouts, recall 20/20, baseline failing 20/28). Lanes: M1 = AI and data, M2 = engine, M3 = platform and monitoring.
 
 ## Drill (P12.3)
 
@@ -45,7 +45,7 @@ An LLM can't guarantee collision-free, supported coordinates, and answers vary r
 An independent validator (imports nothing from the packer) checks bounds, overlap, weight with tare, 70% base support, nothing on fragile, liquids upright, every unit once. 40 / 40 engine layouts pass in the eval.
 
 **Q8. What does the engine NOT guarantee?**
-Not the global optimum (time-bounded search, 1500 ms). No crush strength, stacking load or void-fill modeling, no deformable items, one carton per order. "No carton" means not found within the search budget. Exact-fill stress cases: 20 / 20 found, but they are a stress test.
+Not the global optimum (time-bounded search, 1500 ms). No crush strength, stacking load or void-fill modeling, no deformable items. "No carton" means no single carton was found within the search budget; the engine then suggests a split into up to 4 cartons, each searched and validated like a normal answer (engine-0.3). Exact-fill stress cases: 20 / 20 found, but they are a stress test.
 
 **Q16. You built the test and passed it?**
 Fixtures come from a seeded script with witness layouts, the ground truth is to be reviewed by another member (`docs/team/ground-truth-review.md`, not yet done), the holdout wasn't used for tuning, and we report failures (engine-0.1 missed 5 of 20 exact-fill cases before the fix).
@@ -61,13 +61,13 @@ No claim. On the 8 fixtures where engine and baseline are both valid, the mean s
 M1 correction rate = wrong AI reads; M2 source mix = missing data; M3 validator rejections = engine bug (must be 0); M4 no-carton rate = catalog or margin; M5 latency = slow Gemini vs DB; M6 Gemini failures; M7 cost and cache hits. Story: cached orders took 358-1896 ms because functions ran in `iad1` while Supabase is in Frankfurt; `fra1` gave 119-234 ms.
 
 **Q10. What if Gemini is down during packing?**
-Cached products keep working. Uncached ones fail visibly ("needs measurement", "extraction failed"), the event is logged with its status, and M6 above 10% raises a critical alert (webhook for real outages; simulated ones never notify).
+Cached products keep working. Uncached ones fail visibly ("يحتاج قياس", "تعذّرت قراءة صفحة المنتج"), the event is logged with its status, and M6 above 10% raises a critical alert (webhook for real outages; simulated ones never notify).
 
 **Q11. Why Supabase, Vercel, TypeScript?**
 Vercel gives previews per PR; TypeScript is one language for UI, API and engine; Supabase because serverless has no persistent disk and we need durable events. The team is stronger in Python; we mitigated with cross-reviews and walkthroughs.
 
 **Q12. What's next after the camp?**
-Pilot with one merchant (real catalog, 100 orders, packer vs Rassah), Salla/Zid integration, multi-carton orders, manufacturer-spec lookup, scale-weight feedback.
+Pilot with one merchant (real catalog, 100 orders, packer vs Rassah), live Salla/Zid integration (today only an optional read-only Orders API hook, `lib/integrations/store.ts`), manufacturer-spec lookup, scale-weight feedback.
 
 **Q9. What did AI tools generate and how did you verify it? (all lanes)**
 Claude generated most code drafts and the synthetic data (`docs/report/TOOLS.md`). We verified with tests, CI, the evals, an end-to-end API run and screenshots. Gemini is the runtime feature, verified by the extraction eval.

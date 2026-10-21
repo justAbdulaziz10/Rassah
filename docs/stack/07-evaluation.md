@@ -39,17 +39,17 @@ For group B, ground truth is the "real" box size we define for the product. It i
 
 ### `orders.json` (20)
 
-2–6 products per order, quantities 1–3. Must include: a fragile + heavy mix, two liquids, an order with an inferred-dimension product, an order with a group-C product (→ `needs_measurement`), and an order too large for every carton (→ `no_box`).
+1–4 product lines per order, quantities 1–3. Each order has an `expect` note saying what it tests. They include: a fragile + heavy mix, two liquids, an order with an inferred-dimension product, an order with a group-C product (→ `needs_measurement`), and an order heavier than every carton's limit (→ `no_box`, overweight). Order 1020 needs more than one carton (engine-0.3 splits it; see [results.md](../report/results.md)).
 
 ## 2. Extraction evaluation: `scripts/eval-extraction.ts` (M1)
 
-Runs the **real** extractor on all 30 products (bypassing the cache, `trigger='eval'`), compares with ground truth, and writes `eval_runs` (kind `extraction`) + `eval_results` + `eval/results/extraction-<date>.json`.
+`npm run eval:extraction`. Runs the **real** extractor on all 30 products (bypassing the cache, `trigger='eval'`), compares with ground truth, and writes `eval/results/extraction-<date>-<prompt>.json`, plus `eval_runs` (kind `extraction`) + `eval_results` in Supabase. Scoring is in `lib/eval/` and unit-tested (`tests/eval/extraction-score.test.ts`). Results are reported for all products, the 20 tuning products and the 10 holdout products separately.
 
 | Metric | Definition | Group | Why it matters |
 |---|---|---|---|
 | Dim accuracy ±1 cm | % of the 45 dimension values (15 × 3) within 1 cm (after sorting L ≥ W ≥ H) | A | Reading correctness |
 | Weight accuracy ±10% | % of weights within 10% | A | Reading + unit conversion |
-| **Inferred dim MAPE** | mean absolute % error of each dimension | B | **Sets `MARGIN_INFERRED`**: margin ≈ observed error (rounded up) |
+| **Inferred dim MAPE** | mean absolute % error of each dimension | B | **Sets `marginInferred`**: margin ≈ observed error (rounded up) |
 | Source correctness | % where returned source = expected source | A+B+C | Model knows when it is guessing |
 | **Honesty rate** | % of group C returned as `unknown` (no invented numbers) | C | Hallucination guard |
 | **Fragile recall** | fragile items detected ÷ all fragile items | all | Missing glass = broken order (the costly error) |
@@ -60,13 +60,13 @@ Runs the **real** extractor on all 30 products (bypassing the cache, `trigger='e
 
 **Before/after protocol** (for prompt changes): run the eval, change the prompt, bump `PROMPT_VERSION`, run again, and report both rows. Never tune on a product, then report on that same product only. Keep 10 products as a **holdout**, look at their results only at the end, and report holdout numbers separately.
 
-Free-tier note: run sequentially with a small delay to respect rate limits. 30 calls takes a few minutes.
+Free-tier note: the script runs sequentially with a small delay between products to respect rate limits.
 
 ## 3. Packing evaluation: `scripts/eval-packing.ts` (M2)
 
-No network. Deterministic.
+`npm run eval:packing`. No network. Deterministic. It measures the single-carton search (`packUnits`), not the multi-carton split. CI runs it on every push. Read-only by default; `-- --write` writes `eval/results/packing-<date>-<engine>.json`. When Supabase env vars are set it also stores `eval_runs` (kind `packing`) + `eval_results`.
 
-**60 generated fixtures** (`data/packing_fixtures.json`, created by a seeded generator script so they are reproducible):
+**60 generated fixtures** (`data/packing_fixtures.json`, created by `npm run gen-fixtures` from a fixed seed so they are reproducible):
 
 | Group | Count | Construction | Known answer |
 |---|---|---|---|
@@ -81,18 +81,16 @@ No network. Deterministic.
 | Impossible-case false claims | impossible fixtures where the engine claims a layout | **0** |
 | Baseline invalidity | naive baseline layouts failing the validator, broken down by code (`floating`, `on_fragile`, `liquid_tipped`) | Report actual. Shows why the rules exist. |
 | Carton/cost vs baseline | on fixtures where **both** produce a *valid* layout: mean difference in estimated total cost | Report actual. Don't claim savings that weren't measured. |
-| Runtime p50 / p95 | engine time per fixture | p95 within `MAX_SEARCH_MS` |
+| Runtime p50 / p95 | engine time per fixture | p95 within `maxSearchMs` |
 
-Fair comparison rules: same fixtures, same carton catalog, same cost model, same time budget, same validator for both.
+Fair comparison rules: same fixtures, same carton catalog, same cost model, same time budget, same validator for both. The broader head-to-head benchmark against other packers (`npm run bench`) has its own protocol in [docs/benchmark.md](../benchmark.md).
 
 ## 4. Where results go
 
 1. `eval_runs` + `eval_results` in Supabase → **`/evaluation` page** (latest run per kind, plus the previous run for comparison).
-2. `eval/results/*.json` committed to git (small files), so results are reproducible and reviewable.
+2. `eval/results/*.json` (and the benchmark's `.md`) committed to git, so results are reproducible and reviewable.
 3. `docs/report/results.md` → tables pasted into the final report.
 
 ## 5. External references
 
-- Volumetric weight concept and divisor: cite the courier documentation actually used for the default (the divisor is configurable).
-- Cartonization as an existing product category: Paccurate API docs. The naive baseline mirrors common first-fit 3D bin-packing heuristics (e.g. the open-source `py3dbp` library). We implement our own in TypeScript and do not copy code.
-- Extreme-point placement heuristic: cite the 3D bin-packing literature you consult (add the exact reference you read. Don't cite papers you haven't opened).
+The references actually used, and what is still uncited, are listed in [REPORT.md §13](../report/REPORT.md#13-references). No courier page has been cited yet for the volumetric divisor 5000 (`data/cartons.json`).
