@@ -380,7 +380,7 @@ async function main() {
   out();
   for (const [k, xs] of vendorWall) out(`- ${k} round-trip wall time incl. network: p50 ${r2(percentile(xs, 50))} ms, p95 ${r2(percentile(xs, 95))} ms over ${xs.length} calls (cached calls report their first measurement).`);
 
-  const report = lines.join("\n") + "\n";
+  const report = lines.join("\n").trimEnd() + "\n";
   console.log("\n" + report);
   if (WRITE) {
     const date = new Date().toISOString().slice(0, 10);
