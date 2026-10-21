@@ -43,7 +43,6 @@ async function Catalog() {
     return {
       productId: p.id,
       name: p.name,
-      category: p.category,
       facts: f
         ? {
             lengthCm: f.lengthCm,
@@ -51,7 +50,6 @@ async function Catalog() {
             heightCm: f.heightCm,
             weightG: f.weightG,
             dimsSource: f.dimsSource,
-            weightSource: f.weightSource,
             fragile: f.fragile,
             liquid: f.liquid,
             sensitive: f.sensitive,

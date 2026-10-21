@@ -11,14 +11,12 @@ import { EmptyState, Notice } from "./PageHeader";
 export interface CatalogRow {
   productId: string;
   name: string;
-  category: string | null;
   facts: {
     lengthCm: number | null;
     widthCm: number | null;
     heightCm: number | null;
     weightG: number | null;
     dimsSource: DataSource;
-    weightSource: DataSource;
     fragile: boolean;
     liquid: boolean;
     sensitive: boolean;
