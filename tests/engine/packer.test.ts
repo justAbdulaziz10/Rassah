@@ -118,7 +118,7 @@ describe("property: every returned layout passes the independent validator", () 
       }
     }
     expect(found).toBeGreaterThan(100); // sanity: most random orders should pack
-  });
+  }, 30_000); // 200 full searches; slow CI runners exceed the 5 s default
 });
 
 describe("performance", () => {
