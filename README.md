@@ -124,7 +124,13 @@ See [docs/diagrams.md](docs/diagrams.md) for the development flow, monitoring fl
 
 ## Team
 
-Three members, each owning a lane and reviewing another (details in [docs/PLAN.md](docs/PLAN.md) §10):
+Built by:
+
+- Abdulaziz Alkhlaiwe ([@justAbdulaziz10](https://github.com/justAbdulaziz10))
+- Hana ([@enghanamansour](https://github.com/enghanamansour))
+- Bayan ([@Bayan369](https://github.com/Bayan369))
+
+Three lanes, each owned by one member who also reviews another lane (details in [docs/PLAN.md](docs/PLAN.md) §10):
 
 | Member | Lane |
 |---|---|

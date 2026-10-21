@@ -29,5 +29,5 @@ We are submitting our Project 1 work for *AI Product Development and Monitoring*
 Please tell us if anything fails to open, or if you need another format.
 
 Thank you,
-[names of M1, M2, M3]
+Abdulaziz Alkhlaiwe, Hana, Bayan
 Tuwaiq Academy
