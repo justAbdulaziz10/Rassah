@@ -39,6 +39,8 @@ export interface Metrics {
   m5Latency: {
     cached: Metric<{ p50: number | null; p95: number | null }>;
     uncached: Metric<{ p50: number | null; p95: number | null }>;
+    /** Median over every timed run, known and new products together. */
+    overallP50: number | null;
   };
   m6GeminiFailureRate: Metric & { byStatus: Record<string, number> };
   m7Cost: Metric & { totalUsd: number; cacheHitRate: number | null; hits: number; misses: number };
@@ -88,6 +90,7 @@ export function computeMetrics(input: MetricInput): Metrics {
   const m5 = {
     cached: metric({ p50: percentile(cachedMs, 50), p95: percentile(cachedMs, 95) }, cachedMs.length, 10),
     uncached: metric({ p50: percentile(uncachedMs, 50), p95: percentile(uncachedMs, 95) }, uncachedMs.length, 10),
+    overallP50: percentile(timed.map((r) => r.totalMs), 50),
   };
 
   // M6: Gemini failure rate with a breakdown by status.
@@ -126,9 +129,10 @@ export interface LatencyPoint {
   orderId: string;
 }
 
+/** One point per timed run; error runs are left out, as in M5, so the chart and the M5 counts agree. */
 export function latencySeries(runs: OrderRun[]): LatencyPoint[] {
   return runs
-    .filter((r) => r.trigger !== "eval" && r.createdAt)
+    .filter((r) => r.trigger !== "eval" && r.status !== "error" && r.createdAt)
     .map((r) => ({ at: r.createdAt!, totalMs: r.totalMs, cached: r.cacheMisses === 0, orderId: r.orderId }))
     .sort((a, b) => a.at.localeCompare(b.at));
 }

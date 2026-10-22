@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { percentile } from "@/lib/math";
-import { computeMetrics, windowSince } from "@/lib/monitoring/metrics";
+import { computeMetrics, latencySeries, windowSince } from "@/lib/monitoring/metrics";
 import { correction, extraction, NOW, run } from "./fixtures";
 
 describe("percentile (nearest rank)", () => {
@@ -16,6 +16,16 @@ describe("windowSince", () => {
   it("returns an ISO cutoff or null for 'all'", () => {
     expect(windowSince("1h", NOW)).toBe("2026-10-21T11:00:00.000Z");
     expect(windowSince("all", NOW)).toBeNull();
+  });
+});
+
+describe("latencySeries", () => {
+  it("leaves out error and eval runs, so the chart counts what M5 counts", () => {
+    const runs = [run({ totalMs: 300 }), run({ cacheMisses: 1, totalMs: 3000 }), run({ status: "error", totalMs: 5, orderId: "99999" }), run({ trigger: "eval" })];
+    const points = latencySeries(runs);
+    expect(points.map((p) => p.totalMs)).toEqual([300, 3000]);
+    const m5 = computeMetrics({ runs, extractions: [], corrections: [] }).m5Latency;
+    expect(points).toHaveLength(m5.cached.n + m5.uncached.n);
   });
 });
 
@@ -83,6 +93,20 @@ describe("computeMetrics", () => {
     });
     expect(m.m5Latency.cached.value).toEqual({ p50: 200, p95: 400 });
     expect(m.m5Latency.uncached.value).toEqual({ p50: 3000, p95: 3000 });
+  });
+
+  it("M5: the overall median spans known and new products, without error runs", () => {
+    const runs = [
+      run({ totalMs: 200 }),
+      run({ cacheMisses: 1, totalMs: 3000 }),
+      run({ cacheMisses: 1, totalMs: 4000 }),
+      run({ status: "error", totalMs: 5 }),
+      run({ status: "error", totalMs: 5 }),
+    ];
+    const m = computeMetrics({ runs, extractions: [], corrections: [] });
+    expect(m.m5Latency.cached.value.p50).toBe(200);
+    expect(m.m5Latency.overallP50).toBe(3000);
+    expect(computeMetrics({ runs: [], extractions: [], corrections: [] }).m5Latency.overallP50).toBeNull();
   });
 
   it("M6: Gemini failure rate with breakdown, excluding eval traffic", () => {
