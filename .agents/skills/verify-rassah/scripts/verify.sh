@@ -152,8 +152,8 @@ if [ "$MODE" = local ]; then
   expect_status evaluation GET /evaluation 200
 
   echo "== catalog demo controls (features/monitoring.md); blank Gemini key, so nothing paid is called"
-  expect_status extract-p-01 POST /api/products/p-01/extract 200
-  expect_json "re-read p-01 records an admin extraction (config_error without a key)" extract-p-01 'j.events.length===1&&j.events[0].trigger==="admin"&&j.events[0].status==="config_error"'
+  expect_status extract-p-01 POST /api/products/p-01/extract 503
+  expect_json "re-read p-01 fails with its admin event (config_error without a key)" extract-p-01 'j.events.length===1&&j.events[0].trigger==="admin"&&j.events[0].status==="config_error"'
   expect_status clear-p-02 DELETE /api/products/p-02/facts 200
   expect_json "p-02 facts cleared" clear-p-02 'j.cleared==="p-02"'
   expect_status repack-1001-cleared POST /api/orders/1001/pack 200 '{}'

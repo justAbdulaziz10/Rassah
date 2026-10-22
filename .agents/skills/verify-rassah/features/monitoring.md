@@ -25,7 +25,7 @@ Preconditions:
 - **Metrics.** `GET $BASE/api/monitoring/metrics` → 200 (local).
 - **Pages.** `GET` each of `/monitoring`, `/notifications`, `/catalog`, `/evaluation` → 200.
 - **Queue.** `GET $BASE/api/orders/queue` → 200 with numeric `counts.total`.
-- **Catalog demo controls (local).** `POST $BASE/api/products/p-01/extract` → 200 with one event, `trigger: "admin"`; with the blank key its `status` is `config_error` (nothing paid is called). `DELETE $BASE/api/products/p-02/facts` → 200, `cleared: "p-02"`; packing 1001 again → `needs_measurement` for `p-02` (its facts are gone and there is no key to re-read it).
+- **Catalog demo controls (local).** `POST $BASE/api/products/p-01/extract` → 503 with one event, `trigger: "admin"`, `status: "config_error"` (blank key, nothing paid is called); a failed read is never a 200, and the catalog shows its reason. With a key, a successful read → 200 with `facts` and `monitoring: { saved, degraded }`. `DELETE $BASE/api/products/p-02/facts` → 200, `cleared: "p-02"`; packing 1001 again → `needs_measurement` for `p-02` (its facts are gone and there is no key to re-read it).
 - **Proof.** `extract_p_01.body`, `clear_p_02.body`, `repack_1001_cleared.body`, `health.body`, `metrics.body`, `queue.body` and the page bodies.
 
 ## Gotchas
