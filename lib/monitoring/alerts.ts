@@ -182,7 +182,7 @@ function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
 // instance so two of them cannot both see "no open alert" and open the same alert twice.
 let queue: Promise<unknown> = Promise.resolve();
 
-/** Opens alerts for newly breached rules (one open alert per rule) and resolves recovered ones. */
+/** Opens alerts for newly breached rules (one open alert per rule), replaces outdated ones and resolves recovered ones. */
 export function syncAlerts(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOptions = {}): Promise<Alert[]> {
   // Bounded, so one hung database call cannot hold up every later request on this instance.
   const next = queue.then(() => withTimeout(syncOnce(repo, evaluations, opts), SYNC_TIMEOUT_MS));
@@ -190,19 +190,35 @@ export function syncAlerts(repo: Repo, evaluations: RuleEvaluation[], opts: Sync
   return next;
 }
 
+/**
+ * An open alert stops describing its rule when the rule is still breached but the evidence changed:
+ * a simulated outage turned into real failures, or the severity changed. It is then replaced, so the
+ * real alert is sent to the webhook instead of hiding behind the simulated one.
+ */
+const outdated = (a: Alert, ev: RuleEvaluation) => (a.simulated && !ev.simulated) || a.severity !== ev.severity;
+
 async function syncOnce(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOptions): Promise<Alert[]> {
-  const open = await repo.listOpenAlerts();
-  const openByRule = new Map<string, Alert>();
-  for (const a of open) {
-    if (!openByRule.has(a.rule)) openByRule.set(a.rule, a);
-    else if (a.id) {
-      // Another server instance opened the same alert at the same moment: keep one, resolve the rest.
-      await repo.resolveAlert(a.id);
-    }
+  const evByRule = new Map(evaluations.map((ev) => [ev.rule, ev]));
+  const openByRule = new Map<string, Alert[]>();
+  for (const a of await repo.listOpenAlerts()) openByRule.set(a.rule, [...(openByRule.get(a.rule) ?? []), a]);
+
+  // Another server instance may have opened the same alert at the same moment: keep one, resolve the rest.
+  // Keep the one that still matches the rule, else the newest (repos differ in the order they return).
+  const current = new Map<string, Alert>();
+  for (const [rule, alerts] of openByRule) {
+    const ev = evByRule.get(rule);
+    const ordered = newestFirst(alerts);
+    const keep = ordered.find((a) => ev && !outdated(a, ev)) ?? ordered[0];
+    current.set(rule, keep);
+    for (const a of ordered) if (a !== keep && a.id) await repo.resolveAlert(a.id);
   }
 
   for (const ev of evaluations) {
-    const existing = openByRule.get(ev.rule);
+    let existing = current.get(ev.rule);
+    if (existing && (!ev.breached || outdated(existing, ev))) {
+      if (existing.id) await repo.resolveAlert(existing.id);
+      existing = undefined;
+    }
     if (ev.breached && !existing) {
       const alert: Alert = {
         rule: ev.rule,
@@ -228,8 +244,6 @@ async function syncOnce(repo: Repo, evaluations: RuleEvaluation[], opts: SyncOpt
           // Alert delivery is best effort; the dashboard banner is the primary channel.
         }
       }
-    } else if (!ev.breached && existing?.id) {
-      await repo.resolveAlert(existing.id);
     }
   }
   return repo.listOpenAlerts();

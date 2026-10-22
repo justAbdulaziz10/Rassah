@@ -88,9 +88,57 @@ describe("syncAlerts", () => {
     expect(fetchFn).not.toHaveBeenCalled();
 
     const real = [...Array(4).fill(0).map(() => extraction()), extraction({ status: "api_error" })];
-    await repo.resolveAlert(repo.alerts[0].id!);
     await syncAlerts(repo, evaluateRules({ ...base, extractions: real }), { webhookUrl: "https://hook.example", fetchFn });
     expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("replaces an open simulated alert once real failures keep the rule breached, and posts it", async () => {
+    const repo = new MemoryRepo();
+    const fetchFn = vi.fn(async () => new Response("ok"));
+    const opts = { webhookUrl: "https://hook.example", fetchFn };
+    const healthy = Array.from({ length: 4 }, () => extraction({ minutesAgo: 30 }));
+    const simulated = [extraction({ status: "simulated_outage", minutesAgo: 20 }), ...healthy];
+    await syncAlerts(repo, evaluateRules({ ...base, extractions: simulated }), opts);
+    expect((await repo.listOpenAlerts()).map((a) => [a.rule, a.simulated, a.value])).toEqual([["M6_gemini_failure_rate", true, 0.2]]);
+
+    const realFailures = Array.from({ length: 5 }, (_, i) => extraction({ status: "api_error", minutesAgo: 1 + i }));
+    const ev = rule(evaluateRules({ ...base, extractions: [...realFailures, ...simulated] }), "M6_gemini_failure_rate");
+    expect(ev).toMatchObject({ breached: true, simulated: false, value: 0.6 });
+    const open = await syncAlerts(repo, evaluateRules({ ...base, extractions: [...realFailures, ...simulated] }), opts);
+    expect(open.map((a) => [a.rule, a.simulated, a.value])).toEqual([["M6_gemini_failure_rate", false, 0.6]]);
+    expect(repo.alerts.find((a) => a.simulated)?.resolvedAt).not.toBeNull();
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+
+    // Still breached and still real: the alert stays open and is not posted again.
+    await syncAlerts(repo, evaluateRules({ ...base, extractions: [...realFailures, ...simulated] }), opts);
+    expect(await repo.listOpenAlerts()).toHaveLength(1);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("replaces an open alert whose severity changed", async () => {
+    const repo = new MemoryRepo();
+    const fetchFn = vi.fn(async () => new Response("ok"));
+    const [m3] = evaluateRules({ ...base, runs: [run({ validatorRejections: 1 })] }).filter((e) => e.breached);
+    await syncAlerts(repo, [{ ...m3, severity: "warning" }], { webhookUrl: "https://hook.example", fetchFn });
+    const open = await syncAlerts(repo, [m3], { webhookUrl: "https://hook.example", fetchFn });
+    expect(open.map((a) => a.severity)).toEqual(["critical"]);
+    expect(repo.alerts).toHaveLength(2);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the alert that matches the rule when duplicates come back in either order", async () => {
+    for (const order of ["oldest", "newest"] as const) {
+      const repo = new MemoryRepo();
+      const fetchFn = vi.fn(async () => new Response("ok"));
+      const [m3] = evaluateRules({ ...base, runs: [run({ validatorRejections: 1 })] }).filter((e) => e.breached);
+      await repo.insertAlert({ ...m3, simulated: true, resolvedAt: null });
+      await repo.insertAlert({ ...m3, resolvedAt: null });
+      const list = repo.listOpenAlerts.bind(repo);
+      repo.listOpenAlerts = async () => (order === "newest" ? (await list()).reverse() : list());
+      const open = await syncAlerts(repo, [m3], { webhookUrl: "https://hook.example", fetchFn });
+      expect(open.map((a) => a.simulated)).toEqual([false]);
+      expect(fetchFn).not.toHaveBeenCalled();
+    }
   });
 
   it("two checks at the same moment open one alert and post one webhook", async () => {
