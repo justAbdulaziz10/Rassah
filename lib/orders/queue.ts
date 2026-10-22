@@ -5,7 +5,7 @@
 import type { OrderSummary, QueueRun, RunStatus, StoredFacts } from "@/lib/db/types";
 
 /**
- * new: nobody has prepared it yet.
+ * new: nobody has prepared it yet, or its products were measured after the last attempt stopped for that.
  * ready: Rassah chose a carton; the employee has not confirmed packing.
  * attention: the last attempt stopped (a product needs measuring, no carton fits, or an error),
  *   or a product in it is already known to need measuring.
@@ -71,11 +71,15 @@ export function buildQueue(orders: OrderSummary[], runs: QueueRun[], facts: Map<
     }
     // No single carton fits, but Rassah found a split into several cartons (pack pipeline sets strategy split_N).
     const split = latest?.status === "no_box" && latest.strategy?.startsWith("split_");
-    const runReason = latest ? (split ? "split" : (ATTENTION[latest.status] ?? null)) : null;
+    // The last attempt stopped for measuring, and every product has usable saved facts since then.
+    const measuredSince =
+      latest?.status === "needs_measurement" && order.productIds.every((id) => facts.has(id) && !needsMeasuring(facts.get(id)));
+    const runReason = latest && !measuredSince ? (split ? "split" : (ATTENTION[latest.status] ?? null)) : null;
     // Facts saved after the last attempt can settle it either way, so a fresh "needs measuring" wins over an old success.
     const reason = runReason ?? (unmeasured.length > 0 ? "needs_measurement" : null);
     if (reason) return { ...base, state: "attention", reason };
-    return { ...base, state: latest ? "ready" : "new", reason: null };
+    // Measured since the last attempt: no carton has been chosen yet, so it is new work again, not waiting for confirmation.
+    return { ...base, state: latest && !measuredSince ? "ready" : "new", reason: null };
   });
 }
 

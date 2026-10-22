@@ -96,6 +96,27 @@ describe("order queue", () => {
     expect(buildQueue([order("1001")], fixedLast, noFacts)[0].state).toBe("ready");
   });
 
+  it("an order measured since its needs_measurement attempt leaves attention and is new work again", () => {
+    const runs = [run("1006", "2026-10-21T10:00:00Z", { status: "needs_measurement", cartonId: null })];
+    const measured = new Map([
+      ["p-01", facts("p-01")],
+      ["p-28", facts("p-28", { dimsSource: "manual", weightSource: "manual", origin: "manual" })],
+    ]);
+    expect(buildQueue([order("1006", ["p-01", "p-28"])], runs, measured)[0]).toMatchObject({
+      state: "new",
+      reason: null,
+      unmeasured: [],
+      lastPreparedAt: "2026-10-21T10:00:00Z",
+    });
+    // Still unmeasured, or not read at all: the attempt's reason stands.
+    const stillUnknown = new Map([["p-01", facts("p-01")], ["p-28", facts("p-28", { lengthCm: null, dimsSource: "unknown" })]]);
+    expect(buildQueue([order("1006", ["p-01", "p-28"])], runs, stillUnknown)[0]).toMatchObject({ state: "attention", reason: "needs_measurement" });
+    expect(buildQueue([order("1006", ["p-01", "p-28"])], runs, new Map([["p-01", facts("p-01")]]))[0]).toMatchObject({
+      state: "attention",
+      reason: "needs_measurement",
+    });
+  });
+
   it("an order Rassah split into several cartons needs attention with its own reason", () => {
     const runs = [run("1020", "2026-10-21T10:00:00Z", { status: "no_box", strategy: "split_2" })];
     expect(buildQueue([order("1020")], runs, noFacts)[0]).toMatchObject({ state: "attention", reason: "split" });
