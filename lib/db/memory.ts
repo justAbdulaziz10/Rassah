@@ -61,7 +61,9 @@ export class MemoryRepo implements Repo {
   }
   async getOrder(id: string) {
     const o = this.orders.get(id);
-    return o ? { id: o.id, customerName: customerOf(o), lines: o.lines } : null;
+    if (!o) return null;
+    // Lines sorted by product id, as Supabase returns them.
+    return { id: o.id, customerName: customerOf(o), lines: [...o.lines].sort((a, b) => a.productId.localeCompare(b.productId)) };
   }
   async createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>) {
     this.guard("createStoreOrder");
@@ -161,7 +163,12 @@ export class MemoryRepo implements Repo {
     };
   }
   async listOpenAlerts() {
-    return this.alerts.filter((a) => !a.resolvedAt);
+    // Newest first, as in Supabase: syncAlerts keeps the first open alert of a rule and resolves the rest.
+    // Reversed before the (stable) sort so alerts stamped in the same millisecond still come newest first.
+    return this.alerts
+      .filter((a) => !a.resolvedAt)
+      .reverse()
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }
   async insertAlert(a: Alert) {
     this.guard("insertAlert");
