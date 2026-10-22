@@ -40,14 +40,31 @@ describe("SupabaseRepo.createStoreOrder", () => {
     expect(calls[2]).toMatchObject({ table: "order_items", op: "insert", payload: [{ order_id: "5001", product_id: "p-01", qty: 2 }] });
   });
 
-  it("retries with the next number when the chosen one was taken meanwhile", async () => {
+  it("retries with the next number when the chosen one was taken meanwhile, without skipping one", async () => {
+    // Another checkout inserts 5008 between our read and our insert; the re-read then sees it.
+    let newest = "5007";
+    let inserts = 0;
+    const { db, calls } = fakeDb((q) => {
+      if (q.op === "select") return ok([{ id: newest }]);
+      if (q.table === "orders" && q.op === "insert" && inserts++ === 0) {
+        newest = "5008";
+        return { data: null, error: { message: "duplicate key", code: "23505" } };
+      }
+      if (q.table === "orders" && q.op === "insert") newest = (q.payload as { id: string }).id;
+      return ok();
+    });
+    expect(await new SupabaseRepo(db).createStoreOrder("سارة", lines)).toEqual({ id: "5009" }); // 5008 taken → 5009
+    expect(calls.filter((c) => c.table === "orders" && c.op === "insert").map((c) => (c.payload as { id: string }).id)).toEqual(["5008", "5009"]);
+  });
+
+  it("still moves on when the re-read does not show the order that took the number", async () => {
     let inserts = 0;
     const { db } = fakeDb((q) => {
       if (q.op === "select") return ok([{ id: "5007" }]);
       if (q.table === "orders" && q.op === "insert" && inserts++ === 0) return { data: null, error: { message: "duplicate key", code: "23505" } };
       return ok();
     });
-    expect(await new SupabaseRepo(db).createStoreOrder("سارة", lines)).toEqual({ id: "5009" }); // 5008 taken → 5009
+    expect(await new SupabaseRepo(db).createStoreOrder("سارة", lines)).toEqual({ id: "5009" });
   });
 
   it("deletes the order when its items cannot be saved, and reports the error", async () => {

@@ -314,14 +314,18 @@ export class SupabaseRepo implements Repo {
 
   async createStoreOrder(customerName: string, lines: Array<{ productId: string; qty: number }>) {
     // Next number after the newest store order (5001 for the first). Two checkouts at the same moment
-    // can pick the same number: the primary key rejects the second one, which retries with the next.
+    // can pick the same number: the primary key rejects the second one, which re-reads the newest order
+    // (now the one that won) and takes the number after it. Never the same number twice, never a gap.
+    let tried = 0;
     for (let attempt = 0; attempt < 5; attempt++) {
       const latest = check(
         "createStoreOrder",
         await this.db.from("orders").select("id").eq("demo", STORE_ORDER_TAG).order("created_at", { ascending: false }).limit(1),
       ) as Row[];
       const last = Number(latest[0]?.id);
-      const id = String(Math.max(STORE_FIRST_ORDER_ID - 1, Number.isFinite(last) ? last : 0) + 1 + attempt);
+      const next = Math.max(STORE_FIRST_ORDER_ID - 1, Number.isFinite(last) ? last : 0) + 1;
+      tried = Math.max(next, tried + 1);
+      const id = String(tried);
       const ins = await this.db.from("orders").insert({ id, demo: STORE_ORDER_TAG, expect: customerName });
       if (ins.error) {
         if ((ins.error as { code?: string }).code === "23505") continue; // number taken meanwhile
