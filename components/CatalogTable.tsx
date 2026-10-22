@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { DataSource } from "@/lib/engine/types";
-import { fmtApiError, fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_HINT, SOURCE_LABEL } from "@/lib/ui/format";
+import { EXTRACTION_STATUS_LABEL, fmtApiError, fmtDims, fmtTime, fmtWeight, ORIGIN_LABEL, SOURCE_HINT, SOURCE_LABEL } from "@/lib/ui/format";
 import { FlagChips, SourceBadge } from "./Badges";
 import FactsForm, { toFormValues } from "./FactsForm";
 import { EmptyState, Notice } from "./PageHeader";
@@ -29,6 +29,13 @@ export interface CatalogRow {
 
 type Filter = "all" | DataSource | "none";
 
+/** What the catalog actions answer; the re-read adds its events and whether its results were saved. */
+interface ActionReply {
+  error?: string;
+  events?: Array<{ status: string }>;
+  monitoring?: { saved: boolean; degraded: boolean };
+}
+
 export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; demoMode: boolean }) {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
@@ -46,10 +53,13 @@ export default function CatalogTable({ rows, demoMode }: { rows: CatalogRow[]; d
     setMessage(null);
     try {
       const res = await fetch(url, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) return fmtApiError((data as { error?: string }).error ?? `HTTP ${res.status}`);
+      const data = (await res.json().catch(() => ({}))) as ActionReply;
+      // A failed product read answers with its events, so the reason is shown, not a generic error.
+      const failed = data.events?.find((e) => e.status !== "ok");
+      if (!res.ok && failed) return `تعذّرت قراءة صفحة المنتج: ${EXTRACTION_STATUS_LABEL[failed.status] ?? failed.status}. لم تتغيّر بياناته المحفوظة.`;
+      if (!res.ok) return fmtApiError(data.error ?? `HTTP ${res.status}`);
       router.refresh();
-      return null;
+      return data.monitoring?.degraded ? "قُرئت صفحة المنتج لكن تعذّر حفظ ما قُرئ. حاول مرة أخرى." : null;
     } catch {
       return "تعذّر الاتصال. تأكد من الإنترنت ثم حاول مرة ثانية.";
     } finally {

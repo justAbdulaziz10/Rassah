@@ -33,12 +33,21 @@ export async function POST(request: Request, ctx: RouteContext<"/api/products/[i
   } catch {
     return jsonError(503, "Could not read the product from the database");
   }
+  // The read itself is the answer; a monitoring write that failed is reported, not hidden.
+  let saved = true;
   try {
     await repo.insertExtractionEvents(result.events);
   } catch {
-    // reported below
+    saved = false;
   }
-  log({ stage: "admin-extract", productId: id, events: result.events.map((e) => e.status) });
+  const monitoring = { saved, degraded: result.degraded };
+  log({ stage: "admin-extract", productId: id, events: result.events.map((e) => e.status), ...monitoring });
   if (result.missingProducts.length) return jsonError(404, "Product not found");
-  return Response.json({ facts: result.facts.get(id) ?? null, events: result.events });
+  const failed = result.events.find((e) => e.status !== "ok");
+  if (failed) {
+    // A missing or invalid Gemini setting is a service problem (503); any other failed read is upstream (502).
+    const status = failed.status === "config_error" ? 503 : 502;
+    return jsonError(status, `Could not read the product page (${failed.status})`, { events: result.events, monitoring });
+  }
+  return Response.json({ facts: result.facts.get(id) ?? null, events: result.events, monitoring });
 }
