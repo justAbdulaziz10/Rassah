@@ -32,8 +32,14 @@ export function packOrder(
       : { status: "invalid_input", message: prepared.message };
   }
   const result = packUnits(prepared.units, cartons, { config, rates, now });
-  // No single carton fits: suggest the cheapest split into several cartons, each one validated.
-  if (result.status !== "box_found") return { ...result, split: splitPack(prepared.units, cartons, { config, rates, now }) };
+  if (result.status !== "box_found") {
+    // No single carton fits: suggest the cheapest split into several cartons, each one validated.
+    const split = splitPack(prepared.units, cartons, { config, rates, now });
+    // A "split" into one box means the split's own search found a single carton for the whole
+    // order (e.g. after the main search ran out of time): that is a normal answer, not a no_box.
+    if (split?.boxes.length === 1) return { ...split.boxes[0], searchMs: result.searchMs + split.searchMs };
+    return { ...result, split };
+  }
   return {
     ...result,
     instructions: buildInstructions(result.carton, result.placements, result.units, config.paddingCm),

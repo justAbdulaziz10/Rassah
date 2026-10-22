@@ -6,16 +6,12 @@
 
 import { buildInstructions, type InstructionStep } from "./instructions";
 import { packUnits, type PackOptions } from "./packer";
-import type { Carton, CostEstimate, PackSuccess, Placement, Unit } from "./types";
+import type { Carton, PackSuccess, Unit } from "./types";
 import { volume } from "./geometry";
 import { round2 } from "../math";
 
-interface SplitBox {
-  carton: Carton;
-  placements: Placement[];
-  units: Unit[];
-  strategy: string;
-  cost: CostEstimate;
+/** One carton of the plan: a normal single-carton answer for its share of the units. */
+export interface SplitBox extends PackSuccess {
   instructions: InstructionStep[];
 }
 
@@ -116,14 +112,7 @@ export function splitPack(units: Unit[], cartons: Carton[], opts: PackOptions & 
 
   if (!best) return null;
   return {
-    boxes: best.map((b) => ({
-      carton: b.carton,
-      placements: b.placements,
-      units: b.units,
-      strategy: b.strategy,
-      cost: b.cost,
-      instructions: buildInstructions(b.carton, b.placements, b.units, cfg.paddingCm),
-    })),
+    boxes: best.map((b) => ({ ...b, instructions: buildInstructions(b.carton, b.placements, b.units, cfg.paddingCm) })),
     totalSar: round2(totalOf(best)),
     searchMs: Math.round(now() - start),
   };
