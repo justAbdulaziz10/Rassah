@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { buildInstructions } from "@/lib/engine/instructions";
 import { cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize } from "@/lib/ui/three";
+import { carton, place, unit } from "../engine/helpers";
 
 const inner: [number, number, number] = [30, 20, 15];
 
@@ -34,6 +36,18 @@ describe("3D helpers", () => {
       { id: "floor-front", placement: { x: 0, y: 4, z: 0, dx: 1, dy: 1, dz: 1 } },
     ];
     expect(placementOrder(items).map((i) => i.id)).toEqual(["floor-back", "floor-front", "top"]);
+  });
+
+  it("item k in the 3D view is written step k + 1, after the carton step", () => {
+    // PackingView3D numbers its steps this way; the written list must agree for every item.
+    const units = [unit("book#1", [20, 15, 3]), unit("charger#1", [8, 6, 4]), unit("oil#1", [10, 6, 6], { liquid: true }), unit("mug#1", [10, 9, 9], { fragile: true })];
+    const placements = [place("mug#1", 0, 15, 3, 10, 9, 9), place("charger#1", 10, 15, 3, 8, 6, 4), place("book#1", 0, 0, 0, 20, 15, 3), place("oil#1", 20, 0, 0, 10, 6, 6)];
+    const steps = buildInstructions(carton("M", [30, 25, 15]), placements, units, 1);
+    const items = placements.map((p) => ({ unitId: p.unitId, placement: p }));
+    expect(steps[0]).toMatchObject({ step: 1, unitId: null });
+    placementOrder(items).forEach((it, i) => {
+      expect(steps.find((s) => s.unitId === it.unitId)?.step).toBe(i + 1 + 1);
+    });
   });
 
   it("top view paints lower tops first so stacked items stay visible", () => {

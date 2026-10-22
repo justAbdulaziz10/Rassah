@@ -7,6 +7,12 @@ import { FLAG_LABEL, FLAGS } from "@/components/Badges";
 import { ArrowBackIcon, ArrowForwardIcon } from "@/components/Icons";
 import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, type ViewItem } from "@/lib/ui/three";
 
+/**
+ * The written steps open with the carton (step 1) and then place the items in placementOrder, one
+ * step each, so the view after placing `placed` items shows written step `placed + 1`.
+ */
+const writtenStep = (placed: number) => placed + 1;
+
 interface Props {
   inner: [number, number, number];
   items: Array<ViewItem & { name: string }>;
@@ -71,7 +77,7 @@ export default function PackingView3D({ inner, items }: Props) {
       </div>
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 text-sm">
         <label htmlFor={stepId} className="text-muted">
-          الخطوة
+          خطوات التغليف
         </label>
         <div className="flex items-center gap-2">
           <button
@@ -92,7 +98,7 @@ export default function PackingView3D({ inner, items }: Props) {
             value={step}
             onChange={(e) => go(Number(e.target.value))}
             className="w-36 accent-[var(--brand)] sm:w-48"
-            aria-valuetext={`${step} من ${ordered.length}`}
+            aria-valuetext={`الخطوة ${writtenStep(step)}: ${current ? current.name : "الكرتون فارغ"}`}
           />
           <button
             type="button"
@@ -105,10 +111,11 @@ export default function PackingView3D({ inner, items }: Props) {
             <ArrowForwardIcon className="size-4" />
           </button>
         </div>
-        <span className="ltr-nums">
-          {step} / {ordered.length}
+        {/* Numbered like the written steps, so the packer sees one number for each item. */}
+        <span className="font-medium">
+          الخطوة <span className="ltr-nums">{writtenStep(step)}</span>
         </span>
-        {current && <span className="basis-full text-muted sm:basis-auto">القطعة الحالية: {current.name}</span>}
+        <span className="basis-full text-muted sm:basis-auto">{current ? `القطعة الحالية: ${current.name}` : "الكرتون فارغ"}</span>
         <span className="ms-auto flex flex-wrap gap-3 text-xs text-muted">
           {FLAGS.map((f) => (
             <Legend key={f} color={KIND_COLOR[f]} label={FLAG_LABEL[f]} />
