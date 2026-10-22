@@ -1,6 +1,6 @@
 # Stack 03: Packing Engine, Validator, Cost Model, Instructions
 
-**Location:** `lib/engine/`. Pure TypeScript: **no network, no database, no randomness without a seed.** It is fully unit-testable. Current version: `engine-0.3`.
+**Location:** `lib/engine/`. Pure TypeScript: **no network, no database, no randomness without a seed.** It is fully unit-testable. Current version: `engine-0.4`.
 
 ```
 lib/engine/
@@ -63,7 +63,7 @@ The first design was extreme-point placement under a few item orderings. Evaluat
 
 - **Candidate positions = corner grid.** Every combination of x ∈ {0, right edges}, y ∈ {0, back edges}, z ∈ {0, top faces} of placed boxes. This is a superset of classic extreme points.
 - **Cheap pre-checks per carton.** A unit that fits in no rotation → `oversize`; total weight + tare over the limit → `overweight`; total volume larger than the carton → `no_layout`. These cartons are not searched.
-- **Phase 1, greedy passes:** the **9 fixed strategies** below, then up to **40 seeded restarts** per carton (random orderings from a fixed seed of order + carton id, cycling the scores and fragile-last on/off). Each carton's restarts stop at its fair share of the remaining budget, so larger cartons still get searched. The first layout that passes the validator is that carton's answer.
+- **Phase 1, greedy passes:** the **9 fixed strategies** below, then up to **40 seeded restarts** per carton (random orderings from a fixed seed of the sorted unit ids + carton id, cycling the scores and fragile-last on/off). Each carton's restarts stop at its fair share of the remaining budget, so larger cartons still get searched. The first layout that passes the validator is that carton's answer.
 - **Phase 2, anchor search (engine-0.2):** on unpacked cartons that would beat every carton already packed, a bounded backtracking search takes the lowest uncovered corner and tries every remaining unit in every rotation, up to `anchorNodes` nodes.
 - **Choice:** the packed carton with the lowest estimated total cost (carton + shipping); ties go to the smaller carton.
 - Known-feasible recall on the 100%-fill fixtures: 3/20 (extreme points) → 9/20 (corner grid + restarts) → 15/20 (tight scores, engine-0.1) → **20/20** (engine-0.2). Engine validity stays 100%, false claims on impossible cases stay 0, p95 runtime 12.9 ms.
@@ -91,13 +91,13 @@ Found on the first sanity run over the 20 seeded orders: with only z-first scori
 
 `greedyPlace` places units one by one in the strategy's order. For each unit it tries every candidate position and allowed rotation, keeps those that are in bounds, overlap nothing, have support ≥ `minSupport` and rest on no fragile item, and picks the best by the strategy's score. If a unit has no valid position, the pass is incomplete.
 
-- **Deterministic for the same input:** restarts use a fixed seed. The search runs against a wall-clock budget, so a much slower machine can stop earlier and return a different (still validated) answer.
+- **Deterministic for the same input:** restarts use a fixed seed, and units are searched in unit-id order, so the order lines arrive in never changes the answer (engine-0.4; before, reversing an order's lines could pick a different carton). The search runs against a wall-clock budget, so a much slower machine can stop earlier and return a different (still validated) answer.
 - **Search budget:** `maxSearchMs` (default 1500 ms) per order. Cartons not reached are recorded as `search_budget`. `candidatesChecked` is recorded.
 - **Honesty:** "not found" is **not** proof that no packing exists. The reason is *"No valid carton found within the search budget"*.
 
 ### 4.1 Multi-carton split (`split.ts`, engine-0.3)
 
-Used only when no single carton fits the whole order. `splitPack` groups the units first-fit-decreasing, one box at a time, and asks `packUnits` for each group, so every box is a normal single-carton answer (searched, validated, priced). Two orderings are tried (largest first, heaviest first), each followed by a pass that tries to empty the last box into the others; the cheaper complete plan wins. At most 4 boxes. The run keeps `status = no_box`; the response carries `split` and the strategy is recorded as `split_N`. The split is a heuristic, not a proven cheapest split.
+Used only when no single carton fits the whole order. `splitPack` groups the units first-fit-decreasing, one box at a time, and asks `packUnits` for each group, so every box is a normal single-carton answer (searched, validated, priced). Two orderings are tried (largest first, heaviest first), each followed by a pass that tries to empty the last box into the others; the cheaper complete plan wins. At most 4 boxes. The run keeps `status = no_box`; the response carries `split` and the strategy is recorded as `split_N`. A plan of a single box is not a split: since engine-0.4 it is returned as a normal `box_found` answer (carton, layout, cost, instructions, strategy). The split is a heuristic, not a proven cheapest split.
 
 ## 5. Independent validator (`validator.ts`)
 
@@ -153,7 +153,7 @@ Arabic is the UI language. The templates are in one file (`instructions.ar.ts`) 
 | `wallCm` | 0.5 | Wall thickness for outer dimensions (volumetric weight) |
 | `maxUnits` | 12 | Input cap per order |
 | `eps` | 1e-6 | Geometric tolerance |
-| `ENGINE_VERSION` | `engine-0.3` | Stamped into every order event and eval run (constant in code; bump it with engine changes) |
+| `ENGINE_VERSION` | `engine-0.4` | Stamped into every order event and eval run (constant in code; bump it with engine changes) |
 
 The volumetric divisor (5000 cm³/kg; some couriers use 4000 or 6000) is in `data/cartons.json`, not in `config.ts`.
 

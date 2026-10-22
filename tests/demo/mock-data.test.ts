@@ -5,11 +5,11 @@ import { computeMetrics } from "@/lib/monitoring/metrics";
 import { buildQueue } from "@/lib/orders/queue";
 
 const NOW = Date.parse("2026-10-21T09:00:00Z");
-const data = buildMockData(NOW, { promptVersion: "v1", engineVersion: "engine-0.3", model: "gemini-test" });
+const data = buildMockData(NOW, { promptVersion: "v1", engineVersion: "engine-0.4", model: "gemini-test" });
 
 describe("mock demo history", () => {
   it("is deterministic and ends before now", () => {
-    expect(buildMockData(NOW, { promptVersion: "v1", engineVersion: "engine-0.3", model: "gemini-test" })).toEqual(data);
+    expect(buildMockData(NOW, { promptVersion: "v1", engineVersion: "engine-0.4", model: "gemini-test" })).toEqual(data);
     const times = [...data.runs, ...data.extractions, ...data.corrections].map((r) => Date.parse(r.createdAt!));
     expect(Math.max(...times)).toBeLessThanOrEqual(NOW);
   });

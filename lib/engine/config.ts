@@ -5,8 +5,9 @@
  * Bump it whenever packing behavior changes, so results stay comparable across versions.
  * engine-0.2: backtracking anchor search after the greedy passes (docs/stack/03 §4).
  * engine-0.3: when no single carton fits, a validated split into several cartons (split.ts).
+ * engine-0.4: the order lines arrive in no longer changes the answer; a one-box split is box_found.
  */
-export const ENGINE_VERSION = "engine-0.3";
+export const ENGINE_VERSION = "engine-0.4";
 
 export const ENGINE_CONFIG = {
   /** Safety margin on inferred dimensions. Set from the extraction eval error (docs/stack/07). */
