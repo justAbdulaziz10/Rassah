@@ -71,6 +71,11 @@ describe("factChanges (edit)", () => {
     expect(changesOf({ ...initial, fragile: true }, initial, "edit")).toEqual({ fragile: true });
     expect(factChanges(initial, initial, "edit")).toEqual({ error: "لم تغيّر أي قيمة" });
   });
+
+  it("an emptied box is an error, not a silent no-op", () => {
+    const r = factChanges({ ...initial, weightG: null, heightCm: 7 }, initial, "edit");
+    expect(r).toEqual({ error: "أدخل قيمة في «الوزن (جم)» أو أعد القيمة السابقة" });
+  });
 });
 
 describe("factChanges (measure)", () => {

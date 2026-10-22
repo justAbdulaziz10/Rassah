@@ -17,7 +17,8 @@ export interface DashboardData {
   reviews: ReviewPoint[];
   recentRuns: OrderRun[];
   alerts: Alert[];
-  totals: { runs: number; extractions: number; corrections: number };
+  /** Counts over the whole window; `timedOrders` and `reviewedOrders` are the charts' full series before the last-40 cut. */
+  totals: { runs: number; extractions: number; corrections: number; timedOrders: number; reviewedOrders: number };
   alertsError: boolean;
   /** Runs per result in the window, so the page can say what happened, not only rates. */
   outcomes: Record<RunStatus, number>;
@@ -116,16 +117,24 @@ export async function loadDashboard(repo: Repo, window: MetricWindow, nowMs: num
   const newest = [...live].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   const outcomes: Record<RunStatus, number> = { box_found: 0, no_box: 0, needs_measurement: 0, error: 0 };
   for (const r of live) outcomes[r.status]++;
+  const latency = latencySeries(runs);
+  const reviews = reviewSeries(runs, corrections);
   return {
     window,
     generatedAt: new Date(nowMs).toISOString(),
     metrics: computeMetrics({ extractions, runs, corrections }),
     // The charts show the last 40 orders.
-    latency: latencySeries(runs).slice(-40),
-    reviews: reviewSeries(runs, corrections).slice(-40),
+    latency: latency.slice(-40),
+    reviews: reviews.slice(-40),
     recentRuns: newest.slice(0, 25),
     alerts,
-    totals: { runs: live.length, extractions: extractions.filter((e) => e.trigger !== "eval").length, corrections: corrections.length },
+    totals: {
+      runs: live.length,
+      extractions: extractions.filter((e) => e.trigger !== "eval").length,
+      corrections: corrections.length,
+      timedOrders: latency.length,
+      reviewedOrders: reviews.length,
+    },
     alertsError,
     outcomes,
     problemOrders: latestProblems(newest),

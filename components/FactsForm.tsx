@@ -58,6 +58,8 @@ export function factChanges(
   for (const f of NUM_FIELDS) {
     const v = values[f.key];
     if (mode === "measure" && (v === null || !(v > 0))) return { error: "أدخل الطول والعرض والارتفاع والوزن جميعاً" };
+    // An emptied box cannot erase a saved value, so say so instead of silently keeping the old one.
+    if (mode !== "measure" && v === null && initial[f.key] !== null) return { error: `أدخل قيمة في «${f.label}» أو أعد القيمة السابقة` };
     if (v !== null && (mode === "measure" || v !== initial[f.key])) changes[f.key] = v;
   }
   for (const k of FLAGS) {

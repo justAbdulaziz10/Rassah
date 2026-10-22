@@ -605,7 +605,7 @@ function Sample({ n, minN, sufficient = true }: { n: number; minN?: number; suff
 
 /* ---------------------------------------------------------------- charts */
 
-function Card(props: { code?: string; title: string; hint?: string; n?: number; children: React.ReactNode; className?: string }) {
+function Card(props: { code?: string; title: string; hint?: string; n?: number; shown?: number; children: React.ReactNode; className?: string }) {
   return (
     <section data-metric={props.code} className={`panel p-4 sm:p-5 ${props.className ?? ""}`}>
       <h2 className="text-lg font-bold leading-7">
@@ -613,6 +613,12 @@ function Card(props: { code?: string; title: string; hint?: string; n?: number; 
         {props.n !== undefined && (
           <span className="text-xs font-normal text-muted">
             · <Sample n={props.n} />
+            {props.shown !== undefined && props.shown < props.n && (
+              <>
+                {" "}
+                (يُعرض آخر <span className="ltr-nums">{props.shown}</span>)
+              </>
+            )}
           </span>
         )}
       </h2>
@@ -698,7 +704,7 @@ function LatencyCard({ data }: { data: DashboardData }) {
       code="M5"
       title="زمن تجهيز كل طلب"
       hint="كل عمود طلب واحد، والأحدث على اليسار. الطلب الأبطأ غالباً فيه منتجات جديدة احتاجت قراءة. مرّر المؤشر على العمود لترى رقم الطلب ووقته."
-      n={points.length}
+      n={data.totals.timedOrders} shown={points.length}
     >
       {points.length === 0 ? (
         <Empty />
@@ -771,7 +777,7 @@ function CorrectionsCard({ data }: { data: DashboardData }) {
       code="M1"
       title="منتجات صحّح الموظف بياناتها"
       hint="كل عمود طلب راجعه الموظف، والأحدث على اليسار. طول العمود عدد المنتجات التي قرأتها رصّة في الطلب، والجزء الملوّن بالثاني ما صحّح الموظف مقاسه أو وزنه أو صفته. مرّر المؤشر على العمود لترى ما تغيّر."
-      n={points.length}
+      n={data.totals.reviewedOrders} shown={points.length}
     >
       {points.length === 0 ? (
         <Empty />

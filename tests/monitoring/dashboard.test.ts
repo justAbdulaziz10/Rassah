@@ -39,6 +39,14 @@ describe("loadDashboard", () => {
     expect(all.totals).toMatchObject({ runs: 2, extractions: 8 });
   });
 
+  it("charts the last 40 orders but counts every timed order in the window", async () => {
+    const repo = new MemoryRepo();
+    for (let i = 0; i < 45; i++) repo.orderRuns.push(run({ orderId: String(1001 + i), minutesAgo: 60 + i }));
+    const d = await loadDashboard(repo, "24h", NOW);
+    expect(d.latency).toHaveLength(40);
+    expect(d.totals.timedOrders).toBe(45);
+  });
+
   it("gives one point per reviewed order with the AI-read products it corrected", () => {
     const edited = run({ id: "r-edit", orderId: "1002", employeeAction: "edited", aiProducts: ["p-16", "p-17", "p-19"], minutesAgo: 20 });
     const confirmed = run({ id: "r-ok", orderId: "1003", employeeAction: "confirmed", aiProducts: ["p-07"], minutesAgo: 10 });
