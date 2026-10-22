@@ -61,15 +61,23 @@ async function Catalog() {
         : null,
     };
   });
-  const extracted = rows.filter((r) => r.facts).length;
-  const pending = rows.length - extracted;
+  // A row read without a size (dimsSource "unknown") still needs measuring, so it is not counted as saved.
+  const knownSize = (f: CatalogRow["facts"]) =>
+    !!f && f.dimsSource !== "unknown" && f.lengthCm !== null && f.widthCm !== null && f.heightCm !== null;
+  const known = rows.filter((r) => knownSize(r.facts)).length;
+  const pending = rows.filter((r) => !r.facts).length;
+  const unknownSize = rows.length - known - pending;
   return (
     <>
-      <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border text-center sm:max-w-xl">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border text-center sm:max-w-2xl sm:grid-cols-4">
         <Stat label="كل المنتجات" value={rows.length} />
-        <Stat label="محفوظة مقاساتها" value={extracted} tone="ok" />
+        <Stat label="محفوظة مقاساتها" value={known} tone="ok" />
+        <Stat label="بلا مقاس معروف" value={unknownSize} tone={unknownSize > 0 ? "warn" : undefined} />
         <Stat label="لم تُقرأ بعد" value={pending} tone={pending > 0 ? "warn" : undefined} />
       </dl>
+      {unknownSize > 0 && (
+        <p className="text-sm leading-6 text-muted">المنتجات التي بلا مقاس معروف قُرئت صفحتها ولم يُذكر فيها المقاس، فتحتاج قياساً يدوياً: اضغط «إدخال القياس» بجانبها.</p>
+      )}
       {pending > 0 && <p className="text-sm leading-6 text-muted">المنتجات التي لم تُقرأ بعد ستقرأها رصّة عند أول طلب يحتويها.</p>}
       <CatalogTable rows={rows} demoMode={appEnv().DEMO_MODE} />
     </>
