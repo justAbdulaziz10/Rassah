@@ -69,3 +69,34 @@ export function topViewRects<T extends { placement: BoxPlacement }>(items: T[]):
     })
     .map((it) => ({ ...it, rx: it.placement.x, ry: it.placement.y, rw: it.placement.dx, rh: it.placement.dy }));
 }
+
+/**
+ * Bubble-wrap filler for the last 3D step: one bubble per grid cell of the carton that no item
+ * touches, up to the carton's top, so the packer sees the gaps filled. At most `perSide` cells
+ * along the longest side keeps the count small (≤ perSide³). Positions are three.js (y-up).
+ */
+export function voidFillBubbles(
+  inner: readonly [number, number, number],
+  placements: BoxPlacement[],
+  perSide = 10,
+): { radius: number; positions: Array<[number, number, number]> } {
+  const [L, W, H] = inner;
+  const cell = Math.max(L, W, H) / perSide;
+  const n = [L, W, H].map((side) => Math.max(1, Math.round(side / cell)));
+  const [cx, cy, cz] = [L / n[0], W / n[1], H / n[2]];
+  const eps = 1e-6;
+  const overlaps = (lo: number, hi: number, start: number, size: number) => lo < start + size - eps && hi > start + eps;
+  const positions: Array<[number, number, number]> = [];
+  for (let i = 0; i < n[0]; i++) {
+    for (let j = 0; j < n[1]; j++) {
+      for (let k = 0; k < n[2]; k++) {
+        const [x0, y0, z0] = [i * cx, j * cy, k * cz];
+        const taken = placements.some(
+          (p) => overlaps(x0, x0 + cx, p.x, p.dx) && overlaps(y0, y0 + cy, p.y, p.dy) && overlaps(z0, z0 + cz, p.z, p.dz),
+        );
+        if (!taken) positions.push([x0 + cx / 2 - L / 2, z0 + cz / 2, y0 + cy / 2 - W / 2]);
+      }
+    }
+  }
+  return { radius: Math.min(cx, cy, cz) * 0.48, positions };
+}

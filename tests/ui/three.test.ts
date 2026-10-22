@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildInstructions } from "@/lib/engine/instructions";
-import { cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize } from "@/lib/ui/three";
+import { cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize, voidFillBubbles } from "@/lib/ui/three";
 import { carton, place, unit } from "../engine/helpers";
 
 const inner: [number, number, number] = [30, 20, 15];
@@ -48,6 +48,9 @@ describe("3D helpers", () => {
     placementOrder(items).forEach((it, i) => {
       expect(steps.find((s) => s.unitId === it.unitId)?.step).toBe(i + 1 + 1);
     });
+    // The 3D filler view after the last item is the written "fill the gaps" step.
+    expect(steps[items.length + 1]).toMatchObject({ step: items.length + 2, unitId: null });
+    expect(steps[items.length + 1].text).toContain("املأ الفراغات");
   });
 
   it("top view paints lower tops first so stacked items stay visible", () => {
@@ -78,5 +81,28 @@ describe("3D helpers", () => {
     const rects = topViewRects(items);
     expect(items).toEqual(before);
     expect(rects[1]).toMatchObject({ id: "b", rx: 3, ry: 2, rw: 5, rh: 4 });
+  });
+});
+
+describe("voidFillBubbles", () => {
+  const inner = [30, 20, 10] as const;
+  const item = { x: 0, y: 0, z: 0, dx: 15, dy: 20, dz: 10 }; // fills the left half
+
+  it("fills only the cells no item touches, up to the carton's top", () => {
+    const { positions, radius } = voidFillBubbles(inner, [item]);
+    expect(positions.length).toBeGreaterThan(0);
+    expect(radius).toBeGreaterThan(0);
+    // three.js x = engine x - L/2: the left half (x < 0) holds the item, so every bubble is on the right.
+    for (const [x, y] of positions) {
+      expect(x).toBeGreaterThan(0);
+      expect(y).toBeLessThanOrEqual(inner[2]);
+    }
+  });
+
+  it("a full carton gets no bubbles, an empty one is filled, and the count stays bounded", () => {
+    expect(voidFillBubbles(inner, [{ x: 0, y: 0, z: 0, dx: 30, dy: 20, dz: 10 }]).positions).toHaveLength(0);
+    const empty = voidFillBubbles(inner, [], 14);
+    expect(empty.positions.length).toBeGreaterThan(0);
+    expect(empty.positions.length).toBeLessThanOrEqual(14 ** 3);
   });
 });

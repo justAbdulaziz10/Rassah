@@ -1,17 +1,20 @@
 "use client";
 
-import { Edges, Html, OrbitControls } from "@react-three/drei";
+import { Edges, Html, Instance, Instances, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useId, useMemo, useState } from "react";
 import { FLAG_LABEL, FLAGS } from "@/components/Badges";
 import { ArrowBackIcon, ArrowForwardIcon } from "@/components/Icons";
-import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, type ViewItem } from "@/lib/ui/three";
+import { cartonThreeSize, itemKind, KIND_COLOR, placementOrder, toThreePosition, toThreeSize, voidFillBubbles, type ViewItem } from "@/lib/ui/three";
 
 /**
- * The written steps open with the carton (step 1) and then place the items in placementOrder, one
- * step each, so the view after placing `placed` items shows written step `placed + 1`.
+ * The written steps open with the carton (step 1), place the items in placementOrder (one step each)
+ * and then fill the gaps. So the view after placing `placed` items shows written step `placed + 1`,
+ * and the filler view after the last item is the written fill step.
  */
 const writtenStep = (placed: number) => placed + 1;
+
+const BUBBLE_COLOR = "#bfdbfe";
 
 interface Props {
   inner: [number, number, number];
@@ -20,11 +23,16 @@ interface Props {
 
 export default function PackingView3D({ inner, items }: Props) {
   const ordered = useMemo(() => placementOrder(items), [items]);
+  // The last view fills the gaps with bubble wrap; the page opens on the step before it, every item in place.
+  const fillStep = ordered.length + 1;
   const [step, setStep] = useState(ordered.length);
   const [hovered, setHovered] = useState<string | null>(null);
   const stepId = useId(); // a split order shows one view per carton, so the slider id must be unique
-  const go = (n: number) => setStep(Math.max(0, Math.min(ordered.length, n)));
-  const current = step > 0 ? ordered[step - 1] : null;
+  const go = (n: number) => setStep(Math.max(0, Math.min(fillStep, n)));
+  const filled = step === fillStep;
+  const current = step > 0 && !filled ? ordered[step - 1] : null;
+  const bubbles = useMemo(() => voidFillBubbles(inner, items.map((it) => it.placement)), [inner, items]);
+  const status = filled ? "املأ الفراغات بالفقاعات حتى لا تتحرك القطع، ثم أغلق الكرتون" : current ? `القطعة الحالية: ${current.name}` : "الكرتون فارغ";
   const size = cartonThreeSize(inner);
   const maxSide = Math.max(...inner);
 
@@ -71,6 +79,15 @@ export default function PackingView3D({ inner, items }: Props) {
               </mesh>
             );
           })}
+          {filled && bubbles.positions.length > 0 && (
+            <Instances limit={bubbles.positions.length} raycast={() => null}>
+              <sphereGeometry args={[bubbles.radius, 10, 8]} />
+              <meshStandardMaterial color={BUBBLE_COLOR} transparent opacity={0.35} roughness={0.25} depthWrite={false} />
+              {bubbles.positions.map((p, i) => (
+                <Instance key={i} position={p} />
+              ))}
+            </Instances>
+          )}
           {/* Aim at the carton's centre, not its floor, so tall cartons stay in frame. */}
           <OrbitControls makeDefault enablePan={false} target={[0, size[1] / 2, 0]} />
         </Canvas>
@@ -94,16 +111,16 @@ export default function PackingView3D({ inner, items }: Props) {
             id={stepId}
             type="range"
             min={0}
-            max={ordered.length}
+            max={fillStep}
             value={step}
             onChange={(e) => go(Number(e.target.value))}
             className="w-36 accent-[var(--brand)] sm:w-48"
-            aria-valuetext={`الخطوة ${writtenStep(step)}: ${current ? current.name : "الكرتون فارغ"}`}
+            aria-valuetext={`الخطوة ${writtenStep(step)}: ${filled ? "حشو الفراغات" : current ? current.name : "الكرتون فارغ"}`}
           />
           <button
             type="button"
             onClick={() => go(step + 1)}
-            disabled={step === ordered.length}
+            disabled={filled}
             aria-label="الخطوة التالية"
             className="inline-flex h-9 items-center gap-1 rounded-lg border border-brand bg-brand px-2.5 font-medium text-brand-contrast hover:opacity-90 disabled:border-border disabled:bg-surface disabled:text-muted disabled:opacity-40"
           >
@@ -115,13 +132,14 @@ export default function PackingView3D({ inner, items }: Props) {
         <span className="font-medium">
           الخطوة <span className="ltr-nums">{writtenStep(step)}</span>
         </span>
-        <span className="basis-full text-muted sm:basis-auto">{current ? `القطعة الحالية: ${current.name}` : "الكرتون فارغ"}</span>
+        <span className="basis-full text-muted sm:basis-auto">{status}</span>
         <span className="ms-auto flex flex-wrap gap-3 text-xs text-muted">
           {FLAGS.map((f) => (
             <Legend key={f} color={KIND_COLOR[f]} label={FLAG_LABEL[f]} />
           ))}
           <Legend color={KIND_COLOR.plain} label="عادي" />
           <span>الشفاف: مقاس تقديري</span>
+          {filled && <Legend color={BUBBLE_COLOR} label="فقاعات الحشو" />}
         </span>
       </div>
     </div>
