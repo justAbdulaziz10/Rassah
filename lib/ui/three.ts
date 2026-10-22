@@ -100,3 +100,23 @@ export function voidFillBubbles(
   }
   return { radius: Math.min(cx, cy, cz) * 0.48, positions };
 }
+
+/**
+ * How full the carton is: the share of its inside the placed boxes take (sizes with padding and
+ * margin, as packed) and the space left for filler, in litres.
+ */
+export function cartonFill(inner: readonly [number, number, number], placements: BoxPlacement[]): { usedShare: number; freeLitres: number } {
+  const total = inner[0] * inner[1] * inner[2];
+  const used = placements.reduce((s, p) => s + p.dx * p.dy * p.dz, 0);
+  return { usedShare: Math.min(1, used / total), freeLitres: Math.max(0, total - used) / 1000 };
+}
+
+/**
+ * The 3D view's steps for `n` items: 0 = empty carton, 1..n = items placed, n + 1 = gaps filled,
+ * n + 2 = carton closed. The written steps run in the same order from 1, so view step v is written
+ * step v + 1. Without a "this side up" step the written list has no step of its own for closing,
+ * so the closed view shares the fill step's number.
+ */
+export function writtenStepOf(view: number, writtenCount: number): number {
+  return Math.min(view + 1, writtenCount);
+}

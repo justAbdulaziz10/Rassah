@@ -77,6 +77,11 @@ export function fmtMs(ms: number | null | undefined): string {
   return ms >= 1000 ? `${ltr((ms / 1000).toFixed(1))} ثانية` : `${ltr(String(Math.round(ms)))} ملّي ثانية`;
 }
 
+/** Volume in litres: whole litres from 10 up, one decimal below. */
+export function fmtLitres(l: number): string {
+  return `${ltr(l >= 10 ? String(Math.round(l)) : fmtNum(Math.round(l * 10) / 10))} لتر`;
+}
+
 export function fmtPct(x: number | null | undefined): string {
   return x === null || x === undefined ? "—" : ltr(`${Math.round(x * 100)}%`);
 }

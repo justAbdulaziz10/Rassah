@@ -110,7 +110,7 @@ flowchart LR
 2. **Extraction.** Gemini returns structured JSON: dimensions, weight, flags, the source of each value and a confidence level, with a quote from the page as evidence. Each call is logged with its status, latency, tokens and cost.
 3. **Packing.** A corner-point search tries several item orderings per carton, cheapest carton first. If those fail, it adds seeded random restarts and a bounded backtracking search. Fragile items go on top, liquids stay upright, and every item needs enough support underneath. When no single carton can hold the order, it proposes a split into up to four cartons.
 4. **Validation.** Separate code re-checks every layout. A layout that fails is never shown.
-5. **Result.** The packer sees the carton, numbered Arabic steps, a 3D view with a step slider (it opens with every item in place; the last step fills the gaps with bubble wrap), and the cost: carton plus shipping on dimensional weight.
+5. **Result.** The packer sees the carton, numbered Arabic steps, a 3D view that walks the same steps (it opens with every item in place, marks the current item, then fills the gaps with bubble wrap and closes the carton; tapping a written step jumps to it, and a play button runs them all), and the cost: carton plus shipping on dimensional weight.
 6. **Feedback.** "Confirm" and "correct" are recorded. A correction updates the cached facts and counts against the AI's accuracy.
 
 More detail: [docs/diagrams.md](docs/diagrams.md) has the development flow, monitoring flow and system architecture diagrams.
@@ -318,7 +318,7 @@ docs/                    decisions, diagrams, stack guides and the report
 | Database and event store | Supabase (Postgres) via `@supabase/supabase-js` |
 | 3D view | `@react-three/fiber` and `@react-three/drei` |
 | Charts | Recharts |
-| Tests and quality | Vitest (287 tests), ESLint, `tsc --noEmit` |
+| Tests and quality | Vitest (290 tests), ESLint, `tsc --noEmit` |
 | Hosting and CI | Vercel (production on `main`, Frankfurt region) and GitHub Actions |
 
 ## Team

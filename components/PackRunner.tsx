@@ -2,13 +2,15 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
-import { fmtApiError, fmtCartons, fmtDims, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
+import { fmtApiError, fmtCartons, fmtDims, fmtPct, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
 import { useQueue } from "@/lib/ui/queue-store";
+import { cartonFill, writtenStepOf } from "@/lib/ui/three";
 import { FlagChips, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
 import FactsForm, { toFormValues, type FactsFormValues } from "./FactsForm";
+import type PackingView3DView from "./PackingView3D";
 import Safe3D from "./Safe3D";
 import TopView2D from "./TopView2D";
 
@@ -216,7 +218,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
         </section>
       )}
 
-      {split && <SplitBoxes split={split} />}
+      {split && <SplitBoxes key={d.runId} split={split} />}
 
       {d.status === "no_box" && !split && (
         <section className="rounded-lg border border-critical bg-critical-soft/40 p-4">
@@ -241,15 +243,8 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
 
       {d.status === "box_found" && d.carton && (
         <>
-          <section className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-            <div className="space-y-3">
-              <h2 className="font-bold">خطوات التغليف</h2>
-              <Steps steps={d.instructions} />
-            </div>
-            <div className="space-y-3 print:hidden">
-              <h2 className="font-bold">شكل الترتيب داخل الكرتون</h2>
-              <Layout inner={d.carton.innerCm} items={viewItems} />
-            </div>
+          <section>
+            <PackPlan key={d.runId} inner={d.carton.innerCm} items={viewItems} steps={d.instructions} titled />
           </section>
 
           {d.cost && (
@@ -257,11 +252,16 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
               <h2 className="font-bold">
                 التكلفة المتوقعة
               </h2>
-              <dl className="mt-2 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+              <dl className="mt-2 grid grid-cols-2 gap-3 text-sm sm:grid-cols-6">
                 <Stat label="الكرتون" value={fmtSar(d.cost.cartonSar)} />
                 <Stat label="وزن الطرد" value={fmtWeight(d.cost.actualKg * 1000)} />
                 <Stat label="الوزن الحجمي" value={fmtWeight(d.cost.volumetricKg * 1000)} hint="وزن تحسبه شركات الشحن من حجم الكرتون، ويُحاسب بالأكبر منه ومن وزن الطرد" />
                 <Stat label="الشحن" value={fmtSar(d.cost.shippingSar)} />
+                <Stat
+                  label="امتلاء الكرتون"
+                  value={fmtPct(cartonFill(d.carton.innerCm, viewItems.map((it) => it.placement)).usedShare)}
+                  hint="حجم القطع بعد الحماية والهامش من حجم الكرتون من الداخل. الباقي يُملأ بالحشو"
+                />
                 <Stat label="الإجمالي" value={fmtSar(d.cost.totalSar)} strong />
               </dl>
             </section>
@@ -397,31 +397,92 @@ function toViewItems(items: PackItemView[]) {
   }));
 }
 
-function Steps({ steps }: { steps: PackResponse["instructions"] }) {
+/**
+ * The written steps and the 3D view on one step: picking a written step moves the view, and the
+ * view's step is marked in the list. The view opens with every item in place.
+ */
+function PackPlan({
+  inner,
+  items,
+  steps,
+  titled = false,
+}: {
+  inner: [number, number, number];
+  items: ReturnType<typeof toViewItems>;
+  steps: PackResponse["instructions"];
+  titled?: boolean;
+}) {
+  const [view, setView] = useState(items.length);
+  // Only link the list once the 3D view is up; the 2D fallback has no steps.
+  const [linked, setLinked] = useState(false);
+  const writtenStep = (v: number) => writtenStepOf(v, steps.length);
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+      <div className="space-y-3">
+        {titled && <h2 className="font-bold">خطوات التغليف</h2>}
+        <Steps steps={steps} active={linked ? writtenStep(view) : null} onPick={linked ? (w) => setView(w - 1) : undefined} />
+      </div>
+      <div className="space-y-3 print:hidden">
+        {titled && <h2 className="font-bold">شكل الترتيب داخل الكرتون</h2>}
+        <Layout
+          inner={inner}
+          items={items}
+          step={view}
+          onStep={setView}
+          writtenStep={writtenStep}
+          thisSideUp={items.some((it) => it.liquid)}
+          onReady={() => setLinked(true)}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Steps({ steps, active = null, onPick }: { steps: PackResponse["instructions"]; active?: number | null; onPick?: (step: number) => void }) {
   return (
     <ol className="space-y-2">
-      {steps.map((s) => (
-        <li key={s.step} className="rounded-md border border-border bg-surface p-3">
-          <div className="flex gap-2">
+      {steps.map((s) => {
+        const head = (
+          <>
             <span className="ltr-nums flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs text-brand-contrast">
               {s.step}
             </span>
             <span>{s.text}</span>
-          </div>
-          {s.notes.length > 0 && (
-            <ul className="mt-1 ms-8 list-disc space-y-0.5 text-sm text-muted">
-              {s.notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
+          </>
+        );
+        const isActive = active === s.step;
+        return (
+          <li
+            key={s.step}
+            aria-current={isActive ? "step" : undefined}
+            className={`rounded-md border bg-surface p-3 transition-colors print:border-border print:ring-0 ${isActive ? "border-brand ring-1 ring-brand" : "border-border"}`}
+          >
+            {onPick ? (
+              <button type="button" onClick={() => onPick(s.step)} className="flex w-full gap-2 text-start hover:text-brand" title="اعرض هذه الخطوة في الشكل">
+                {head}
+              </button>
+            ) : (
+              <div className="flex gap-2">{head}</div>
+            )}
+            {s.notes.length > 0 && (
+              <ul className="mt-1 ms-8 list-disc space-y-0.5 text-sm text-muted">
+                {s.notes.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
     </ol>
   );
 }
 
-function Layout({ inner, items }: { inner: [number, number, number]; items: ReturnType<typeof toViewItems> }) {
+function Layout({
+  inner,
+  items,
+  ...view
+}: { inner: [number, number, number]; items: ReturnType<typeof toViewItems> } & Omit<ComponentProps<typeof PackingView3DView>, "inner" | "items">) {
   return (
     <Safe3D
       fallback={
@@ -435,7 +496,7 @@ function Layout({ inner, items }: { inner: [number, number, number]; items: Retu
         </div>
       }
     >
-      <PackingView3D inner={inner} items={items} />
+      <PackingView3D inner={inner} items={items} {...view} />
     </Safe3D>
   );
 }
@@ -478,12 +539,7 @@ function SplitBoxes({ split }: { split: NonNullable<PackResponse["split"]> }) {
                 </span>
               ))}
             </p>
-            <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
-              <Steps steps={b.instructions} />
-              <div className="print:hidden">
-                <Layout inner={b.carton.innerCm} items={items} />
-              </div>
-            </div>
+            <PackPlan inner={b.carton.innerCm} items={items} steps={b.instructions} />
           </section>
         );
       })}

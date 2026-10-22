@@ -56,6 +56,18 @@ export const ArrowForwardIcon = (p: P) => (
     <path d="M19 12H5M11 6l-6 6 6 6" />
   </Svg>
 );
+export const PlayIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M7 5v14l12-7z" />
+  </Svg>
+);
+
+export const PauseIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M9 5v14M15 5v14" />
+  </Svg>
+);
+
 export const BellIcon = (p: P) => (
   <Svg {...p}>
     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />

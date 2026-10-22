@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildInstructions } from "@/lib/engine/instructions";
-import { cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize, voidFillBubbles } from "@/lib/ui/three";
+import { fmtLitres } from "@/lib/ui/format";
+import { cartonFill, cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize, voidFillBubbles, writtenStepOf } from "@/lib/ui/three";
 import { carton, place, unit } from "../engine/helpers";
 
 const inner: [number, number, number] = [30, 20, 15];
@@ -51,6 +52,17 @@ describe("3D helpers", () => {
     // The 3D filler view after the last item is the written "fill the gaps" step.
     expect(steps[items.length + 1]).toMatchObject({ step: items.length + 2, unitId: null });
     expect(steps[items.length + 1].text).toContain("املأ الفراغات");
+    // Every view step maps to the written step with the same meaning; the closed carton is «this side up».
+    placementOrder(items).forEach((it, i) => expect(steps[writtenStepOf(i + 1, steps.length) - 1].unitId).toBe(it.unitId));
+    expect(writtenStepOf(0, steps.length)).toBe(1);
+    expect(steps[writtenStepOf(items.length + 2, steps.length) - 1].text).toContain("للأعلى");
+  });
+
+  it("without liquids the closed carton shares the fill step's number", () => {
+    const steps = buildInstructions(carton("M", [30, 25, 15]), [place("book#1", 0, 0, 0, 20, 15, 3)], [unit("book#1", [20, 15, 3])], 1);
+    expect(steps).toHaveLength(3);
+    expect(writtenStepOf(2, steps.length)).toBe(3); // fill
+    expect(writtenStepOf(3, steps.length)).toBe(3); // closed
   });
 
   it("top view paints lower tops first so stacked items stay visible", () => {
@@ -104,5 +116,20 @@ describe("voidFillBubbles", () => {
     const empty = voidFillBubbles(inner, [], 14);
     expect(empty.positions.length).toBeGreaterThan(0);
     expect(empty.positions.length).toBeLessThanOrEqual(14 ** 3);
+  });
+});
+
+describe("cartonFill", () => {
+  it("is the share the placed boxes take and the litres left for filler", () => {
+    // 30×20×10 = 6 L; a 15×20×10 box takes half.
+    expect(cartonFill([30, 20, 10], [{ x: 0, y: 0, z: 0, dx: 15, dy: 20, dz: 10 }])).toEqual({ usedShare: 0.5, freeLitres: 3 });
+    expect(cartonFill([30, 20, 10], [])).toEqual({ usedShare: 0, freeLitres: 6 });
+  });
+
+  it("prints whole litres from 10 up and one decimal below", () => {
+    expect(fmtLitres(23.6)).toContain("24");
+    expect(fmtLitres(3)).toContain("3");
+    expect(fmtLitres(2.46)).toContain("2.5");
+    expect(fmtLitres(2.46)).toContain("لتر");
   });
 });

@@ -39,7 +39,7 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 
 ## Verification steps we can show
 
-1. `npm run check` → lint, typecheck, `validate-data`, 287 tests (incl. a 200-order property test: every layout passes the independent validator).
+1. `npm run check` → lint, typecheck, `validate-data`, 290 tests (incl. a 200-order property test: every layout passes the independent validator).
 2. CI green on every commit (GitHub Actions).
 3. `npm run eval:packing` → `eval/results/packing-*.json` (validity 40/40, 0 false claims, recall 20/20, baseline failing 20/28).
 4. `npm run eval:extraction` → `eval/results/extraction-2026-10-21-v1.json` (30/30 calls ok, `gemini-3.5-flash-lite`).
