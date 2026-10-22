@@ -5,9 +5,9 @@ The maintained recipes for proving Rassah's user-facing behavior. Read this inde
 | Feature | File | Covered by `verify.sh` |
 |---|---|---|
 | Packing an order | [packing.md](packing.md) | local (packs), prod (GET pages only) |
-| Confirming and correcting a result | [corrections.md](corrections.md) | local only |
-| Demo store checkout | [store-checkout.md](store-checkout.md) | local only |
-| Monitoring, notifications, catalog, health | [monitoring.md](monitoring.md) | local and prod |
+| Confirming, correcting and measuring | [corrections.md](corrections.md) | local only |
+| Demo store checkout and confirmation page | [store-checkout.md](store-checkout.md) | local only |
+| Monitoring, notifications, catalog (and its demo controls), health | [monitoring.md](monitoring.md) | local and prod |
 | Site footer (MVP note and repo link) | [site-footer.md](site-footer.md) | local and prod |
 
 ## Baseline preconditions
@@ -26,7 +26,7 @@ The maintained recipes for proving Rassah's user-facing behavior. Read this inde
 
 - Evidence lands in `artifacts/verify/rassah/<timestamp>-<mode>/` (git-ignored): every response body, plus `build.log` and `server.log` in local mode. It survives cleanup.
 - A check passes only on its asserted value (status code and a JSON or HTML expectation), never because a request merely answered.
-- A mutation (correction, checkout) is proven by a second read: the re-pack or the queue.
+- A mutation (correction, measurement, checkout, cleared facts) is proven by a second read: the re-pack or the queue.
 - Report a feature you could not drive with the command you tried and the precondition that failed. Do not count a prod GET as proof of a POST-only behavior.
 
 ## Feature entry contract

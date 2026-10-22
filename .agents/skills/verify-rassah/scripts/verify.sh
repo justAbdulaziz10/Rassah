@@ -32,8 +32,10 @@ fail() { echo "FAIL $1"; FAIL=1; }
 # expect_status NAME METHOD PATH EXPECTED [BODY]
 expect_status() {
   local name="$1" method="$2" path="$3" want="$4" body="${5:-}" f="$OUT/$(echo "$1" | tr -c 'A-Za-z0-9\n' _).body" code
-  if [ "$method" = POST ]; then
-    code=$(curl -s -o "$f" -w '%{http_code}' --max-time 60 -X POST -H 'content-type: application/json' -d "$body" "$BASE$path")
+  if [ "$method" = POST ] || [ "$method" = PATCH ]; then
+    code=$(curl -s -o "$f" -w '%{http_code}' --max-time 60 -X "$method" -H 'content-type: application/json' -d "$body" "$BASE$path")
+  elif [ "$method" = DELETE ]; then
+    code=$(curl -s -o "$f" -w '%{http_code}' --max-time 60 -X DELETE "$BASE$path")
   else
     code=$(curl -s -o "$f" -w '%{http_code}' --max-time 60 "$BASE$path")
   fi
@@ -121,6 +123,14 @@ if [ "$MODE" = local ]; then
   expect_status repack-1002 POST /api/orders/1002/pack 200 '{}'
   expect_json "repack 1002 uses the corrected height (origin manual)" repack-1002 "const f=j.items.find(i=>i.productId===\"p-16\").facts;f.heightCm===$NEW_H&&f.origin===\"manual\""
 
+  echo "== measure the products 1017 asks for (features/corrections.md)"
+  expect_status measure-partial PATCH /api/products/p-29/facts 400 '{"changes":{"lengthCm":20}}'
+  expect_status measure-p-29 PATCH /api/products/p-29/facts 200 '{"changes":{"lengthCm":20,"widthCm":15,"heightCm":10,"weightG":500}}'
+  expect_json "p-29 measured by hand (origin manual)" measure-p-29 'j.facts.dimsSource==="manual"&&j.facts.origin==="manual"&&j.corrections.length===4'
+  expect_status measure-p-30 PATCH /api/products/p-30/facts 200 '{"changes":{"lengthCm":12,"widthCm":8,"heightCm":5,"weightG":200}}'
+  expect_status repack-1017 POST /api/orders/1017/pack 200 '{}'
+  expect_json "repack 1017 packs with the measured sizes" repack-1017 'j.status==="box_found"&&["p-29","p-30"].every(p=>j.items.find(i=>i.productId===p).facts.origin==="manual")'
+
   echo "== store checkout (features/store-checkout.md)"
   expect_status checkout POST /api/store/checkout 201 '{"customerName":"تحقق رصّة","items":[{"productId":"p-16","qty":1},{"productId":"p-17","qty":1}]}'
   expect_json "checkout returns a store order number (5001+)" checkout 'Number(j.orderId)>=5001'
@@ -129,6 +139,9 @@ if [ "$MODE" = local ]; then
   expect_json "store order $STORE_ID is new in the packer queue" queue "j.newOrderIds.includes(\"$STORE_ID\")"
   expect_status pack-store POST "/api/orders/$STORE_ID/pack" 200 '{}'
   expect_json "store order $STORE_ID packs" pack-store 'j.status==="box_found"&&j.orderSource!==undefined'
+  expect_status store-placed GET "/store/order/$STORE_ID" 200
+  expect_body "confirmation page thanks the customer" store-placed "تحقق رصّة"
+  expect_body "confirmation page links to packing the order" store-placed "href=\"/orders/$STORE_ID\""
   expect_status checkout-no-name POST /api/store/checkout 400 '{"customerName":"","items":[{"productId":"p-16","qty":1}]}'
 
   echo "== monitoring and notifications (features/monitoring.md)"
@@ -137,6 +150,14 @@ if [ "$MODE" = local ]; then
   expect_status notifications GET /notifications 200
   expect_status catalog GET /catalog 200
   expect_status evaluation GET /evaluation 200
+
+  echo "== catalog demo controls (features/monitoring.md); blank Gemini key, so nothing paid is called"
+  expect_status extract-p-01 POST /api/products/p-01/extract 200
+  expect_json "re-read p-01 records an admin extraction (config_error without a key)" extract-p-01 'j.events.length===1&&j.events[0].trigger==="admin"&&j.events[0].status==="config_error"'
+  expect_status clear-p-02 DELETE /api/products/p-02/facts 200
+  expect_json "p-02 facts cleared" clear-p-02 'j.cleared==="p-02"'
+  expect_status repack-1001-cleared POST /api/orders/1001/pack 200 '{}'
+  expect_json "1001 now needs p-02 measured (its facts are gone, no key to re-read)" repack-1001-cleared 'j.status==="needs_measurement"&&j.productsToMeasure.map(p=>p.productId).join()==="p-02"'
 else
   BASE="${BASE_URL:-https://rassah.vercel.app}"
   echo "== production read-only smoke against $BASE (GET only, no packs)"

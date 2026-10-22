@@ -1,6 +1,6 @@
 ---
 name: verify-rassah
-description: Drives the Rassah app over HTTP, locally in memory mode or read-only on production, to prove packing, corrections, store checkout, monitoring and the footer. Use when a change touches app/, components/, lib/, proxy.ts or data/.
+description: Drives the Rassah app over HTTP, locally in memory mode or read-only on production, to prove packing, corrections and measurements, store checkout, monitoring and the footer. Use when a change touches app/, components/, lib/, proxy.ts or data/.
 metadata:
   origin: home-grown
 ---
@@ -25,12 +25,12 @@ Built into local mode: the port must be listening and the server PID alive befor
 | Feature | Local | Prod (GET only) |
 |---|---|---|
 | [Packing](features/packing.md) | 1001 → `FLAT`; 1002 → packs with `p-16` `inferred`; 1017 → `needs_measurement` for `p-29`, `p-30`; 1020 → `no_box` with a split of ≥ 2 cartons; trace of the 1001 run; `/orders/1021` → 404 | `/orders`, `/orders/1001` 200; `/orders/1021` 404 |
-| [Corrections](features/corrections.md) | confirm the 1001 run; correct `p-16` height on the 1002 run; re-pack uses it with origin `manual` | none |
-| [Store checkout](features/store-checkout.md) | checkout → 201 with order ≥ 5001; it is new in `/api/orders/queue`; it packs; empty name → 400 | `/store` 200 |
-| [Monitoring](features/monitoring.md) | `/api/health`, `/api/monitoring/metrics`, `/monitoring`, `/notifications`, `/catalog`, `/evaluation` | health `status: ok`, the same pages, queue counts |
+| [Corrections](features/corrections.md) | confirm the 1001 run; correct `p-16` height on the 1002 run; re-pack uses it with origin `manual`; partial measure → 400; measure `p-29`, `p-30` → 1017 packs | none |
+| [Store checkout](features/store-checkout.md) | checkout → 201 with order ≥ 5001; `/store/order/<id>` thanks the customer and links to packing; it is new in `/api/orders/queue`; it packs; empty name → 400 | `/store` 200 |
+| [Monitoring](features/monitoring.md) | `/api/health`, `/api/monitoring/metrics`, `/monitoring`, `/notifications`, `/catalog`, `/evaluation`; catalog re-read (`config_error`, no key) and clear `p-02` → 1001 needs measuring | health `status: ok`, the same pages, queue counts |
 | [Site footer](features/site-footer.md) | repo link (new tab) in `/`, `/orders`, `/store` | same |
 
-Prod mode never POSTs: packing writes events and can call Gemini (paid), and a checkout creates an order every visitor sees. Any real-world side effect needs the user's approval.
+Prod mode never POSTs, PATCHes or DELETEs: packing writes events and can call Gemini (paid), and a checkout creates an order every visitor sees. Any real-world side effect needs the user's approval.
 
 ## Evidence
 `artifacts/verify/rassah/<timestamp>-<mode>/` (git-ignored): every response body, `build.log`, `server.log`. Survives cleanup.
@@ -42,5 +42,7 @@ Prod mode never POSTs: packing writes events and can call Gemini (paid), and a c
 
 ## Proven
 2026-10-21, on top of commit b03849f: `verify.sh local` passed all 40 checks and `verify.sh prod` passed all 16 against https://rassah.vercel.app. Break test: pointing the repo link in `components/SiteFooter.tsx` at `#` made exactly the `/orders` and `/store` footer checks fail (`"href=…" not in …/orders.body`) while the landing page's own footer passed; restored, product diff empty, local run green again.
+
+2026-10-22, on top of commit 0dd598e (maintain pass): `verify.sh local` passed all 55 checks, now including manual measurement, the store confirmation page and the catalog demo controls. Prod mode not rerun (no external calls in that pass).
 
 Keep this skill and the feature map current with `maintain-verification-skill`.
