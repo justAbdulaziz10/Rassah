@@ -318,7 +318,7 @@ docs/                    decisions, diagrams, stack guides and the report
 | Database and event store | Supabase (Postgres) via `@supabase/supabase-js` |
 | 3D view | `@react-three/fiber` and `@react-three/drei` |
 | Charts | Recharts |
-| Tests and quality | Vitest (227 tests), ESLint, `tsc --noEmit` |
+| Tests and quality | Vitest (283 tests), ESLint, `tsc --noEmit` |
 | Hosting and CI | Vercel (production on `main`, Frankfurt region) and GitHub Actions |
 
 ## Team
