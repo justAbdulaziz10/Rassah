@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { packOrder } from "@/lib/engine";
 import { packUnits } from "@/lib/engine/packer";
 import { validateLayout } from "@/lib/engine/validator";
-import type { Unit } from "@/lib/engine/types";
+import { loadCartons } from "@/lib/data/load";
+import type { ProductFacts, Unit } from "@/lib/engine/types";
 import { CFG, RATES, VOPTS, carton, facts, rng, unit } from "./helpers";
 
 const CARTONS = [
@@ -77,6 +78,14 @@ describe("packUnits", () => {
     const a = packUnits(units, CARTONS, { ...opts, now: fixedClock });
     const b = packUnits(units, CARTONS, { ...opts, now: fixedClock });
     expect(a).toEqual(b);
+  });
+
+  it("gives the same answer whatever order the units arrive in", () => {
+    const units = [unit("a#1", [12, 9, 5]), unit("b#1", [10, 8, 7], { fragile: true }), unit("c#1", [9, 9, 9]), unit("c#2", [9, 9, 9])];
+    const fixedClock = () => 0;
+    const a = packUnits(units, CARTONS, { ...opts, now: fixedClock });
+    const b = packUnits([...units].reverse(), CARTONS, { ...opts, now: fixedClock });
+    expect(b).toEqual(a);
   });
 
   it("stops at the search budget and says so", () => {
@@ -159,6 +168,33 @@ describe("packOrder (facts → result + instructions)", () => {
       RATES,
     );
     expect(r).toEqual({ status: "needs_measurement", productIds: ["x"] });
+  });
+
+  it("same lines in a different order give the same carton, cost and status", () => {
+    // Regression: the random restarts were seeded from the units in line order, so reversing
+    // these lines turned an L carton (38.6 SAR) into an XL one (66.8 SAR).
+    const { cartons, shipping } = loadCartons();
+    const est = (id: string, l: number, w: number, h: number, weightG: number, flags: Partial<ProductFacts> = {}) =>
+      [id, facts(id, { lengthCm: l, widthCm: w, heightCm: h, weightG, dimsSource: "inferred", ...flags })] as const;
+    const f = new Map([
+      est("p-26", 16, 12, 8, 250),
+      est("p-24", 10, 8, 4, 150, { sensitive: true }),
+      est("p-01", 7, 7, 16, 420, { fragile: true, liquid: true }),
+      est("p-13", 28, 20, 6, 1150),
+    ]);
+    const lines = [
+      { productId: "p-26", name: "p-26", qty: 3 },
+      { productId: "p-24", name: "p-24", qty: 1 },
+      { productId: "p-01", name: "p-01", qty: 3 },
+      { productId: "p-13", name: "p-13", qty: 1 },
+    ];
+    const summary = (r: ReturnType<typeof packOrder>) =>
+      r.status === "box_found" ? { status: r.status, carton: r.carton.id, totalSar: r.cost.totalSar } : { status: r.status };
+    const fixedClock = () => 0;
+    const forward = summary(packOrder(lines, f, cartons, shipping, CFG, fixedClock));
+    expect(forward.status).toBe("box_found");
+    expect(summary(packOrder([...lines].reverse(), f, cartons, shipping, CFG, fixedClock))).toEqual(forward);
+    expect(summary(packOrder([lines[2], lines[0], lines[3], lines[1]], f, cartons, shipping, CFG, fixedClock))).toEqual(forward);
   });
 
   it("returns instructions with a box", () => {

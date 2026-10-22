@@ -1,6 +1,6 @@
 // Search-based packing: extreme-point placement with gravity and handling rules,
-// tried under several item orderings for every carton. Deterministic for a given input
-// (the only non-deterministic input is the wall-clock search budget).
+// tried under several item orderings for every carton. Deterministic for a given set of units,
+// whatever order they arrive in (the only non-deterministic input is the wall-clock search budget).
 
 import type { EngineConfig } from "./config";
 import { estimateCost } from "./cost";
@@ -398,12 +398,18 @@ function seedOf(text: string): number {
   return h >>> 0;
 }
 
-/** Seeded random orderings tried after the fixed strategies fail (deterministic per order + carton). */
+/** Units in a fixed order (by unit id), so the order lines arrive in never changes the search. */
+function canonical(units: Unit[]): Unit[] {
+  return [...units].sort((a, b) => a.unitId.localeCompare(b.unitId));
+}
+
+/** Seeded random orderings tried after the fixed strategies fail (deterministic per set of units + carton). */
 function restartOrders(units: Unit[], cartonId: string, count: number): Array<{ name: string; order: Unit[]; score: ScoreMode }> {
-  const rand = prng(seedOf(units.map((u) => u.unitId).join("|") + "@" + cartonId));
+  const sorted = canonical(units);
+  const rand = prng(seedOf(sorted.map((u) => u.unitId).join("|") + "@" + cartonId));
   const out: Array<{ name: string; order: Unit[]; score: ScoreMode }> = [];
   for (let k = 0; k < count; k++) {
-    const shuffled = [...units].sort((a, b) => a.unitId.localeCompare(b.unitId));
+    const shuffled = [...sorted];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(rand() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -416,7 +422,8 @@ function restartOrders(units: Unit[], cartonId: string, count: number): Array<{ 
   return out;
 }
 
-export function packUnits(units: Unit[], cartons: Carton[], opts: PackOptions): PackSuccess | PackNoBox {
+export function packUnits(input: Unit[], cartons: Carton[], opts: PackOptions): PackSuccess | PackNoBox {
+  const units = canonical(input);
   const cfg = opts.config;
   const now = opts.now ?? (() => performance.now());
   const start = now();
