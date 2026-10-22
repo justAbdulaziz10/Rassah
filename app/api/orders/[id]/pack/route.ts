@@ -1,6 +1,7 @@
 import { after, connection } from "next/server";
 import { z } from "zod";
 import { serverExtractDeps } from "@/lib/ai";
+import { ENGINE_VERSION } from "@/lib/engine/config";
 import { appEnv } from "@/lib/env";
 import { jsonError, log, readJson, repoOrError } from "@/lib/http";
 import { isOrderId } from "@/lib/ids";
@@ -31,20 +32,15 @@ export async function POST(request: Request, ctx: RouteContext<"/api/orders/[id]
   const simulateOutage = env.DEMO_MODE && body.data.simulateOutage === true;
   const runId = crypto.randomUUID();
   const storeCfg = storeIntegrationConfig();
-  let deps: ReturnType<typeof serverExtractDeps>;
-  try {
-    deps = serverExtractDeps({ simulateOutage });
-  } catch {
-    return jsonError(503, "The AI settings on the server are invalid");
-  }
+  const deps = serverExtractDeps({ simulateOutage });
 
   const result = await runPack({
     repo,
     orderId: id,
     runId,
     deps,
-    engineVersion: env.ENGINE_VERSION,
-    promptVersion: env.PROMPT_VERSION,
+    engineVersion: ENGINE_VERSION,
+    promptVersion: deps.promptVersion,
     webhookUrl: env.ALERT_WEBHOOK_URL,
     // Connected store (read-only). Off unless STORE_API_URL and STORE_API_KEY are set.
     externalOrders: storeCfg ? makeStoreOrderFetcher(storeCfg) : undefined,

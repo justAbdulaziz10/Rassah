@@ -261,7 +261,6 @@ Copy `.env.example` to `.env.local`. Never commit real values, and never give a 
 | `MEMORY_MOCK_DATA` | optional | Memory mode only: `true` loads the same mock history as `npm run demo:data` at start-up |
 | `STORE_API_URL`, `STORE_API_KEY` | optional | An external store's Orders API (for example Salla later). When both are set, an order number that isn't in Rassah's database is read from it, read-only. `/store` needs neither |
 | `DEMO_MODE` | optional | `true` enables demo controls: fault injection (`/orders/<id>?outage=1`), re-extract and clear cached facts |
-| `ENGINE_VERSION`, `PROMPT_VERSION` | optional | Stamped into events and eval runs |
 | `ALERT_WEBHOOK_URL` | optional | Discord or Slack webhook for alerts |
 
 > This project uses Next.js 16 with Cache Components. Several APIs differ from older Next.js versions, so read `AGENTS.md` and the docs in `node_modules/next/dist/docs/` before writing pages or routes.

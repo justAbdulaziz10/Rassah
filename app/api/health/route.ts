@@ -1,5 +1,7 @@
 import { connection } from "next/server";
 import { seededFactsCount } from "@/lib/db/local";
+import { PROMPT_VERSION } from "@/lib/ai/prompt";
+import { ENGINE_VERSION } from "@/lib/engine/config";
 import { appEnv, hasGeminiKey, hasSupabaseConfig, isLocalBackend } from "@/lib/env";
 import { evaluateHealth, type DatabaseState } from "@/lib/health";
 import { repoOrError } from "@/lib/http";
@@ -29,8 +31,8 @@ export async function GET() {
     geminiKeyPresent: hasGeminiKey(),
     seededFacts: local && database === "ok" ? seededFactsCount() : 0,
     demoMode: env.DEMO_MODE,
-    engineVersion: env.ENGINE_VERSION,
-    promptVersion: env.PROMPT_VERSION,
+    engineVersion: ENGINE_VERSION,
+    promptVersion: PROMPT_VERSION,
   });
   return Response.json(body, { status: httpStatus });
 }

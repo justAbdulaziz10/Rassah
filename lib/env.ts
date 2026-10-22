@@ -1,7 +1,5 @@
 import "server-only";
 import { z } from "zod";
-import { PROMPT_VERSION } from "./ai/prompt";
-import { ENGINE_VERSION } from "./engine/config";
 
 // Env vars are validated lazily per feature, so a missing Gemini key does not
 // stop the engine or the dashboard from working (the health check reports it).
@@ -12,22 +10,20 @@ const optionalString = z
   .transform((v) => (v && v.trim() !== "" ? v.trim() : undefined));
 
 const AppEnvSchema = z.object({
-  DEMO_MODE: optionalString.transform((v) => v === "true"),
-  ENGINE_VERSION: optionalString.transform((v) => v ?? ENGINE_VERSION),
-  PROMPT_VERSION: optionalString.transform((v) => v ?? PROMPT_VERSION),
+  DEMO_MODE: optionalString.transform((v) => v?.toLowerCase() === "true" || v === "1"),
   ALERT_WEBHOOK_URL: optionalString,
 });
 
 const GeminiEnvSchema = z.object({
-  GEMINI_API_KEY: z.string().min(1, "GEMINI_API_KEY is missing"),
-  GEMINI_MODEL: z.string().min(1, "GEMINI_MODEL is missing"),
+  GEMINI_API_KEY: z.string().trim().min(1, "GEMINI_API_KEY is missing"),
+  GEMINI_MODEL: z.string().trim().min(1, "GEMINI_MODEL is missing"),
   GEMINI_PRICE_INPUT_PER_M: z.coerce.number().nonnegative().default(0),
   GEMINI_PRICE_OUTPUT_PER_M: z.coerce.number().nonnegative().default(0),
 });
 
 const SupabaseEnvSchema = z.object({
-  SUPABASE_URL: z.url("SUPABASE_URL must be a URL"),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "SUPABASE_SERVICE_ROLE_KEY is missing"),
+  SUPABASE_URL: z.string().trim().pipe(z.url("SUPABASE_URL must be a URL")),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().trim().min(1, "SUPABASE_SERVICE_ROLE_KEY is missing"),
 });
 
 export type AppEnv = z.infer<typeof AppEnvSchema>;

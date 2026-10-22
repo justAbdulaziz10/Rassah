@@ -153,7 +153,7 @@ Arabic is the UI language. The templates are in one file (`instructions.ar.ts`) 
 | `wallCm` | 0.5 | Wall thickness for outer dimensions (volumetric weight) |
 | `maxUnits` | 12 | Input cap per order |
 | `eps` | 1e-6 | Geometric tolerance |
-| `ENGINE_VERSION` | `engine-0.3` | Stamped into every order event (env `ENGINE_VERSION` overrides) |
+| `ENGINE_VERSION` | `engine-0.3` | Stamped into every order event and eval run (constant in code; bump it with engine changes) |
 
 The volumetric divisor (5000 cm³/kg; some couriers use 4000 or 6000) is in `data/cartons.json`, not in `config.ts`.
 
