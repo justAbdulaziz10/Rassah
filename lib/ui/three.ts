@@ -18,7 +18,16 @@ export interface ViewItem {
   sensitive: boolean;
   /** Size is a guess: drawn see-through. */
   estimated: boolean;
+  /** null when the weight is unknown. */
+  weightG?: number | null;
   placement: BoxPlacement;
+}
+
+/** From this weight an item is marked «ثقيل» in the steps and the 3D view. */
+export const HEAVY_G = 1000;
+
+export function isHeavy(item: { weightG?: number | null }): boolean {
+  return (item.weightG ?? 0) >= HEAVY_G;
 }
 
 /** Engine (x, y, z) with z up → three.js (x, y, z) with y up, centred on the carton floor. */

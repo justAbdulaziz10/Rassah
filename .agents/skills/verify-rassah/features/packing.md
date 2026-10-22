@@ -23,7 +23,7 @@ Preconditions:
 
 - Local baseline from [README.md](README.md); no earlier correction to `p-16` in this server's life.
 
-- **Single item.** `curl -s -X POST -H 'content-type: application/json' -d '{}' $BASE/api/orders/1001/pack` → 200, `status: "box_found"`, `carton.id: "FLAT"`.
+- **Single item.** `curl -s -X POST -H 'content-type: application/json' -d '{}' $BASE/api/orders/1001/pack` → 200, `status: "box_found"`, `carton.id: "FLAT"`, and `smaller` holds only `S` with `reason.kind: "too_long"` (the book does not fit it).
 - **Estimated size.** Same for `1002` → `box_found`, and `lines[]` for `p-16` has `dimsSource: "inferred"`.
 - **Measure first.** Same for `1017` → `status: "needs_measurement"`, `productsToMeasure[].productId` is exactly `p-29`, `p-30`.
 - **Split.** Same for `1020` → `status: "no_box"`, `split.boxes.length >= 2`.

@@ -10,6 +10,7 @@ import type { Carton, OrderLine, PackResult, ProductFacts, ShippingRates } from 
 export { ENGINE_CONFIG } from "./config";
 export type { EngineConfig } from "./config";
 export type { InstructionStep } from "./instructions";
+export { smallerCartons, type SmallerCarton, type SmallerReason } from "./smaller";
 export * from "./types";
 
 export type PackOrderResult =

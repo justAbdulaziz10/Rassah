@@ -52,6 +52,10 @@ describe("runPack", () => {
     expect(repo.orderRuns[0]).toMatchObject({ id: "run-1", status: "box_found", cacheMisses: 2, aiProducts: ["p-01", "p-02"] });
     expect(repo.orderRuns[0].costUsd).toBeGreaterThan(0);
     expect(r.monitoring.saved).toBe(true);
+    // Every carton smaller than the chosen one says why it was not used.
+    expect(r.carton?.id).toBe("L");
+    expect(r.smaller.map((c) => c.id)).toEqual(["S"]);
+    expect(r.smaller[0].reason.kind).not.toBe("pricier");
   });
 
   it("happy path when everything is cached: no Gemini calls", async () => {

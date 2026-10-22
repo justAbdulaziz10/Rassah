@@ -105,6 +105,7 @@ if [ "$MODE" = local ]; then
   echo "== packing (features/packing.md)"
   expect_status pack-1001 POST /api/orders/1001/pack 200 '{}'
   expect_json "pack 1001: one book in the FLAT carton" pack-1001 'j.status==="box_found"&&j.carton.id==="FLAT"'
+  expect_json "pack 1001: the smaller S carton is ruled out because the book is too long" pack-1001 'j.smaller.length===1&&j.smaller[0].id==="S"&&j.smaller[0].reason.kind==="too_long"'
   expect_status pack-1002 POST /api/orders/1002/pack 200 '{}'
   expect_json "pack 1002: perfume p-16 sized by estimate, order packed" pack-1002 'j.status==="box_found"&&j.lines.find(l=>l.productId==="p-16").dimsSource==="inferred"'
   expect_status pack-1017 POST /api/orders/1017/pack 200 '{}'

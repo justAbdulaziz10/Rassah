@@ -2,14 +2,15 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import type { PackItemView, PackResponse } from "@/lib/pipeline/pack";
-import { fmtApiError, fmtCartons, fmtDims, fmtPct, fmtPieces, fmtSar, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
+import { fmtApiError, fmtCartons, fmtDims, fmtPct, fmtPieces, fmtSar, fmtSmallerReason, fmtTime, fmtWeight, OUTCOME_LABEL, STATUS_LABEL } from "@/lib/ui/format";
 import { useQueue } from "@/lib/ui/queue-store";
-import { cartonFill, writtenStepOf } from "@/lib/ui/three";
+import { cartonFill, isHeavy, writtenStepOf } from "@/lib/ui/three";
 import { FlagChips, SourceBadge, StatusPill } from "./Badges";
 import { QUEUE_CHANGED } from "./ConsoleNav";
 import FactsForm, { toFormValues, type FactsFormValues } from "./FactsForm";
+import OrderQr from "./OrderQr";
 import type PackingView3DView from "./PackingView3D";
 import Safe3D from "./Safe3D";
 import TopView2D from "./TopView2D";
@@ -19,6 +20,8 @@ const PackingView3D = dynamic(() => import("./PackingView3D"), {
   ssr: false,
   loading: () => <p className="rounded-lg border border-border bg-surface p-6 text-center text-muted">جارٍ تحميل الشكل المجسّم…</p>,
 });
+
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 type State = { kind: "loading" } | { kind: "done"; data: PackResponse } | { kind: "failed"; message: string };
 
@@ -149,6 +152,7 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
               <p className="mt-1 text-sm text-muted">
                 {fmtPieces(d.items.length)} · الكرتون الأوفر الذي يتّسع للطلب بأمان
               </p>
+              {d.smaller?.length > 0 && <WhyNotSmaller smaller={d.smaller} />}
             </>
           )}
           {packedBefore && !confirmed && (
@@ -156,6 +160,13 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
           )}
           {!d.monitoring.saved && <p className="mt-1 text-xs text-warn">لم يُحفظ سجل هذا الطلب في صفحة الأداء. التغليف غير متأثر.</p>}
         </div>
+        {/* The printed sheet links back to this order, so the packer can open the 3D steps on a phone. */}
+        {packable && (
+          <div className="hidden items-center gap-2 print:flex">
+            <OrderQr url={`${window.location.origin}/orders/${encodeURIComponent(d.orderId)}`} className="size-24" />
+            <p className="w-28 text-xs">امسح الرمز لفتح الطلب وخطواته المجسّمة على الجوال</p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2 print:hidden">
           {packable && (
             <button onClick={() => window.print()} className="rounded-lg border border-border px-3 py-2 text-sm hover:bg-border/40">
@@ -385,6 +396,22 @@ function Stat({ label, value, strong, hint }: { label: string; value: string; st
   );
 }
 
+/** The cartons smaller than the chosen one and why each was not used, so the choice can be checked by hand. */
+function WhyNotSmaller({ smaller }: { smaller: PackResponse["smaller"] }) {
+  return (
+    <details className="mt-2 text-sm print:hidden">
+      <summary className="cursor-pointer text-brand underline-offset-4 hover:underline">لماذا ليس كرتوناً أصغر؟</summary>
+      <ul className="mt-1 space-y-0.5">
+        {smaller.map((c) => (
+          <li key={c.id}>
+            <span className="font-medium">{c.name}</span> <span className="text-muted">{fmtDims(c.innerCm)}</span>: {fmtSmallerReason(c.reason)}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 function toViewItems(items: PackItemView[]) {
   return items.map((it) => ({
     unitId: it.unitId,
@@ -393,6 +420,7 @@ function toViewItems(items: PackItemView[]) {
     liquid: it.facts.liquid,
     sensitive: it.facts.sensitive,
     estimated: it.marginApplied,
+    weightG: it.facts.weightG,
     placement: it.placement,
   }));
 }
@@ -416,13 +444,16 @@ function PackPlan({
   // Only link the list once the 3D view is up; the 2D fallback has no steps.
   const [linked, setLinked] = useState(false);
   const writtenStep = (v: number) => writtenStepOf(v, steps.length);
+  const heavy = new Map(items.filter(isHeavy).map((it) => [it.unitId, it.weightG ?? 0]));
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+    // minmax(0, …): a column never grows to its content's width, or the canvas would push the page wider than a phone.
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <div className="space-y-3">
         {titled && <h2 className="font-bold">خطوات التغليف</h2>}
-        <Steps steps={steps} active={linked ? writtenStep(view) : null} onPick={linked ? (w) => setView(w - 1) : undefined} />
+        <Steps steps={steps} heavy={heavy} active={linked ? writtenStep(view) : null} onPick={linked ? (w) => setView(w - 1) : undefined} />
       </div>
-      <div className="space-y-3 print:hidden">
+      {/* The 3D view prints as a still of the carton (see PackingView3D). */}
+      <div className="space-y-3">
         {titled && <h2 className="font-bold">شكل الترتيب داخل الكرتون</h2>}
         <Layout
           inner={inner}
@@ -438,7 +469,18 @@ function PackPlan({
   );
 }
 
-function Steps({ steps, active = null, onPick }: { steps: PackResponse["instructions"]; active?: number | null; onPick?: (step: number) => void }) {
+function Steps({
+  steps,
+  heavy,
+  active = null,
+  onPick,
+}: {
+  steps: PackResponse["instructions"];
+  /** Weight in grams of each heavy unit, by unitId. */
+  heavy?: Map<string, number>;
+  active?: number | null;
+  onPick?: (step: number) => void;
+}) {
   return (
     <ol className="space-y-2">
       {steps.map((s) => {
@@ -448,6 +490,11 @@ function Steps({ steps, active = null, onPick }: { steps: PackResponse["instruct
               {s.step}
             </span>
             <span>{s.text}</span>
+            {s.unitId && heavy?.has(s.unitId) && (
+              <span className="ms-auto h-fit shrink-0 whitespace-nowrap rounded bg-border/60 px-1.5 py-0.5 text-xs font-medium print:border print:border-border">
+                ثقيل، {fmtWeight(heavy.get(s.unitId))}
+              </span>
+            )}
           </>
         );
         const isActive = active === s.step;
@@ -501,9 +548,20 @@ function Layout({
   );
 }
 
-/** One section per carton when the order is split: what goes in it, the steps, the picture and the cost. */
+/**
+ * One tab per carton when the order is split: what goes in it, the steps, the picture and the cost.
+ * The printed sheet has every carton, each on its own page.
+ */
 function SplitBoxes({ split }: { split: NonNullable<PackResponse["split"]> }) {
   const n = split.boxes.length;
+  const [shown, setShown] = useState(0);
+  const tabsId = useId();
+  const tabs = useRef<Array<HTMLButtonElement | null>>([]);
+  const show = (i: number, focus = false) => {
+    const next = (i + n) % n;
+    setShown(next);
+    if (focus) tabs.current[next]?.focus();
+  };
   return (
     <>
       <section className="rounded-lg border border-warn bg-warn-soft/40 p-4">
@@ -514,12 +572,49 @@ function SplitBoxes({ split }: { split: NonNullable<PackResponse["split"]> }) {
           <span className="font-bold">{fmtSar(split.totalSar)}</span>
         </p>
       </section>
+      {/* Arrows move between cartons in reading order: left is the next one. */}
+      <div
+        role="tablist"
+        aria-label="كراتين الطلب"
+        className="flex flex-wrap gap-2 print:hidden"
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") show(shown + 1, true);
+          else if (e.key === "ArrowRight") show(shown - 1, true);
+          else return;
+          e.preventDefault();
+        }}
+      >
+        {split.boxes.map((b, i) => (
+          <button
+            key={i}
+            ref={(el) => {
+              tabs.current[i] = el;
+            }}
+            type="button"
+            role="tab"
+            id={`${tabsId}-tab-${i}`}
+            aria-controls={`${tabsId}-panel-${i}`}
+            aria-selected={shown === i}
+            tabIndex={shown === i ? 0 : -1}
+            onClick={() => show(i)}
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm hover:border-brand aria-selected:border-brand aria-selected:bg-brand aria-selected:font-bold aria-selected:text-brand-contrast"
+          >
+            الكرتون <span className="ltr-nums">{i + 1}</span>: {b.carton.name}
+          </button>
+        ))}
+      </div>
       {split.boxes.map((b, i) => {
         const items = toViewItems(b.items);
         const names = new Map<string, number>();
         for (const it of b.items) names.set(it.name, (names.get(it.name) ?? 0) + 1);
         return (
-          <section key={i} className="space-y-4 rounded-lg border border-border bg-surface p-4 print:break-before-page">
+          <section
+            key={i}
+            role="tabpanel"
+            id={`${tabsId}-panel-${i}`}
+            aria-labelledby={`${tabsId}-tab-${i}`}
+            className={`space-y-4 rounded-lg border border-border bg-surface p-4 print:block print:break-before-page ${shown === i ? "" : "hidden"}`}
+          >
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="text-xl font-bold">
                 الكرتون <span className="ltr-nums">{i + 1}</span> من <span className="ltr-nums">{n}</span>: {b.carton.name}
@@ -540,6 +635,18 @@ function SplitBoxes({ split }: { split: NonNullable<PackResponse["split"]> }) {
               ))}
             </p>
             <PackPlan inner={b.carton.innerCm} items={items} steps={b.instructions} />
+            {i < n - 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  show(i + 1, true);
+                  tabs.current[i + 1]?.scrollIntoView({ block: "nearest", behavior: reducedMotion() ? "auto" : "smooth" });
+                }}
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-bold text-brand-contrast hover:opacity-90 print:hidden"
+              >
+                الكرتون التالي <span className="ltr-nums">({i + 2}/{n})</span> ←
+              </button>
+            )}
           </section>
         );
       })}

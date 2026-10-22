@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildInstructions } from "@/lib/engine/instructions";
 import { fmtLitres } from "@/lib/ui/format";
-import { cartonFill, cartonThreeSize, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize, voidFillBubbles, writtenStepOf } from "@/lib/ui/three";
+import { cartonFill, cartonThreeSize, isHeavy, itemKind, placementOrder, topViewRects, toThreePosition, toThreeSize, voidFillBubbles, writtenStepOf } from "@/lib/ui/three";
 import { carton, place, unit } from "../engine/helpers";
 
 const inner: [number, number, number] = [30, 20, 15];
@@ -131,5 +131,14 @@ describe("cartonFill", () => {
     expect(fmtLitres(3)).toContain("3");
     expect(fmtLitres(2.46)).toContain("2.5");
     expect(fmtLitres(2.46)).toContain("لتر");
+  });
+});
+
+describe("heavy items", () => {
+  it("marks an item from 1 kg, and never one with an unknown weight", () => {
+    expect(isHeavy({ weightG: 1000 })).toBe(true);
+    expect(isHeavy({ weightG: 999 })).toBe(false);
+    expect(isHeavy({ weightG: null })).toBe(false);
+    expect(isHeavy({})).toBe(false);
   });
 });

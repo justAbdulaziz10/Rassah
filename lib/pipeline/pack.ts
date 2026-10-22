@@ -5,7 +5,7 @@ import { getOrExtractFacts } from "@/lib/ai/catalog";
 import type { ExtractDeps } from "@/lib/ai/extractor";
 import type { Repo } from "@/lib/db/repo";
 import type { Correction, ExtractionEvent, OrderRun, StoredFacts } from "@/lib/db/types";
-import { ENGINE_CONFIG, packOrder, type EngineConfig, type InstructionStep } from "@/lib/engine";
+import { ENGINE_CONFIG, packOrder, smallerCartons, type EngineConfig, type InstructionStep, type SmallerCarton } from "@/lib/engine";
 import type { CartonAttempt, CostEstimate, DataSource, Placement, ProductFacts, Unit } from "@/lib/engine/types";
 import { evaluateRules, syncAlerts } from "@/lib/monitoring/alerts";
 
@@ -43,6 +43,8 @@ export interface PackResponse {
   cost: CostEstimate | null;
   reason: string | null;
   attempts: CartonAttempt[];
+  /** With box_found: the cartons smaller than the chosen one and why each was not used, nearest in size first. */
+  smaller: SmallerCarton[];
   /** `known` holds what is already stored (flags, any measured side), so measuring keeps it instead of resetting it. */
   productsToMeasure: Array<{ productId: string; name: string; failedExtraction: boolean; known: MeasureStart }>;
   /** origin is null when the product has no stored facts. */
@@ -127,6 +129,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
     cost: null,
     reason: null,
     attempts: [],
+    smaller: [],
     productsToMeasure: [],
     lines: [],
     timings: { extractMs: 0, packMs: 0, totalMs: 0 },
@@ -332,6 +335,7 @@ export async function runPack(req: PackRequest): Promise<PackResponse> {
           response.cost = result.cost;
           response.instructions = result.instructions ?? [];
           response.items = itemViews(result.placements, result.units);
+          response.smaller = smallerCartons(result.carton, cartons, result.units, result.attempts);
         }
       }
     }

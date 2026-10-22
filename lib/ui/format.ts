@@ -1,5 +1,6 @@
 // Display helpers shared by UI components. Western digits with units for readability.
 
+import type { SmallerReason } from "@/lib/engine/smaller";
 import type { DataSource } from "@/lib/engine/types";
 
 function fmtNum(n: number | null | undefined, digits = 1): string {
@@ -80,6 +81,24 @@ export function fmtMs(ms: number | null | undefined): string {
 /** Volume in litres: whole litres from 10 up, one decimal below. */
 export function fmtLitres(l: number): string {
   return `${ltr(l >= 10 ? String(Math.round(l)) : fmtNum(Math.round(l * 10) / 10))} لتر`;
+}
+
+/** Why a smaller carton was not used, said so the packer can check it by hand. */
+export function fmtSmallerReason(r: SmallerReason): string {
+  switch (r.kind) {
+    case "too_long":
+      return `ينقصه ${ltr(fmtNum(r.overCm))} سم ليدخل فيه «${r.unitName}»`;
+    case "too_heavy":
+      return `وزن القطع ${fmtWeight(r.itemsKg * 1000)}، وأقصى ما يحمله ${fmtWeight(r.maxKg * 1000)}`;
+    case "too_full":
+      return `حجم القطع ${fmtLitres(r.itemsLitres)}، وحجمه من الداخل ${fmtLitres(r.cartonLitres)}`;
+    case "no_layout":
+      return "لم تجد رصّة ترتيباً آمناً للقطع فيه";
+    case "pricier":
+      return "يتّسع للطلب، لكن تكلفته مع الشحن أعلى";
+    case "timeout":
+      return "انتهى وقت البحث قبل تجربته كاملاً";
+  }
 }
 
 export function fmtPct(x: number | null | undefined): string {
