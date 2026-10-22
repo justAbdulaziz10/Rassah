@@ -411,6 +411,21 @@ export class SupabaseRepo implements Repo {
     return rows.length ? toRun(rows[0]) : null;
   }
 
+  async latestOrderRunId(orderId: string) {
+    const rows = check(
+      "latestOrderRunId",
+      await this.db
+        .from("order_runs")
+        .select("id")
+        .eq("order_id", orderId)
+        .eq("trigger", "order")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .limit(1),
+    ) as Row[];
+    return rows.length ? (rows[0].id as string) : null;
+  }
+
   async setOrderRunAction(runId: string, action: EmployeeAction) {
     check(
       "setOrderRunAction",

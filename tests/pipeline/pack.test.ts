@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ExtractDeps, GenerateFn } from "@/lib/ai/extractor";
-import { applyRunAction, updateProductFacts } from "@/lib/pipeline/facts";
+import { applyRunAction, NOT_CONFIRMABLE_MESSAGE, STALE_RUN_MESSAGE, updateProductFacts } from "@/lib/pipeline/facts";
 import { runPack } from "@/lib/pipeline/pack";
 import { MemoryRepo } from "@/lib/db/memory";
 import { RESPONSES } from "../fixtures/gemini/responses";
@@ -142,6 +142,67 @@ describe("corrections and actions", () => {
     await runPack(req(repo, deps));
     await applyRunAction(repo, "run-1", { action: "confirm" });
     expect(repo.orderRuns[0].employeeAction).toBe("confirmed");
+  });
+
+  it("confirm is refused unless the run chose a carton or a split", async () => {
+    const { repo, deps } = setup(RESPONSES.noInfo);
+    await runPack(req(repo, deps));
+    expect(repo.orderRuns[0].status).toBe("needs_measurement");
+    await expect(applyRunAction(repo, "run-1", { action: "confirm" })).rejects.toMatchObject({
+      httpStatus: 409,
+      message: NOT_CONFIRMABLE_MESSAGE,
+    });
+    expect(repo.orderRuns[0].employeeAction).toBe("pending");
+    // A no_box run with a split plan is a carton choice and can be confirmed.
+    Object.assign(repo.orderRuns[0], { status: "no_box", strategy: "split_2" });
+    await applyRunAction(repo, "run-1", { action: "confirm" });
+    expect(repo.orderRuns[0].employeeAction).toBe("confirmed");
+    // A plain no_box cannot.
+    Object.assign(repo.orderRuns[0], { status: "no_box", strategy: null, employeeAction: "pending" });
+    await expect(applyRunAction(repo, "run-1", { action: "confirm" })).rejects.toMatchObject({ httpStatus: 409 });
+  });
+
+  it("confirm is refused for a run that is no longer the order's latest", async () => {
+    const { repo, deps } = setup();
+    await runPack(req(repo, deps, "1001", "run-1"));
+    await runPack(req(repo, deps, "1001", "run-2"));
+    await expect(applyRunAction(repo, "run-1", { action: "confirm" })).rejects.toMatchObject({
+      httpStatus: 409,
+      message: STALE_RUN_MESSAGE,
+    });
+    expect(repo.orderRuns[0].employeeAction).toBe("pending");
+    await applyRunAction(repo, "run-2", { action: "confirm" });
+    expect(repo.orderRuns[1].employeeAction).toBe("confirmed");
+  });
+
+  it("evaluation runs of the same order do not make a packing run stale", async () => {
+    const { repo, deps } = setup();
+    await runPack(req(repo, deps, "1001", "run-1"));
+    repo.orderRuns.push({ ...repo.orderRuns[0], id: "eval-1", trigger: "eval", createdAt: "2099-01-01T00:00:00Z" });
+    expect(await repo.latestOrderRunId("1001")).toBe("run-1");
+    await applyRunAction(repo, "run-1", { action: "confirm" });
+    expect(repo.orderRuns[0].employeeAction).toBe("confirmed");
+  });
+
+  it("confirming twice succeeds and keeps the first confirmation time", async () => {
+    const { repo, deps } = setup();
+    await runPack(req(repo, deps));
+    await applyRunAction(repo, "run-1", { action: "confirm" });
+    const first = repo.orderRuns[0].actionAt;
+    expect(first).not.toBeNull();
+    await expect(applyRunAction(repo, "run-1", { action: "confirm" })).resolves.toMatchObject({ action: "confirmed" });
+    expect(repo.orderRuns[0]).toMatchObject({ employeeAction: "confirmed", actionAt: first });
+  });
+
+  it("an edit after confirming keeps the run confirmed and still links the corrections", async () => {
+    const { repo, deps } = setup();
+    await runPack(req(repo, deps));
+    await applyRunAction(repo, "run-1", { action: "confirm" });
+    const confirmedAt = repo.orderRuns[0].actionAt;
+    const res = await applyRunAction(repo, "run-1", { action: "edit", productId: "p-01", changes: { heightCm: 18 } });
+    expect(res.action).toBe("edited");
+    expect(repo.orderRuns[0]).toMatchObject({ employeeAction: "confirmed", actionAt: confirmedAt });
+    expect(repo.corrections.at(-1)).toMatchObject({ runId: "run-1", field: "height_cm" });
   });
 
   it("edit writes corrections, marks facts ai_corrected and sources manual", async () => {

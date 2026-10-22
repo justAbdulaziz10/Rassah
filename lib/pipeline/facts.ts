@@ -118,15 +118,27 @@ export const RunActionSchema = z.discriminatedUnion("action", [
 ]);
 export type RunAction = z.infer<typeof RunActionSchema>;
 
+/** English messages of the 409s below; lib/ui/format.ts maps them to Arabic for the packer. */
+export const STALE_RUN_MESSAGE = "This run is no longer the latest one for its order";
+export const NOT_CONFIRMABLE_MESSAGE = "Only a run that chose cartons can be confirmed";
+
 export async function applyRunAction(repo: Repo, runId: string, action: RunAction) {
   const run = await repo.getOrderRun(runId);
   if (action.action === "confirm") {
     if (!run) throw new FactsError(`Run ${runId} not found`, 404);
+    // Confirming twice (a double click, a second tab) is not an error and keeps the first time.
+    if (run.employeeAction === "confirmed") return { action: "confirmed" as const, corrections: [] as Correction[] };
+    // Only a carton choice can be packed: one carton, or a split into several.
+    const packable = run.status === "box_found" || (run.status === "no_box" && Boolean(run.strategy?.startsWith("split_")));
+    if (!packable) throw new FactsError(NOT_CONFIRMABLE_MESSAGE, 409);
+    // An older run of the same order may show a carton the latest facts no longer support.
+    if ((await repo.latestOrderRunId(run.orderId)) !== runId) throw new FactsError(STALE_RUN_MESSAGE, 409);
     await repo.setOrderRunAction(runId, "confirmed");
     return { action: "confirmed" as const, corrections: [] as Correction[] };
   }
   // A run whose save failed has no row: the correction is still kept, just not linked to it.
   const { corrections } = await updateProductFacts({ repo, productId: action.productId, changes: action.changes, runId: run ? runId : null });
-  if (run) await repo.setOrderRunAction(runId, "edited");
+  // A packed (confirmed) order stays packed; the corrections are still linked to its run.
+  if (run && run.employeeAction !== "confirmed") await repo.setOrderRunAction(runId, "edited");
   return { action: "edited" as const, corrections };
 }

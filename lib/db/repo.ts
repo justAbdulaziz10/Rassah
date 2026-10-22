@@ -47,6 +47,8 @@ export interface Repo {
   insertExtractionEvents(events: ExtractionEvent[]): Promise<void>;
   insertOrderRun(run: OrderRun): Promise<void>;
   getOrderRun(runId: string): Promise<OrderRun | null>;
+  /** Id of the order's newest packing run (trigger "order"), or null when it has none. */
+  latestOrderRunId(orderId: string): Promise<string | null>;
   setOrderRunAction(runId: string, action: EmployeeAction): Promise<void>;
   insertCorrections(rows: Correction[]): Promise<void>;
   listExtractionEvents(sinceIso: string | null): Promise<ExtractionEvent[]>;

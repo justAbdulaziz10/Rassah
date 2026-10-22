@@ -117,6 +117,13 @@ export class MemoryRepo implements Repo {
   async getOrderRun(runId: string) {
     return this.orderRuns.find((r) => r.id === runId) ?? null;
   }
+  async latestOrderRunId(orderId: string) {
+    // Newest first, ties by id, as the Supabase query orders them.
+    const runs = this.orderRuns
+      .filter((r) => r.trigger === "order" && r.orderId === orderId)
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "") || a.id.localeCompare(b.id));
+    return runs[0]?.id ?? null;
+  }
   async setOrderRunAction(runId: string, action: EmployeeAction) {
     this.guard("setOrderRunAction");
     const r = this.orderRuns.find((x) => x.id === runId);

@@ -98,7 +98,9 @@ export default function PackRunner({ orderId, customerName = null, simulateOutag
     try {
       const res = await postJson(`/api/runs/${d.runId}/action`, { action: "confirm" });
       if (!res.ok) {
-        setConfirmError("تعذّر حفظ التأكيد. اضغط «أعد الحساب» ثم أكّد مرة أخرى.");
+        // 409: the server says why this result cannot be confirmed (a newer run, or no carton chosen).
+        const error = (res.data as { error?: string }).error;
+        setConfirmError(res.status === 409 && error ? fmtApiError(error) : "تعذّر حفظ التأكيد. اضغط «أعد الحساب» ثم أكّد مرة أخرى.");
         return;
       }
     } catch {
