@@ -83,6 +83,14 @@ describe("extractFacts: sanity rules", () => {
     expect(r.facts).toMatchObject({ dimsSource: "inferred", weightSource: "inferred" });
   });
 
+  it("a tiny value that rounds to 0 becomes unknown, never a stored 0 from the page", async () => {
+    const r = await extractFacts(product, deps(ok({ ...RESPONSES.explicitPerfume, widthCm: 0.004, weightG: 0.003 })));
+    expect(r.facts).toMatchObject({ lengthCm: null, widthCm: null, heightCm: null, dimsSource: "unknown", weightG: null, weightSource: "unknown" });
+    // Values that stay above 0 after rounding are kept, rounded.
+    const kept = await extractFacts(product, deps(ok({ ...RESPONSES.explicitPerfume, widthCm: 0.006, weightG: 420.004 })));
+    expect(kept.facts).toMatchObject({ widthCm: 0.01, weightG: 420, dimsSource: "page", weightSource: "page" });
+  });
+
   it("an 'unknown' source never carries a value", async () => {
     const r = await extractFacts(product, deps(ok(RESPONSES.unknownWithValue)));
     expect(r.facts).toMatchObject({ lengthCm: null, weightG: null });

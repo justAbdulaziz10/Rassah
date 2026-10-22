@@ -73,13 +73,15 @@ export interface ExtractOutcome {
 
 /**
  * Post-validation rules applied after Zod (see docs/stack/02):
+ * - values are rounded to 2 decimals first, then checked, so one that rounds to 0 is never stored
  * - out-of-range values become unknown
  * - a source of page/inferred with a missing value becomes unknown
  * - a source of unknown never carries a value (honesty)
  * - "page" with "low" confidence is inconsistent, so it is downgraded to "inferred"
  */
 export function sanitize(productId: string, m: ModelFacts): ExtractedFacts {
-  let dims = [m.lengthCm, m.widthCm, m.heightCm];
+  const r2 = (v: number | null) => (v === null ? null : round2(v));
+  let dims = [r2(m.lengthCm), r2(m.widthCm), r2(m.heightCm)];
   let dimsSource = m.dimsSource;
   if (dims.some((d) => d === null || !(d > 0) || d > LIMITS.maxSideCm)) {
     dims = [null, null, null];
@@ -87,7 +89,7 @@ export function sanitize(productId: string, m: ModelFacts): ExtractedFacts {
   }
   if (dimsSource === "unknown") dims = [null, null, null];
 
-  let weightG = m.weightG;
+  let weightG = r2(m.weightG);
   let weightSource = m.weightSource;
   if (weightG === null || !(weightG > 0) || weightG > LIMITS.maxWeightG) {
     weightG = null;
@@ -102,10 +104,10 @@ export function sanitize(productId: string, m: ModelFacts): ExtractedFacts {
 
   return {
     productId,
-    lengthCm: dims[0] === null ? null : round2(dims[0]),
-    widthCm: dims[1] === null ? null : round2(dims[1]),
-    heightCm: dims[2] === null ? null : round2(dims[2]),
-    weightG: weightG === null ? null : round2(weightG),
+    lengthCm: dims[0],
+    widthCm: dims[1],
+    heightCm: dims[2],
+    weightG,
     dimsSource,
     weightSource,
     fragile: m.fragile,
