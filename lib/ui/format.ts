@@ -173,6 +173,8 @@ const API_ERRORS: Array<[RegExp, string]> = [
   [/Invalid (changes|action|request body|product id|run id)/i, "البيانات المرسلة غير صحيحة. راجع القيم وحاول مرة أخرى."],
   [/Could not save/i, "تعذّر الحفظ. حاول مرة أخرى."],
   [/Could not load/i, "تعذّر تحميل البيانات. حاول مرة أخرى."],
+  [/Could not read the product from the database/i, "تعذّرت قراءة المنتج من قاعدة البيانات. حاول مرة أخرى."],
+  [/Could not clear/i, "تعذّر حذف البيانات المحفوظة. حاول مرة أخرى."],
   [/Database is not configured|Database unavailable/i, "قاعدة البيانات غير متاحة حالياً."],
   [/Not available/i, "هذه الميزة غير متاحة."],
   [/Too many requests|rate limit/i, "عدد الطلبات كبير. انتظر قليلاً ثم حاول مرة أخرى."],
