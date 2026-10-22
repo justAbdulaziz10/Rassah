@@ -42,6 +42,31 @@ const NUM_FIELDS: Array<{ key: "lengthCm" | "widthCm" | "heightCm" | "weightG"; 
   { key: "weightG", label: "الوزن (جم)", max: 30000 },
 ];
 
+/**
+ * What the form sends: an error to show, or the fields to save.
+ * - measure: every number, even one that matches the stored guess (it is now measured).
+ * - edit: only the fields whose value changed, each side on its own, so the sides still
+ *   guessed keep their safety margin (the server marks the size measured only when all three
+ *   sides are sent).
+ */
+export function factChanges(
+  values: FactsFormValues,
+  initial: FactsFormValues,
+  mode: Props["mode"],
+): { error: string } | { changes: Partial<FactsFormValues> } {
+  const changes: Partial<FactsFormValues> = {};
+  for (const f of NUM_FIELDS) {
+    const v = values[f.key];
+    if (mode === "measure" && (v === null || !(v > 0))) return { error: "أدخل الطول والعرض والارتفاع والوزن جميعاً" };
+    if (v !== null && (mode === "measure" || v !== initial[f.key])) changes[f.key] = v;
+  }
+  for (const k of FLAGS) {
+    if (values[k] !== initial[k]) changes[k] = values[k];
+  }
+  if (Object.keys(changes).length === 0) return { error: "لم تغيّر أي قيمة" };
+  return { changes };
+}
+
 export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCancel }: Props) {
   const [values, setValues] = useState<FactsFormValues>(initial);
   const [error, setError] = useState<string | null>(null);
@@ -50,27 +75,12 @@ export default function FactsForm({ initial, mode, submitLabel, onSubmit, onCanc
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const changes: Partial<FactsFormValues> = {};
-    for (const f of NUM_FIELDS) {
-      const v = values[f.key];
-      if (mode === "measure" && (v === null || !(v > 0))) {
-        setError("أدخل الطول والعرض والارتفاع والوزن جميعاً");
-        return;
-      }
-      // Measuring records every number as measured, even one that matches the stored guess.
-      if (v !== null && (mode === "measure" || v !== initial[f.key])) changes[f.key] = v;
-    }
-    // Editing one side means the packer measured the item: send all three so the size counts as measured.
-    if (mode === "edit" && (["lengthCm", "widthCm", "heightCm"] as const).some((k) => k in changes)) {
-      for (const k of ["lengthCm", "widthCm", "heightCm"] as const) if (values[k] !== null) changes[k] = values[k];
-    }
-    for (const k of FLAGS) {
-      if (values[k] !== initial[k]) changes[k] = values[k];
-    }
-    if (Object.keys(changes).length === 0) {
-      setError("لم تغيّر أي قيمة");
+    const built = factChanges(values, initial, mode);
+    if ("error" in built) {
+      setError(built.error);
       return;
     }
+    const { changes } = built;
     setBusy(true);
     try {
       const err = await onSubmit(changes);
