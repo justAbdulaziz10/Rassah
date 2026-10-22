@@ -325,9 +325,11 @@ docs/                    decisions, diagrams, stack guides and the report
 
 Built in two days by:
 
-- **Abdulaziz Alkhlaiwe** ([@justAbdulaziz10](https://github.com/justAbdulaziz10))
-- **Hana** ([@enghanamansour](https://github.com/enghanamansour))
-- **Bayan** ([@Bayan369](https://github.com/Bayan369))
+| Name | GitHub | LinkedIn |
+|---|---|---|
+| **Abdulaziz Alkhlaiwe** | [@justAbdulaziz10](https://github.com/justAbdulaziz10) | [abdulaziz-alkhlaiwe](https://www.linkedin.com/in/abdulaziz-alkhlaiwe) |
+| **Hana Alshamrani** | [@enghanamansour](https://github.com/enghanamansour) | [hana-alshamrani-855946228](https://www.linkedin.com/in/hana-alshamrani-855946228) |
+| **Bayan Alkathiri** | [@Bayan369](https://github.com/Bayan369) | [bayan-alkathiri-3069bsa](https://www.linkedin.com/in/bayan-alkathiri-3069bsa) |
 
 The work was split into three areas:
 
