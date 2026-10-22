@@ -27,11 +27,16 @@
 
 ## GitHub Actions CI: `.github/workflows/ci.yml`
 
-On pull requests and pushes to `main`, one job runs on Node from `.nvmrc`: `npm ci`, `npm run lint`, `npm run typecheck`, `npm run validate-data`, `npm test`, `npm run build`, `npm run eval:packing`. The file is the source of truth.
+On pull requests and pushes to `main`, two jobs run on Node from `.nvmrc`. The file is the source of truth.
+
+- **`check`:** `npm ci`, `npm run lint`, `npm run typecheck`, `npm run validate-data`, `npm test`, `npm run build`, `npm run eval:packing`.
+- **`site`:** `.agents/skills/verify-rassah/scripts/verify.sh local` builds and starts the app on the in-memory backend and drives every page and API flow (packing, measuring, corrections, store checkout, monitoring, catalog controls). On failure its evidence is uploaded as the `site-check-evidence` artifact.
 
 - CI needs **no secrets**. Tests never call Gemini or Supabase (Stack 08).
 - `.nvmrc` holds the Node LTS version (24) so local, CI and Vercel match.
-- Branch protection on `main` (GitHub → Settings → Branches): require the `CI / check` status and 1 approving review. **Not enabled.** The gate was local (`agent-ship ci`) before pushing straight to `main`, with GitHub Actions CI re-running after the push (`docs/decisions.md`, 2026-10-21).
+- Rules on `main` (GitHub → Settings → Rules): nobody can force-push or delete it; every change arrives through a pull request whose `check` and `site` jobs pass. The repository admin may push directly, after the local gate (`agent-ship ci`) has posted its `agent-ship/local-ci` status for that commit.
+- Dependabot (`.github/dependabot.yml`) opens one weekly PR with minor and patch npm updates and a monthly one for GitHub Actions; major versions are upgraded by hand.
+- The report PDF, the slide deck and the demo video are assets of the [v1.0.0 release](https://github.com/justAbdulaziz10/Rassah/releases/tag/v1.0.0), not tracked files.
 
 ## Release checks
 
