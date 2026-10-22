@@ -37,7 +37,17 @@ export function packOrder(
     const split = splitPack(prepared.units, cartons, { config, rates, now });
     // A "split" into one box means the split's own search found a single carton for the whole
     // order (e.g. after the main search ran out of time): that is a normal answer, not a no_box.
-    if (split?.boxes.length === 1) return { ...split.boxes[0], searchMs: result.searchMs + split.searchMs };
+    // The main search's counters stay on the answer, so a validator rejection there still reaches M3.
+    if (split?.boxes.length === 1) {
+      const box = split.boxes[0];
+      return {
+        ...box,
+        searchMs: result.searchMs + split.searchMs,
+        candidatesChecked: result.candidatesChecked + box.candidatesChecked,
+        validatorRejections: result.validatorRejections + box.validatorRejections,
+        violations: [...result.violations, ...box.violations],
+      };
+    }
     return { ...result, split };
   }
   return {

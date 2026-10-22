@@ -9,7 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { loadCartons, loadPackingFixtures } from "../lib/data/load";
 import { baselinePack } from "../lib/engine/baseline";
-import { ENGINE_CONFIG, ENGINE_VERSION as DEFAULT_ENGINE_VERSION } from "../lib/engine/config";
+import { ENGINE_CONFIG, ENGINE_VERSION } from "../lib/engine/config";
 import { estimateCost } from "../lib/engine/cost";
 import { packUnits } from "../lib/engine/packer";
 import type { Unit, ViolationCode } from "../lib/engine/types";
@@ -17,7 +17,6 @@ import { validateLayout } from "../lib/engine/validator";
 import { percentile } from "../lib/math";
 import { hasSupabaseEnv, must, scriptSupabase } from "./_supabase";
 
-const ENGINE_VERSION = process.env.ENGINE_VERSION?.trim() || DEFAULT_ENGINE_VERSION;
 const WRITE = process.argv.includes("--write");
 const VOPTS = { minSupport: ENGINE_CONFIG.minSupport, eps: ENGINE_CONFIG.eps };
 

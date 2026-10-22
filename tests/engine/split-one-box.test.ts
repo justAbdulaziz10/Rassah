@@ -16,8 +16,8 @@ vi.mock("@/lib/engine/packer", async (importOriginal) => {
           status: "no_box",
           reason: "No valid carton found within the search budget",
           attempts: [],
-          candidatesChecked: 0,
-          validatorRejections: 0,
+          candidatesChecked: 7,
+          validatorRejections: 2,
           violations: [],
           searchMs: 1500,
         };
@@ -49,6 +49,9 @@ describe("packOrder when the split finds a single carton", () => {
     expect(r.strategy).not.toMatch(/^split_/);
     expect("split" in r).toBe(false);
     expect(r.searchMs).toBeGreaterThanOrEqual(1500); // the failed main search counts towards the time
+    // A validator rejection in the failed main search still reaches the run (and the M3 alert).
+    expect(r.validatorRejections).toBeGreaterThanOrEqual(2);
+    expect(r.candidatesChecked).toBeGreaterThanOrEqual(7);
   });
 
   it("still reports a real split of two or more boxes as no_box with the plan", () => {

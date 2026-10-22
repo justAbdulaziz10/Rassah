@@ -27,7 +27,7 @@ async function apply() {
   // The same versions and model the deployed app stamps (lib/env.ts falls back to the same defaults).
   const data = buildMockData(now, {
     promptVersion: process.env.PROMPT_VERSION?.trim() || PROMPT_VERSION,
-    engineVersion: process.env.ENGINE_VERSION?.trim() || ENGINE_VERSION,
+    engineVersion: ENGINE_VERSION,
     model: process.env.GEMINI_MODEL?.trim() || undefined,
   });
   must("orders", await db.from("orders").insert(data.orders.map((o) => ({ id: o.id, demo: MOCK_ORDER_TAG, expect: o.expect, created_at: o.createdAt }))));
