@@ -293,7 +293,8 @@ function signals(d: DashboardData, c: Checks): Signal[] {
               .filter(Boolean)
               .join("، ") + ".",
       limit: `الحدّ ${fmtMs(t.cachedP95Ms)}، و${fmtMs(t.uncachedP95Ms)} مع منتج جديد`,
-      few: few(cached.n + uncached.n, cached.minN, "طلبات"),
+      // Each kind is judged on its own once it has its minimum, so the count is given per kind.
+      few: speedSample(cached, uncached),
     },
     {
       key: "cartons",
@@ -435,6 +436,17 @@ function alertNumber(rule: string, v: number): string {
   return fmtPct(v);
 }
 
+type Speed = DashboardData["metrics"]["m5Latency"]["cached"];
+
+/**
+ * M5 counts per kind against the per-kind minimum: "يكفي 10 طلبات لكل نوع: المعروفة 7، الجديدة 3".
+ * Once one kind is judged, `markFew` flags the other if it is still short.
+ */
+function speedSample(cached: Speed, uncached: Speed, markFew = false): string {
+  const kind = (label: string, m: Speed) => `${label} ${ltr(String(m.n))}${markFew && m.n > 0 && !m.sufficient ? " (قليلة)" : ""}`;
+  return `يكفي ${fmtCount(cached.minN, ORDERS)} لكل نوع: ${kind("المعروفة", cached)}، ${kind("الجديدة", uncached)}`;
+}
+
 /* --------------------------------------------------------------- numbers */
 
 function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
@@ -483,8 +495,9 @@ function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
         n={cached.n + uncached.n}
         minN={cached.minN}
         sufficient={cached.sufficient || uncached.sufficient}
+        sample={<SpeedSample cached={cached} uncached={uncached} />}
         limit={`الحدّ المسموح ${fmtMs(t.cachedP95Ms)} للمعروفة، و${fmtMs(t.uncachedP95Ms)} مع منتج جديد`}
-        detail={`نصف الطلبات تنتهي خلال ${fmtMs(cached.value.p50 ?? uncached.value.p50)}`}
+        detail={`نصف الطلبات تنتهي خلال ${fmtMs(m.m5Latency.overallP50)}`}
         hint="95% من الطلبات تنتهي خلال هذا الزمن أو أقل. الطلب الذي فيه منتج جديد أبطأ لأن رصّة تقرأ صفحته أول مرة."
       />
       <Tile
@@ -498,6 +511,18 @@ function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
         hint="متوسط ما يكلّفه الذكاء الاصطناعي لكل طلب. ترتفع كلما زادت المنتجات الجديدة التي تحتاج قراءة، والمنتجات المعروفة مسبقاً بلا تكلفة."
       />
     </section>
+  );
+}
+
+function SpeedSample({ cached, uncached }: { cached: Speed; uncached: Speed }) {
+  if (cached.sufficient || uncached.sufficient) {
+    return <span title="عدد الطلبات التي بُني عليها كل رقم. يُعتمد على رقم النوع حين يبلغ الحدّ الأدنى.">عدد الحالات: {speedSample(cached, uncached, true)}</span>;
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-border/50 px-2 font-medium">
+      <InfoIcon className="size-3" />
+      الحالات قليلة: {speedSample(cached, uncached)}، فلا يُعتمد على الرقمين بعد
+    </span>
   );
 }
 
@@ -520,6 +545,8 @@ function Tile(props: {
   over?: boolean;
   limit?: string;
   detail?: string;
+  /** Replaces the default sample line, for tiles built from more than one count. */
+  sample?: React.ReactNode;
   hint: string;
 }) {
   return (
@@ -539,7 +566,7 @@ function Tile(props: {
       {props.detail && <p className="mt-1.5 text-xs leading-5 text-muted">{props.detail}</p>}
       <p className="mt-1 flex flex-wrap gap-x-2 text-xs leading-5 text-muted">
         {props.limit && <span>{props.limit}</span>}
-        <Sample n={props.n} minN={props.minN} sufficient={props.sufficient} />
+        {props.sample ?? <Sample n={props.n} minN={props.minN} sufficient={props.sufficient} />}
       </p>
       <p className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted">{props.hint}</p>
     </div>
@@ -873,7 +900,8 @@ const SKIP_NOTE: Record<string, string> = {
   oversize: "قطعة أطول أو أعرض من الكرتون",
   overweight: "مجموع الوزن أكبر مما يتحمله الكرتون",
   search_budget: "لم يكتمل البحث في الوقت المسموح",
-  no_layout: "القطع لا تتسع معاً مهما رُتّبت",
+  // Also reported when the search stops at its node or time limit, so it must not claim the pieces can never fit.
+  no_layout: "لم يُعثر على ترتيب يناسبه ضمن حدود البحث",
   validator_rejected: "وُجد ترتيب لكن المدقّق رفضه",
 };
 
