@@ -1,13 +1,13 @@
 # Rassah (رصّة): AI Packing Assistant. Project Report
 
 **Project 1: AI Product Development and Monitoring** · Tuwaiq Academy × Startupbootcamp × Meta · 22 October 2026\
-**Team:** Abdulaziz Alkhlaiwe, Hana, Bayan. Lanes: AI & Data, Engine & UI, Platform & Monitoring\
+**Team:** Abdulaziz Alkhlaiwe, Hana, Bayan. Areas: AI & Data, Engine & UI, Platform & Monitoring\
 **Date:** 2026-10-22\
 **Live demo:** https://rassah.vercel.app · **Repository:** https://github.com/justAbdulaziz10/Rassah
 
 > **Rassah is an MVP built in two days.** The brief asked each team to come up with an AI product, build it end to end between 20 and 22 October 2026, deploy it so anyone can try it, and monitor it. It runs on synthetic data, with no login and no live store integration (see section 11, Limitations).
 >
-> Every number comes from `eval/results/*.json`, `docs/report/results.md`, `docs/demo-script.md` or the dashboard.
+> Every number comes from `eval/results/*.json`, `docs/report/results.md` or the dashboard.
 
 ---
 
@@ -54,7 +54,7 @@ If a value has no basis, the order stops with "needs measurement" (the packer me
   - **Group A (15):** dimensions and weight stated, in varied formats (Arabic-Indic digits, inches/lb, "الطول/العرض/الارتفاع", buried mid-paragraph).
   - **Group B (12):** clues only (50 ml, 400 pages, 12 pieces).
   - **Group C (3):** no usable information.
-- **Ground truth** per product (outer box, natural upright orientation, flags, expected source). Independent review by a member other than the description author is still open (CHECKLIST P3.12), so the ground truth is AI-drafted and unreviewed. **10-product holdout** is excluded from prompt tuning.
+- **Ground truth** per product (outer box, natural upright orientation, flags, expected source). Independent review by a member other than the description author is still open, so the ground truth is AI-drafted and unreviewed. **10-product holdout** is excluded from prompt tuning.
 - **20 orders** (incl. 3 demo orders, needs-measurement and impossible cases), **5 cartons**, synthetic shipping rates.
 - **60 packing fixtures** from a seeded generator: 20 known-feasible (guillotine cuts of a carton, so a witness layout exists), 20 impossible (oversize / overweight / liquid too tall), 20 random.
 - All data files are schema-validated in CI (`npm run validate-data`).
@@ -75,7 +75,7 @@ Mermaid sources are in `docs/diagrams.md`. PNG exports:
 
 ## 6. Development environment
 
-Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 227 tests, build, packing eval) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Progress is tracked in `docs/CHECKLIST.md` (13 phases, gates). Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
+Agents work in git worktrees → local merge → **local CI gate** (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) → push straight to `main` → **GitHub Actions CI** (lint, typecheck with `next typegen`, data validation, 227 tests, build, packing eval) → Vercel production deploy → smoke test → dashboard. There was no per-PR review and no branch protection; per-PR previews were planned but only one preview check was done (2026-10-21). Decisions are logged with reasons in `docs/decisions.md`. Exact dependency versions are pinned, and Node 24 LTS is set via `.nvmrc`.
 
 ![Development flow](diagram-dev-flow.png)
 *Figure 2. Development flow as planned (branch → PR → preview → review → merge). The process actually used is the paragraph above and `docs/decisions.md`; the figure was not redrawn.*
@@ -163,7 +163,7 @@ Every metric shows its sample size and says "insufficient data" below its minimu
 
 ## 10. Tools and AI usage
 
-Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI feature. Claude Code (Anthropic), including its subagents on 2026-10-20/21, generated most code drafts, the docs and the synthetic data. Google AI Studio was used for the key and manual prompt trials. Everything was reviewed by the team and verified by tests, CI, evals, an end-to-end API run and screenshots. Every member walks through code they didn't write (CHECKLIST P11.44–P11.49).
+Summary of `docs/report/TOOLS.md`: Gemini (`@google/genai`) is the runtime AI feature. Claude Code (Anthropic), including its subagents on 2026-10-20/21, generated most code drafts, the docs and the synthetic data. Google AI Studio was used for the key and manual prompt trials. Everything was reviewed by the team and verified by tests, CI, evals, an end-to-end API run and screenshots.
 
 ## 11. Limitations
 
@@ -184,5 +184,5 @@ Run the head-to-head benchmark against the commercial APIs with trial keys. Test
 - React Three Fiber: https://r3f.docs.pmnd.rs
 - Paccurate API documentation (existing cartonization product, used for positioning). No URL is recorded in the repository.
 - py3dbp (`enzoruiz/3dbinpacking`, MIT): reference for the naive first-fit baseline idea. Our code is independent TypeScript. No URL is recorded in the repository.
-- Courier volumetric-weight divisor 5000 cm³/kg: described in `docs/PLAN.md` as "commonly 5000"; set in `data/cartons.json` (`shipping.volumetricDivisor`). No courier page has been cited yet.
+- Courier volumetric-weight divisor 5000 cm³/kg: a common courier value; set in `data/cartons.json` (`shipping.volumetricDivisor`). No courier page has been cited yet.
 - Bin-packing papers: none read or cited.

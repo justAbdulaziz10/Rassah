@@ -1,5 +1,5 @@
-// Route-level tests for POST /api/orders/[id]/pack: the DEMO_MODE gate on simulated outages (P6.30)
-// and the per-IP rate limit (P10.11). Real pipeline + real serverExtractDeps; only the request
+// Route-level tests for POST /api/orders/[id]/pack: the DEMO_MODE gate on simulated outages
+// and the per-IP rate limit. Real pipeline + real serverExtractDeps; only the request
 // scope (`connection`) and the repo lookup are stubbed.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRepo } from "@/lib/db/memory";
@@ -42,7 +42,7 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe("POST /api/orders/[id]/pack — simulated outage (P6.30)", () => {
+describe("POST /api/orders/[id]/pack — simulated outage", () => {
   it("DEMO_MODE=true + simulateOutage:true → outage events, products need measurement", async () => {
     vi.stubEnv("DEMO_MODE", "true");
     const res = await call({ simulateOutage: true });
@@ -67,7 +67,7 @@ describe("POST /api/orders/[id]/pack — simulated outage (P6.30)", () => {
   });
 });
 
-describe("POST /api/orders/[id]/pack — rate limit (P10.11)", () => {
+describe("POST /api/orders/[id]/pack — rate limit", () => {
   it("returns 429 with Retry-After once one IP exceeds the window, other IPs unaffected", async () => {
     for (let i = 0; i < 30; i++) expect((await call({})).status).not.toBe(429);
     const blocked = await call({});

@@ -1,5 +1,5 @@
 {
-  "_note": "SYNTHETIC orders for the mock store. 'demo' marks the three orders used in the live pitch. 'expect' is the intended scenario (documentation only; the eval and smoke test check actual behavior).",
+  "_note": "SYNTHETIC orders for the mock store. 'demo' marks the three orders used as the featured demo orders. 'expect' is the intended scenario (documentation only; the eval and smoke test check actual behavior).",
   "orders": [
     { "id": "1001", "demo": "quick-success", "expect": "single page-sourced item, smallest carton", "items": [{ "productId": "p-02", "qty": 1 }] },
     { "id": "1002", "demo": "fragile-liquid-estimated", "expect": "inferred perfume (fragile + liquid) with a book and a charger", "items": [{ "productId": "p-16", "qty": 1 }, { "productId": "p-17", "qty": 1 }, { "productId": "p-19", "qty": 1 }] },

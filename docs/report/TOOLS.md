@@ -7,7 +7,7 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 | Tool | Used for | Why this tool | Generated / assisted / manual | How we verified it | Limitations / trade-offs |
 |---|---|---|---|---|---|
 | **Gemini API** (Flash-tier, `@google/genai` 2.30) | **Runtime product feature**: reads each product page and returns outer-package dimensions, weight, fragile/liquid/sensitive flags, the source of each value, confidence, and evidence | Team has access. Flash tier is fast and cheap for short structured extraction. Strong Arabic and mixed-unit understanding. | Product feature (our prompt + schema, see `lib/ai/`) | Extraction eval against hand-labeled ground truth (dims ±1 cm, weight ±10%, inferred MAPE, honesty, fragile recall). Zod validation + sanity rules on every response. | Can misread or guess. Mitigated by source tags, never-invent rule, safety margin on inferred values, packer confirmation, and the M1/M6 metrics. Synthetic data only. |
-| **Claude (Claude Code)** | Idea critique and planning, `docs/` drafts, project scaffold, engine/validator/extractor/pipeline/UI code drafts, tests, eval scripts | Agentic coding assistant with repository access. Fast iteration with tests. | **Generated**, then reviewed by the team (review owners in PLAN §10) | `npm run check` (lint, typecheck, data validation, 227 unit/property/pipeline tests), GitHub Actions CI on every push, production build, end-to-end API run, screenshots of the running app, packing eval | Generated code must be understood by every member (Q&A drill, CHECKLIST P11.44–P11.49). Synthetic ground truth was drafted by the same tool that wrote the descriptions, so **M2 must review it independently** (CHECKLIST P3.12). |
+| **Claude (Claude Code)** | Idea critique and planning, `docs/` drafts, project scaffold, engine/validator/extractor/pipeline/UI code drafts, tests, eval scripts | Agentic coding assistant with repository access. Fast iteration with tests. | **Generated**, then reviewed by the team | `npm run check` (lint, typecheck, data validation, 227 unit/property/pipeline tests), GitHub Actions CI on every push, production build, end-to-end API run, screenshots of the running app, packing eval | Generated code must be understood by every member. Synthetic ground truth was drafted by the same tool that wrote the descriptions, so **it still needs independent review**. |
 | Google AI Studio | Creating the Gemini key, trying prompts by hand | Official console for the Gemini API | Manual | n/a | Free-tier rate limits decide our concurrency (2) and the eval delay |
 
 ## Development tools
@@ -23,19 +23,19 @@ The brief asks for: which tools we used, what each did, why we chose it over alt
 | Zod 4 | Validating env vars, API input, data files, model output | One schema library for every trust boundary |
 | react-three-fiber + drei | 3D layout view | Lightweight, React-native box meshes |
 | Recharts | Dashboard charts | React components. Palette validated for color-vision deficiency in both themes. |
-| tsx | Running TS scripts (seed, evals, benchmark, fixture generator, demo-morning check) | No build step for scripts |
+| tsx | Running TS scripts (seed, evals, benchmark, fixture generator) | No build step for scripts |
 
 ## Which parts were written how
 
-| Part | Origin | Owner who must explain it |
-|---|---|---|
-| Problem framing, idea pivots (lost-and-found → Rassah), scope decisions | Team, with AI critique | ALL |
-| `lib/engine/*` (prepare, packer, split, validator, cost, instructions, baseline) | AI-generated, team-reviewed, then improved through evaluation (recall 3/20 → 20/20) | M2 (reviewer M1) |
-| `lib/ai/*` (prompt, schema, extractor, Gemini adapter, catalog cache) | AI-generated, team-reviewed | M1 (reviewer M3) |
-| `lib/db/*`, migration, scripts | AI-generated, team-reviewed | M3 (reviewer M2) |
-| `lib/monitoring/*`, dashboard | AI-generated, team-reviewed | M3 (reviewer M1) |
-| `data/*.json` (synthetic products, ground truth, orders, cartons) | AI-generated synthetic data. **Ground truth needs independent review by M2.** | M1 + M2 |
-| Evaluation design and interpretation | Team + AI | M1 + M2 |
+| Part | Origin |
+|---|---|
+| Problem framing, idea pivots (lost-and-found → Rassah), scope decisions | Team, with AI critique |
+| `lib/engine/*` (prepare, packer, split, validator, cost, instructions, baseline) | AI-generated, team-reviewed, then improved through evaluation (recall 3/20 → 20/20) |
+| `lib/ai/*` (prompt, schema, extractor, Gemini adapter, catalog cache) | AI-generated, team-reviewed |
+| `lib/db/*`, migration, scripts | AI-generated, team-reviewed |
+| `lib/monitoring/*`, dashboard | AI-generated, team-reviewed |
+| `data/*.json` (synthetic products, ground truth, orders, cartons) | AI-generated synthetic data. **Ground truth still needs independent review.** |
+| Evaluation design and interpretation | Team + AI |
 
 ## Verification steps we can show
 

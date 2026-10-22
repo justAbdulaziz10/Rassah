@@ -1,14 +1,12 @@
 # Stack 01: Next.js + TypeScript
 
-**Owner:** M3 (skeleton), M2 (order/result pages). **Reviewers:** M1.
-
 ## Why this choice
 
 - Vercel is our hosting target, and Next.js is Vercel's first-class framework. Pages and API live in one project with one deploy.
 - One language (TypeScript) for UI, API, engine and scripts.
 - Route handlers run server-side, so API keys never reach the browser.
 
-**Known trade-off:** the team is stronger in Python. Mitigations: plain, well-commented code, no advanced type gymnastics, cross-lane reviews, and the Q&A drill (PLAN §11 T26).
+**Known trade-off:** the team is stronger in Python. Mitigations: plain, well-commented code, no advanced type gymnastics, code review, and tests around every rule.
 
 ## Setup
 

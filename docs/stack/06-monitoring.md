@@ -1,6 +1,5 @@
 # Stack 06: Monitoring & Alerting
 
-**Owner:** M3. **Reviewer:** M1.
 **Brief requirement:** a dashboard connected to the product that shows metrics relevant to its actual behavior. *"Do not add charts or metrics simply to make the dashboard look comprehensive."* Every metric below names the failure it reveals and how to investigate it.
 
 Code: `lib/monitoring/metrics.ts` (the seven metrics), `lib/monitoring/alerts.ts` (rules and delivery), `lib/monitoring/dashboard.ts` (data for the page), `components/MonitoringDashboard.tsx` (the page).
@@ -74,9 +73,7 @@ To *demonstrate* that monitoring detects and helps investigate a problem, withou
 - Effect: the extractor fails **before** calling Gemini, for **uncached** products only. (Cached products keep working, which is itself a point worth showing.)
 - Events get `status` and `error_code` `simulated_outage`, so they are visibly distinguishable from real failures, and their alert sends no webhook.
 
-The step-by-step demo is in [docs/demo-script.md](../demo-script.md).
-
-## 6. Investigation story (for the pitch)
+## 6. Investigation story
 
 The real story from development is the latency investigation (Vercel region `iad1` → `fra1`), told with its numbers in [docs/report/results.md](../report/results.md). Tell only stories that happened, with real numbers.
 

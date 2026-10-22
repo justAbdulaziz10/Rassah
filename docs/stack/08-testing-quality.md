@@ -1,7 +1,5 @@
 # Stack 08: Testing & Code Quality
 
-**Owner:** M3 (setup). Each lane writes its own tests. **Reviewer:** everyone.
-
 ## Tools
 
 | Tool | Purpose | Command |
@@ -27,11 +25,11 @@ All scripts are listed in the [README](../../README.md#getting-started) and `pac
 | Pipeline and route handlers | `lib/pipeline` with a fake extractor + in-memory repo (`tests/fakes/memory-repo.ts`, behind the `Repo` interface); route tests for pack, facts and store checkout (body validation, `DEMO_MODE`, rate limits) | No |
 | Real Gemini | **Only** via `npm run eval:extraction` (costs tokens, not in CI) | Yes |
 | UI helpers | `tests/ui/` (formatting, 3D helpers) | No |
-| UI | Manual check of fixture orders on the running app before pushing UI changes (plan: on the Vercel preview; in practice only one preview check was done, see `docs/decisions.md` 2026-10-21) | — |
+| UI | Manual check of fixture orders on the running app before pushing UI changes (no per-PR previews were used, see `docs/decisions.md` 2026-10-21) | — |
 
 **Test list (minimum).** All exist; file in brackets.
 
-Engine (M2):
+Engine:
 - [x] validator: one failing test per violation code (9) (`tests/engine/validator.test.ts`)
 - [x] validator: boundary contact allowed; 80% support OK; 50% support → `floating` (`validator.test.ts`)
 - [x] packer: smallest carton chosen; oversize → `no_box`; overweight → `no_box` (`packer.test.ts`)
@@ -42,7 +40,7 @@ Engine (M2):
 - [x] prepare: margin applied only to inferred; padding only to fragile/sensitive; liquid keeps its upright height (`prepare.test.ts`)
 - [x] split and anchor search (`split.test.ts`, `anchor-search.test.ts`)
 
-AI (M1):
+AI:
 - [x] parses an explicit-dims fixture; converts inches/lb; Arabic-Indic digits (`tests/ai/extractor.test.ts`, `recorded.test.ts`)
 - [x] malformed JSON → `parse_error`, product treated as `unknown` (`extractor.test.ts`)
 - [x] out-of-range values → `unknown` (`extractor.test.ts`)
@@ -50,20 +48,19 @@ AI (M1):
 - [x] manual facts are never overwritten by re-extraction (`catalog.test.ts`)
 - [x] stale `source_hash` triggers re-extraction (`catalog.test.ts`)
 
-Monitoring (M3):
+Monitoring:
 - [x] each metric from fixtures; below min-n marked insufficient; eval traffic excluded (`tests/monitoring/metrics.test.ts`)
 - [x] each alert rule fires above threshold, not at it; dedup; auto-resolve (`alerts.test.ts`)
 - [x] event-write failure → `monitoring.saved = false`, pack still returns its result (`tests/pipeline/pack.test.ts`)
 
 ## Conventions
 
-- **Plan:** branch names `feat/<lane>-<short>`, `fix/<short>`, `docs/<short>`, `eval/<short>`.
+- Branch names, if a branch is used: `feat/<short>`, `fix/<short>`, `docs/<short>`, `eval/<short>`.
 - Commit messages: imperative, scoped, e.g. `engine: enforce support ratio in validator`.
 - Commit/PR description: what changed, how it was tested, screenshots for UI, and eval before/after numbers for prompt or engine changes.
-- **Plan:** no PR merges with a red CI check, no direct pushes to `main` after Phase 0.
-- **As built (2026-10-21, `docs/decisions.md`):** agents worked in git worktrees, work was merged locally, and the local CI gate (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) had to pass before pushing straight to `main`. GitHub Actions CI then re-ran, and a red CI was the stop signal. There was no per-PR review and no branch protection.
+- **Workflow (`docs/decisions.md`, 2026-10-21):** agents worked in git worktrees, work was merged locally, and the local CI gate (`agent-ship ci`: secret scan, floor guard, lint, typecheck, tests, build, packing eval) had to pass before pushing straight to `main`. GitHub Actions CI then re-ran, and a red CI was the stop signal. There was no per-PR review and no branch protection.
 - Code comments explain *why* (e.g. why fragile items go last), not *what*.
-- Keep engine code plain and grouped by the rule it enforces. `validateLayout` checks each rule of the rule table (Stack 03 §3) and reports a violation code per broken rule, which makes the Q&A walkthrough easy.
+- Keep engine code plain and grouped by the rule it enforces. `validateLayout` checks each rule of the rule table (Stack 03 §3) and reports a violation code per broken rule, which makes a layout easy to walk through.
 
 ## Decision log
 

@@ -1,7 +1,5 @@
 # Stack 04: Supabase (Postgres)
 
-**Owner:** M3. **Reviewer:** M2.
-
 ## Why Supabase
 
 - Vercel functions are stateless with no durable disk, so SQLite would lose data between invocations.

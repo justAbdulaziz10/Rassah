@@ -1,6 +1,6 @@
 # Evaluation & Monitoring Results
 
-> **Status: FINAL, 2026-10-21.** Filled from `eval/results/*.json` (extraction `extraction-2026-10-21-v1.json`, packing `packing-2026-10-21-engine-0.2.json`) and the dashboard. Do not type numbers by hand that don't come from those sources. Checked against those files in the P11.42 consistency sweep.
+> **Status: FINAL, 2026-10-21.** Filled from `eval/results/*.json` (extraction `extraction-2026-10-21-v1.json`, packing `packing-2026-10-21-engine-0.2.json`) and the dashboard. Do not type numbers by hand that don't come from those sources.
 
 ## Extraction evaluation
 
@@ -23,9 +23,9 @@ Source: `eval/results/extraction-2026-10-21-v1.json` (`npm run eval:extraction`;
 | Avg tokens | 632 | 632 | 633 |
 | Cost per product | $0.000452 | $0.000453 | $0.000450 |
 
-**Prompt decision (P9.16):** every non-holdout (tuning) metric is perfect except the inferred-estimate errors (dim MAPE 11.3%, weight MAPE 11.9%, plus one fragile false positive). Those are estimates from clues (ml, pages, pieces), not extraction failures, so there is no failure pattern to fix with a prompt change. Decision: **no prompt change**, `PROMPT_VERSION` stays `v1`, so there is no before/after pair.
+**Prompt decision:** every non-holdout (tuning) metric is perfect except the inferred-estimate errors (dim MAPE 11.3%, weight MAPE 11.9%, plus one fragile false positive). Those are estimates from clues (ml, pages, pieces), not extraction failures, so there is no failure pattern to fix with a prompt change. Decision: **no prompt change**, `PROMPT_VERSION` stays `v1`, so there is no before/after pair.
 
-**Margin decision (P9.19):** the rule is margin = observed inferred-dimension MAPE, rounded up. The measured MAPE over all 12 inferred products is 12.9%, which rounds up to **15%**, so `marginInferred` stays at 0.15. Caveat: the holdout MAPE (16.1%, only 4 inferred products) is above 15%, so the margin does not cover every estimate. The 11.3% / 16.1% spread on 8 and 4 products shows this is noisy; the pack instructions already say "check the fit" for estimated sizes. Raising the margin to 20% would trade carton cost for cover and is the first change to make if a real-merchant pilot confirms the higher error.
+**Margin decision:** the rule is margin = observed inferred-dimension MAPE, rounded up. The measured MAPE over all 12 inferred products is 12.9%, which rounds up to **15%**, so `marginInferred` stays at 0.15. Caveat: the holdout MAPE (16.1%, only 4 inferred products) is above 15%, so the margin does not cover every estimate. The 11.3% / 16.1% spread on 8 and 4 products shows this is noisy; the pack instructions already say "check the fit" for estimated sizes. Raising the margin to 20% would trade carton cost for cover and is the first change to make if a real-merchant pilot confirms the higher error.
 
 **Model note:** `gemini-3.5-flash-lite`, $0.30 / 1M input and $2.50 / 1M output (ai.google.dev pricing, 2026-10-21). Free tier 15 RPM / 500 RPD (AI Studio rate-limit page, 2026-10-21). See `docs/decisions.md` for why `gemini-3.8-flash` and `gemini-3.6-flash` were not used.
 
@@ -64,7 +64,7 @@ Diagnosis that led to the last change: fixture `feasible-05` (3 items) failed be
 
 ## Investigation story
 
-**Slow cached orders (2026-10-21).** Problem: after the first production deploy, the M5 latency chart on `/monitoring` showed cached orders taking 358-1896 ms server-side (smoke test of all 20 orders). Trace: the `x-vercel-id` response header showed functions in `iad1` (US East) while Supabase is in `eu-central-1` (Frankfurt), so every DB query crossed the Atlantic. Fix: `vercel.json` `"regions": ["fra1"]` (see `docs/decisions.md`). After: cached orders 119-234 ms; uncached order 1589 ms total, of which Gemini extraction 1205 ms (`docs/demo-script.md`). Screenshot: `docs/report/screens/04-monitoring.png`.
+**Slow cached orders (2026-10-21).** Problem: after the first production deploy, the M5 latency chart on `/monitoring` showed cached orders taking 358-1896 ms server-side (smoke test of all 20 orders). Trace: the `x-vercel-id` response header showed functions in `iad1` (US East) while Supabase is in `eu-central-1` (Frankfurt), so every DB query crossed the Atlantic. Fix: `vercel.json` `"regions": ["fra1"]` (see `docs/decisions.md`). After: cached orders 119-234 ms; uncached order 1589 ms total, of which Gemini extraction 1205 ms. Screenshot: `docs/report/screens/04-monitoring.png`.
 
 **Gemini quota.** `rate_limited` events (429 QuotaFailure) showed a free tier of 20 requests/day/model for the Flash models; switched to `gemini-3.5-flash-lite` (500/day), see `docs/decisions.md`.
 

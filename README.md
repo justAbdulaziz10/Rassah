@@ -52,7 +52,7 @@ The app is live at **https://rassah.vercel.app**. There is no account to create:
    - [Accuracy](https://rassah.vercel.app/evaluation) (الدقة): the offline evaluation results.
 
 > [!TIP]
-> Orders numbered **9001 and up** are mock history, written by `npm run demo:data` so the presentation can show every state (problems, alerts, corrections). The products, orders, cartons and prices are all synthetic. Everyone shares the one demo database, so what you pack is visible to other visitors.
+> Orders numbered **9001 and up** are mock history, written by `npm run demo:data` so every state can be shown (problems, alerts, corrections). The products, orders, cartons and prices are all synthetic. Everyone shares the one demo database, so what you pack is visible to other visitors.
 
 ## The idea
 
@@ -187,24 +187,14 @@ When a metric crosses its limit, an alert opens, from info up to critical. It sh
 - **Products:** no clothing or other deformable items. The target is rigid, box-shaped products such as perfume, cosmetics, electronics accessories, books and home goods.
 - **Courier rates:** no real courier rate APIs.
 
-**Known limits:**
+**Known limitations and next steps:**
 
+- **No login on the write APIs.** There are no accounts or per-merchant data, and everyone shares one database. The per-IP rate limits live in process memory, so they slow abuse down but are not a hard cap. Next: authentication and per-merchant isolation.
+- **Ground truth is AI-drafted.** The extraction ground truth was drafted with AI help and not independently reviewed, so treat the extraction accuracy numbers as indicative.
+- **Estimates and the split are approximate.** Estimated sizes carry a 15% margin and the packing steps say to check the fit. The multi-carton split is validated but not proven to be the cheapest. Next: a cheaper split search and stacking-load rules.
+- **The vendor benchmark has not run against the vendors.** `npm run bench` needs Paccurate and 3DBinPacking keys; results so far compare Rassah with a naive packer only.
 - **Free-tier Gemini.** `gemini-3.5-flash-lite` on the free tier allows 15 requests per minute. A burst of new products can hit that limit; Rassah reports it as `rate_limited` and never guesses.
-- **Estimates are approximate.** Estimated sizes carry a 15% margin, and the packing steps say to check the fit.
-- **The split is a heuristic.** It is validated, but it is not proven to be the cheapest split.
-- **Rate limiting is per server instance.** The per-IP limits live in process memory, so they slow abuse down but are not a hard cap.
-
-**What would come after the MVP:**
-
-- Real Salla and Zid integration.
-- Authentication and per-merchant data.
-- Real courier rates.
-- A cheaper split search, plus stacking-load rules.
-- Manufacturer-spec lookup for branded products.
-- A scale-weight check on packed orders.
-- A pilot on real orders, comparing carton spend, damage and packing time.
-
-The full backlog is in [docs/CHECKLIST.md](docs/CHECKLIST.md#post-camp-backlog-not-tracked-for-thursday).
+- **Not yet built:** real Salla and Zid integration, real courier rates, manufacturer-spec lookup for branded products, a scale-weight check on packed orders, and a pilot on real orders comparing carton spend, damage and packing time.
 
 ## Run it locally
 
@@ -219,11 +209,11 @@ npm run check                  # lint + typecheck + data validation + unit tests
 npm run dev                    # http://localhost:3000
 ```
 
-**No Supabase or Gemini key?** Put `DATA_BACKEND=memory` and `DEMO_MODE=true` in `.env.local`. The app then runs on the mock store from `data/*.json`, held in memory. This mode is local only and ignored on Vercel; it is also the offline fallback for demo day.
+**No Supabase or Gemini key?** Put `DATA_BACKEND=memory` and `DEMO_MODE=true` in `.env.local`. The app then runs on the mock store from `data/*.json`, held in memory. This mode is local only and ignored on Vercel.
 
 - **Without a Gemini key:** product facts are pre-loaded from the synthetic test set (`data/ground_truth.json`) with origin `seeded`. They are labelled «محفوظة في الكتالوج» and never shown as AI output, so the demo orders pack with no network.
 - **Turning seeding off:** set `MEMORY_SEED_FACTS=false`. Products are then reported as "needs measurement", never guessed.
-- **Mock history:** add `MEMORY_MOCK_DATA=true` to load the same mock history the presentation uses.
+- **Mock history:** add `MEMORY_MOCK_DATA=true` to load the same mock history `npm run demo:data` writes.
 - **Health check:** in this mode `/api/health` answers 200 with `status: "degraded"` and `offline: true`.
 
 ### Scripts
@@ -240,8 +230,7 @@ npm run dev                    # http://localhost:3000
 | `npm run eval:packing` | Packing evaluation: engine vs naive baseline, no network. `-- --write` saves the results JSON |
 | `npm run eval:extraction` | Extraction evaluation against ground truth. Calls Gemini and costs tokens |
 | `npm run bench` | Head-to-head packing benchmark (protocol in [docs/benchmark.md](docs/benchmark.md)) |
-| `npm run demo:morning` | Readiness check against production: health, database counts, 4 sample packs and open alerts. `-- --reset` clears the events (keeping eval runs and facts) after the counts and before the packs. `BASE_URL` overrides the target |
-| `npm run demo:data -- --apply` | Writes the mock history to Supabase so every page shows every state for a presentation. The history is orders 9001+ (tagged `demo = 'mock'`) in each queue state and attention reason, with every product-read failure, corrections, slow reads, a validator rejection and the alerts they cause. It ends at the moment you run it, so run it shortly before presenting. `-- --remove` deletes exactly those rows and resolves the alerts they caused |
+| `npm run demo:data -- --apply` | Writes the mock history to Supabase so every page shows every state. The history is orders 9001+ (tagged `demo = 'mock'`) in each queue state and attention reason, with every product-read failure, corrections, slow reads, a validator rejection and the alerts they cause. It ends at the moment you run it, so run it shortly before showing the app. `-- --remove` deletes exactly those rows and resolves the alerts they caused |
 | `npm run clear-facts -- --product p-16` | Deletes one product's cached facts so the next order reads it again (`--all --yes` clears all) |
 
 `scripts/reset-events.ts --yes` deletes all monitoring events and alerts but keeps facts and eval runs. Run it with `npx tsx --env-file-if-exists=.env.local`. `GET /api/health` reports whether the Gemini key and the database are available, and never returns secret values.
@@ -295,21 +284,19 @@ lib/
   orders/ store/ integrations/ demo/ ui/
 data/                    synthetic products, orders, cartons, ground truth, packing fixtures
 eval/results/            stored evaluation and benchmark results
-scripts/                 seed, evaluations, benchmark, demo checks and mock history
+scripts/                 seed, evaluations, benchmark and mock history
 supabase/migrations/     database schema
 tests/                   Vitest unit, property and pipeline tests
-docs/                    plan, decisions, diagrams, stack guides, report, demo and team material
+docs/                    decisions, diagrams, stack guides and the report
 ```
 
 ## Documentation
 
 | Document | What it covers |
 |---|---|
-| [docs/PLAN.md](docs/PLAN.md) | The original plan: problem, MVP scope, architecture, timeline, team ownership and risks, with notes where the build differs |
 | [docs/decisions.md](docs/decisions.md) | Every technical choice, with its reason and the alternatives |
-| [docs/CHECKLIST.md](docs/CHECKLIST.md) | Progress tracker: tasks in 13 phases, gates, credentials register, env matrix, blockers and post-MVP backlog |
 | [docs/diagrams.md](docs/diagrams.md) | Development flow, monitoring flow and system architecture |
-| [docs/report/REPORT.md](docs/report/REPORT.md) | Final report ([PDF](docs/report/REPORT.pdf)), with [results](docs/report/results.md), the [AI tools log](docs/report/TOOLS.md) and the pitch deck ([PDF](docs/report/deck.pdf)) |
+| [docs/report/REPORT.md](docs/report/REPORT.md) | Final report ([PDF](docs/report/REPORT.pdf)), with [results](docs/report/results.md), the [AI tools log](docs/report/TOOLS.md) and the slide deck ([PDF](docs/report/deck.pdf)) |
 | [docs/stack/01-nextjs-typescript.md](docs/stack/01-nextjs-typescript.md) | Next.js app: routes, pages, API handlers, folder layout, UI and RTL |
 | [docs/stack/02-gemini-extraction.md](docs/stack/02-gemini-extraction.md) | Gemini API: extraction prompt, JSON schema, fallback chain, confidence, caching and errors |
 | [docs/stack/03-packing-engine.md](docs/stack/03-packing-engine.md) | Packing engine, independent validator, cost model, packing instructions and split |
@@ -320,7 +307,6 @@ docs/                    plan, decisions, diagrams, stack guides, report, demo a
 | [docs/stack/08-testing-quality.md](docs/stack/08-testing-quality.md) | Vitest, ESLint, TypeScript strict mode and the test list |
 | [docs/stack/09-vercel-ci.md](docs/stack/09-vercel-ci.md) | Vercel deployment and GitHub Actions CI |
 | [docs/benchmark.md](docs/benchmark.md) | Head-to-head packing benchmark protocol |
-| [docs/demo-script.md](docs/demo-script.md), [docs/qa.md](docs/qa.md) | Demo-day script, backup plan and Q&A |
 
 ## Tech stack
 
@@ -344,9 +330,9 @@ Built in two days by:
 - **Hana** ([@enghanamansour](https://github.com/enghanamansour))
 - **Bayan** ([@Bayan369](https://github.com/Bayan369))
 
-The work was split into three lanes. Each member owned one and reviewed another, so everyone can explain every part ([docs/PLAN.md](docs/PLAN.md) §10):
+The work was split into three areas:
 
-| Lane | Covers |
+| Area | Covers |
 |---|---|
 | AI & Data | Gemini extraction, the synthetic dataset, the extraction evaluation |
 | Engine & UI | Packing engine, validator, cost, instructions, result page, 3D view |

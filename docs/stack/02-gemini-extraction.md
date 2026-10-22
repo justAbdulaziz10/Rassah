@@ -1,7 +1,5 @@
 # Stack 02: Gemini AI Extraction
 
-**Owner:** M1. **Reviewer:** M3.
-
 ## Role in the product
 
 Gemini is the **AI core**. For each product it turns free-form page text into structured, labeled facts:
@@ -104,7 +102,7 @@ Every extraction call writes **one** `extraction_events` row with its final outc
 - The Gemini call is injected (`extractFacts(product, { generate, … })`) so tests pass a fake.
 - The real model is exercised only by `scripts/eval-extraction.ts` (Stack 07).
 
-## Getting a key (Phase 0, T2)
+## Getting a key
 
 1. Google AI Studio → *Get API key* → create the key in a new project.
 2. Put it in `.env.local` (local) and in the Vercel project env vars.

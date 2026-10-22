@@ -1,11 +1,11 @@
-// Deletes monitoring events (extraction_events, order_runs, corrections, alerts) for a clean demo slate.
+// Deletes monitoring events (extraction_events, order_runs, corrections, alerts) for a clean slate.
 // Keeps the catalog (product_facts) and evaluation runs.
 // Usage: npx tsx --env-file-if-exists=.env.local scripts/reset-events.ts --yes
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { confirmed, must, scriptSupabase } from "./_supabase";
 
-/** Clears monitoring events. Reused by scripts/demo-morning.ts (--reset). */
+/** Clears monitoring events. */
 export async function resetEvents(db: SupabaseClient, log: (msg: string) => void = console.log) {
   // corrections reference order_runs, so delete them first.
   for (const table of ["corrections", "extraction_events", "alerts", "order_runs"]) {
@@ -22,7 +22,7 @@ async function main() {
   await resetEvents(scriptSupabase());
 }
 
-// Run only when executed directly, not when imported by demo-morning.
+// Run only when executed directly, not when imported.
 if (process.argv[1]?.endsWith("reset-events.ts")) {
   main().catch((e) => {
     console.error(e);

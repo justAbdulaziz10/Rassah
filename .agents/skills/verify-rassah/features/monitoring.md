@@ -31,6 +31,6 @@ Preconditions:
 ## Gotchas
 
 - A 200 page proves it renders, not that the numbers are right; metric math is covered by the unit tests in `tests/monitoring/`.
-- Memory mode starts with no events, so the dashboard shows "too few cases" until something is packed. `MEMORY_MOCK_DATA=true` loads the presentation's mock history instead.
+- Memory mode starts with no events, so the dashboard shows "too few cases" until something is packed. `MEMORY_MOCK_DATA=true` loads the mock history instead.
 - The extract and clear controls share a limiter (each clear leads to a Gemini call on the next order when a key is set). Never use them on production: they change the shared catalog and can spend money.
 - Production numbers include real visitors' runs; do not assert exact counts there.

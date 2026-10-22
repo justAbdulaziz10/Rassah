@@ -1,7 +1,6 @@
 // SYNTHETIC model responses shaped like Gemini's JSON output for our schema.
 // They are written by hand to exercise the parser and sanitizer; they are NOT recorded from the
-// real API. Replace or extend them with real recorded responses once the Gemini key exists
-// (CHECKLIST P5.35).
+// real API. Real recorded responses are in recorded.json.
 
 export const RESPONSES = {
   explicitPerfume: {

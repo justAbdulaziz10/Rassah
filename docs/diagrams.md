@@ -12,7 +12,7 @@ How a change goes from idea to production, and how problems found in production 
 
 ```mermaid
 flowchart LR
-    A[Task from PLAN.md /<br/>CHECKLIST.md] --> B[Agents work in<br/>separate git worktrees]
+    A[Task / issue] --> B[Agents work in<br/>separate git worktrees]
     B --> C[Code + tests locally<br/>npm run dev / npm test]
     C --> D[Merge worktrees<br/>into main locally]
     D --> E[Local CI gate: agent-ship ci<br/>secret scan · floor guard · lint ·<br/>typecheck · tests · build]
@@ -32,7 +32,7 @@ flowchart LR
     P --> Q[Evaluation page<br/>+ report numbers]
 ```
 
-**Explaining it in Q&A:**
+**How to read it:**
 - No change reaches `main` without passing the local gate (`agent-ship ci`: secret scan, floor guard that blocks new lint suppressions or skipped tests, lint, typecheck, tests, build). GitHub Actions then re-runs CI on the pushed commit, and Vercel deploys production from `main`.
 - We did not use per-PR branches, Vercel preview deployments or a PR review step: one integrator merged the worktrees locally and pushed to `main`.
 - Prompt and engine changes are re-scored with the evaluation scripts before merging, so we can show *before/after* numbers.

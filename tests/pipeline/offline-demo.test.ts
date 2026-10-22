@@ -1,4 +1,4 @@
-// Offline demo (DATA_BACKEND=memory, no Gemini key, no network): the orders in docs/demo-script.md
+// Offline demo (DATA_BACKEND=memory, no Gemini key, no network): the demo orders
 // must pack from seeded ground-truth facts, and the seeded facts must never be presented as AI output.
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -65,7 +65,7 @@ describe("offline demo pack (memory backend, no Gemini key)", () => {
     expect(r.productsToMeasure[0]).toMatchObject({ productId: "p-02", failedExtraction: true });
   });
 
-  it("demo-script orders: 1001 and 1002 get a carton, 1020 is no_box (overweight)", async () => {
+  it("demo orders: 1001 and 1002 get a carton, 1020 is no_box (overweight)", async () => {
     const repo = buildLocalRepo({ seedFacts: true });
     const r1001 = await pack(repo, "1001");
     expect(r1001.status).toBe("box_found");

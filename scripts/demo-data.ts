@@ -1,5 +1,5 @@
 // Writes (or removes) the mock history from lib/demo/mock-data.ts, so every page shows every state
-// during a presentation: orders 9001+ tagged demo = 'mock', their runs, product reads and corrections.
+// for demos: orders 9001+ tagged demo = 'mock', their runs, product reads and corrections.
 // Re-running --apply replaces the previous mock rows with a fresh story that ends now.
 // Usage: npm run demo:data -- --apply     |     npm run demo:data -- --remove
 // Afterwards it re-checks the alert rules once without a webhook, so the alerts the mock data causes

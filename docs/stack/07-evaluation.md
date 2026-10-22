@@ -1,12 +1,10 @@
 # Stack 07: Offline Evaluation & Benchmarks
 
-**Owners:** M1 (extraction), M2 (packing). **Reviewer:** M3.
-
 Monitoring tells us how the live system behaves. **Evaluation** tells us whether it works as intended, on a fixed labeled dataset, so results are comparable across prompt and engine versions.
 
 ## 1. Datasets (`data/`)
 
-> **Synthetic data, stated openly.** Products are written by the team in the style of Saudi store pages (Salla/Zid). They do not come from real stores, and no real merchant data is used. The report and Q&A say this explicitly. The next step after the camp is a pilot with a real merchant's catalog.
+> **Synthetic data, stated openly.** Products are written by the team in the style of Saudi store pages (Salla/Zid). They do not come from real stores, and no real merchant data is used. The report says this explicitly. The next step is a pilot with a real merchant's catalog.
 
 ### `products.json` (30 products)
 
@@ -41,7 +39,7 @@ For group B, ground truth is the "real" box size we define for the product. It i
 
 1–4 product lines per order, quantities 1–3. Each order has an `expect` note saying what it tests. They include: a fragile + heavy mix, two liquids, an order with an inferred-dimension product, an order with a group-C product (→ `needs_measurement`), and an order heavier than every carton's limit (→ `no_box`, overweight). Order 1020 needs more than one carton (engine-0.3 splits it; see [results.md](../report/results.md)).
 
-## 2. Extraction evaluation: `scripts/eval-extraction.ts` (M1)
+## 2. Extraction evaluation: `scripts/eval-extraction.ts`
 
 `npm run eval:extraction`. Runs the **real** extractor on all 30 products (bypassing the cache, `trigger='eval'`), compares with ground truth, and writes `eval/results/extraction-<date>-<prompt>.json`, plus `eval_runs` (kind `extraction`) + `eval_results` in Supabase. Scoring is in `lib/eval/` and unit-tested (`tests/eval/extraction-score.test.ts`). Results are reported for all products, the 20 tuning products and the 10 holdout products separately.
 
@@ -62,7 +60,7 @@ For group B, ground truth is the "real" box size we define for the product. It i
 
 Free-tier note: the script runs sequentially with a small delay between products to respect rate limits.
 
-## 3. Packing evaluation: `scripts/eval-packing.ts` (M2)
+## 3. Packing evaluation: `scripts/eval-packing.ts`
 
 `npm run eval:packing`. No network. Deterministic. It measures the single-carton search (`packUnits`), not the multi-carton split. CI runs it on every push. Read-only by default; `-- --write` writes `eval/results/packing-<date>-<engine>.json`. When Supabase env vars are set it also stores `eval_runs` (kind `packing`) + `eval_results`.
 

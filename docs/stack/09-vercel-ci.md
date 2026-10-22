@@ -1,23 +1,21 @@
 # Stack 09: Vercel Deployment & CI
 
-**Owner:** M3. **Reviewer:** M2.
-
 ## Environments
 
 | Environment | Trigger | URL | Database | Purpose |
 |---|---|---|---|---|
 | Local | `npm run dev` | localhost:3000 | Supabase (same project), or `DATA_BACKEND=memory` with no database | Development |
-| **Preview** | Every push to a PR branch (planned; not used in the workflow as built: only PR #1, a PR template, got a preview, used once for a check on 2026-10-21) | unique `*.vercel.app` per PR | Supabase | Review on a live URL before merge (plan) |
-| **Production** | Push to `main` (as built: straight from the local CI gate) | project domain | Supabase | Demo URL |
+| **Preview** | A push to a PR branch (not used in the workflow as built; see `docs/decisions.md`, 2026-10-21) | unique `*.vercel.app` per PR | Supabase | Review on a live URL before merge |
+| **Production** | Push to `main` (as built: straight from the local CI gate) | project domain | Supabase | Live site |
 
-> One Supabase project serves local, preview and production, so they share data. Events are not tagged by environment; instead events are cleared before the demo (`npm run demo:morning -- --reset`, or `scripts/reset-events.ts --yes`).
+> One Supabase project serves local, preview and production, so they share data. Events are not tagged by environment; to start from a clean slate, clear the events with `scripts/reset-events.ts --yes`.
 
-## Vercel setup (Phase 0, T2–T3)
+## Vercel setup
 
 1. Vercel → *Add New Project* → import `justAbdulaziz10/Rassah` from GitHub. Framework is auto-detected as Next.js.
 2. Settings → Node.js version = the LTS used locally.
 3. Settings → Environment Variables: the variables in the [README](../../README.md#environment-variables), except `DATA_BACKEND` and `MEMORY_SEED_FACTS` (local only, ignored on Vercel).
-4. All three members get access to the Vercel project and the GitHub repo.
+4. Give every member access to the Vercel project and the GitHub repo.
 5. `vercel.json` pins functions to `fra1` (Frankfurt), next to the Supabase region `eu-central-1` (`docs/decisions.md`).
 
 ## Serverless constraints that shape the design
@@ -33,12 +31,12 @@ On pull requests and pushes to `main`, one job runs on Node from `.nvmrc`: `npm 
 
 - CI needs **no secrets**. Tests never call Gemini or Supabase (Stack 08).
 - `.nvmrc` holds the Node LTS version (24) so local, CI and Vercel match.
-- Branch protection on `main` (GitHub → Settings → Branches): require the `CI / check` status and 1 approving review. **Plan only: this was not enabled.** As built, the gate was local (`agent-ship ci`) before pushing straight to `main`, with GitHub Actions CI re-running after the push (`docs/decisions.md`, 2026-10-21).
+- Branch protection on `main` (GitHub → Settings → Branches): require the `CI / check` status and 1 approving review. **Not enabled.** The gate was local (`agent-ship ci`) before pushing straight to `main`, with GitHub Actions CI re-running after the push (`docs/decisions.md`, 2026-10-21).
 
-## Release and demo checklist
+## Release checks
 
-The release and demo-day steps are tracked in [docs/CHECKLIST.md](../CHECKLIST.md) (Phase 10 and Phase 12) and run in [docs/demo-script.md](../demo-script.md) ("Demo morning", smoke test, backup plan, outage story with `/orders/<id>?outage=1` and `DEMO_MODE=true`).
+After each production deploy: run the smoke test on the seeded orders, open `/monitoring`, and for the outage story open `/orders/<id>?outage=1` (needs `DEMO_MODE=true`).
 
 ## Rollback
 
-Vercel keeps every deployment. If a bad deploy reaches production during the demo window, use *Promote to Production* on the last good deployment (instant), then fix forward. The exact steps are in [docs/demo-script.md](../demo-script.md) ("Rollback").
+Vercel keeps every deployment. If a bad deploy reaches production, use *Promote to Production* on the last good deployment (instant), then fix forward.

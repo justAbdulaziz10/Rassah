@@ -6,7 +6,7 @@ import { buildUserPrompt, SYSTEM_PROMPT } from "@/lib/ai/prompt";
 import type { ModelFacts } from "@/lib/ai/schema";
 
 // tests/fixtures/gemini/recorded.json holds REAL Gemini responses (model + date inside each entry),
-// recorded once with the production prompt and response schema (CHECKLIST P5.35). No network here.
+// recorded once with the production prompt and response schema. No network here.
 interface Recorded {
   productId: string;
   name: string;

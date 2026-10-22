@@ -32,7 +32,7 @@ create table if not exists shipping_rates (
 
 create table if not exists orders (
   id          text primary key,               -- '1045'
-  demo        text,                           -- demo label, if used in the pitch
+  demo        text,                           -- demo label, if used for a featured order
   expect      text,                           -- intended scenario (documentation)
   created_at  timestamptz not null default now()
 );

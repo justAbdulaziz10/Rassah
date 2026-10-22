@@ -1,6 +1,5 @@
 # Stack 03: Packing Engine, Validator, Cost Model, Instructions
 
-**Owner:** M2. **Reviewer:** M1.
 **Location:** `lib/engine/`. Pure TypeScript: **no network, no database, no randomness without a seed.** It is fully unit-testable. Current version: `engine-0.3`.
 
 ```

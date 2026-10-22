@@ -1,10 +1,8 @@
 # Stack 05: 3D Layout View
 
-**Owner:** M2. **Reviewer:** M3.
-
 ## Why
 
-The 3D view lets the packer (and the judges) **see** the decision: which carton, where each item goes, which items are fragile or liquid, and what was estimated. It is an explanation aid. The value of the product is the validated decision and the instructions, not the 3D view.
+The 3D view lets the packer **see** the decision: which carton, where each item goes, which items are fragile or liquid, and what was estimated. It is an explanation aid. The value of the product is the validated decision and the instructions, not the 3D view.
 
 ## Libraries
 
