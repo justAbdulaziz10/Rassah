@@ -8,6 +8,10 @@ updates:
       day: sunday
       timezone: Asia/Riyadh
     open-pull-requests-limit: 5
+    # Major versions are upgraded by hand: they need code changes (e.g. typescript-eslint does not support TypeScript 7 yet).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       # Minor and patch updates together, one PR a week; majors stay separate so each can be checked.
       minor-and-patch:

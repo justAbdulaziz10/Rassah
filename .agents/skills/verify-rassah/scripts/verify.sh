@@ -85,8 +85,11 @@ if [ "$MODE" = local ]; then
     kill -0 "$SERVER_PID" 2>/dev/null || { echo "FAIL server died"; tail -20 "$OUT/server.log"; exit 1; }
     sleep 1
   done
-  # Doctor: the port must answer from our PID.
-  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | grep -q . || { echo "FAIL doctor: nothing listening on $PORT"; exit 1; }
+  # Doctor: our server is still running and the port answers (lsof when it can see the socket; CI runners may not).
+  kill -0 "$SERVER_PID" 2>/dev/null || { echo "FAIL doctor: server pid $SERVER_PID exited"; tail -20 "$OUT/server.log"; exit 1; }
+  lsof -nP -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | grep -q . \
+    || curl -s -o /dev/null --max-time 5 "$BASE/api/health" \
+    || { echo "FAIL doctor: nothing listening on $PORT"; tail -20 "$OUT/server.log"; exit 1; }
   pass "doctor: server up on $PORT (pid $SERVER_PID)"
 
   expect_status health GET /api/health 200
