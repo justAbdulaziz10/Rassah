@@ -123,9 +123,9 @@ export default function ConsoleNav() {
                   {item.href === "/notifications" && <BellIcon className="me-1.5 size-4" />}
                   {item.label}
                   {item.href === "/orders" && c && (
-                    <Badge n={c.remaining} tone={c.attention > 0 ? "critical" : "brand"} label={`${c.remaining} طلب متبقٍ`} />
+                    <Badge n={c.remaining} tone={c.attention > 0 ? "critical" : "brand"} label={fmtCount(c.remaining, { one: "طلب واحد متبقٍ", two: "طلبان متبقيان", few: "طلبات متبقية", many: "طلباً متبقياً" })} />
                   )}
-                  {item.href === "/notifications" && <Badge n={alertsCount} tone="critical" label={`${alertsCount} إشعار`} />}
+                  {item.href === "/notifications" && <Badge n={alertsCount} tone="critical" label={fmtCount(alertsCount, { one: "إشعار واحد", two: "إشعاران", few: "إشعارات", many: "إشعاراً" })} />}
                 </Link>
               </li>
             );

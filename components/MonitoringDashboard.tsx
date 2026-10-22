@@ -13,7 +13,6 @@ import {
   fmtCount,
   fmtMs,
   fmtPct,
-  fmtPieces,
   fmtTime,
   ltr,
   ORIGIN_LABEL,
@@ -39,6 +38,12 @@ const ORDERS: PluralForms = { one: "طلب واحد", two: "طلبان", few: "�
 const READS: PluralForms = { one: "قراءة واحدة", two: "قراءتان", few: "قراءات", many: "قراءة" };
 const PRODUCTS: PluralForms = { one: "منتج واحد", two: "منتجان", few: "منتجات", many: "منتجاً" };
 const SIGNALS: PluralForms = { one: "مؤشر واحد", two: "مؤشران", few: "مؤشرات", many: "مؤشراً" };
+// After "من" the dual takes its genitive form ("من قراءتين", not "من قراءتان").
+const OF_ORDERS: PluralForms = { ...ORDERS, two: "طلبين" };
+const OF_READS: PluralForms = { ...READS, two: "قراءتين" };
+const OF_PRODUCTS: PluralForms = { ...PRODUCTS, two: "منتجين" };
+const OF_PIECES: PluralForms = { one: "قطعة واحدة", two: "قطعتين", few: "قطع", many: "قطعة" };
+const REJECTED_LAYOUTS: PluralForms = { one: "ترتيباً واحداً", two: "ترتيبين", few: "ترتيبات", many: "ترتيباً" };
 const REFRESH_SECONDS = 15;
 
 type Win = DashboardData["window"];
@@ -262,7 +267,7 @@ function signals(d: DashboardData, c: Checks): Signal[] {
       result:
         reads.n === 0
           ? "لم تحتج رصّة إلى قراءة أي صفحة جديدة في هذه الفترة."
-          : `القراءات الفاشلة: ${ltr(String(c.failedReads))} من أصل ${fmtCount(reads.n, READS)} (${fmtPct(reads.value)}).`,
+          : `القراءات الفاشلة: ${ltr(String(c.failedReads))} من أصل ${fmtCount(reads.n, OF_READS)} (${fmtPct(reads.value)}).`,
       limit: `الحدّ ${fmtPct(t.failureRate)}`,
       few: few(reads.n, reads.minN, "قراءات"),
       action: { href: "/catalog", label: "افتح المنتجات" },
@@ -274,7 +279,7 @@ function signals(d: DashboardData, c: Checks): Signal[] {
       result:
         m1.reviewed === 0
           ? "لم يؤكّد الموظف بعد أي طلب فيه منتج قرأته رصّة."
-          : `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, PRODUCTS)} راجعها (${fmtPct(m1.value)}).`,
+          : `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, OF_PRODUCTS)} راجعها (${fmtPct(m1.value)}).`,
       limit: `الحدّ ${fmtPct(t.correctionRate)}`,
       few: few(m1.n, m1.minN, "منتجات مراجَعة"),
       action: { href: "/catalog", label: "راجع المنتجات" },
@@ -303,7 +308,7 @@ function signals(d: DashboardData, c: Checks): Signal[] {
       result:
         m4.n === 0
           ? "لم يصل أي طلب إلى اختيار الكرتون في هذه الفترة."
-          : `طلبات لم يتّسع لها كرتون واحد: ${ltr(String(d.outcomes.no_box))} من أصل ${fmtCount(m4.n, ORDERS)} (${fmtPct(m4.value)}).`,
+          : `طلبات لم يتّسع لها كرتون واحد: ${ltr(String(d.outcomes.no_box))} من أصل ${fmtCount(m4.n, OF_ORDERS)} (${fmtPct(m4.value)}).`,
       limit: `الحدّ ${fmtPct(t.noBoxRate)}`,
       few: few(m4.n, m4.minN, "طلبات"),
     },
@@ -314,7 +319,7 @@ function signals(d: DashboardData, c: Checks): Signal[] {
       result:
         m3.value === 0
           ? "لم يُرفض أي ترتيب: كل ترتيب رآه الموظف اجتاز الفحص."
-          : `رُفض ${ltr(String(m3.value))} ترتيب. أبلغ الفريق التقني.`,
+          : `رفض المدقّق ${fmtCount(m3.value, REJECTED_LAYOUTS)}. أبلغ الفريق التقني.`,
       limit: "يجب أن يبقى 0",
       few: "لم يُجهَّز أي طلب بعد",
     },
@@ -325,7 +330,7 @@ function signals(d: DashboardData, c: Checks): Signal[] {
       result:
         m2.n === 0
           ? "لا توجد قطع في هذه الفترة."
-          : `${ltr(String(m2.value.unknown))} من ${fmtPieces(m2.n)} بلا مقاس معروف (${fmtPct(m2.unknownShare)}) وتحتاج قياساً.`,
+          : `${ltr(String(m2.value.unknown))} من ${fmtCount(m2.n, OF_PIECES)} بلا مقاس معروف (${fmtPct(m2.unknownShare)}) وتحتاج قياساً.`,
       limit: `الحدّ ${fmtPct(t.unknownShare)}`,
       few: few(m2.n, m2.minN, "قطع"),
       action: { href: "/catalog", label: "افتح المنتجات" },
@@ -420,7 +425,7 @@ function Alerts({ alerts }: { alerts: DashboardData["alerts"] }) {
             </p>
             <p className="mt-1 leading-6">{a.message}</p>
             <p className="mt-1 text-xs text-muted">
-              القيمة {alertNumber(a.rule, a.value)} والحدّ {alertNumber(a.rule, a.threshold)} · من {ltr(String(a.sampleSize))} حالة · منذ {fmtClock(a.createdAt)}
+              القيمة {alertNumber(a.rule, a.value)} والحدّ {alertNumber(a.rule, a.threshold)} · من {alertSample(a.rule, a.sampleSize)} · منذ {fmtClock(a.createdAt)}
             </p>
           </div>
         );
@@ -434,6 +439,14 @@ function alertNumber(rule: string, v: number): string {
   if (rule.startsWith("M3_")) return ltr(String(v));
   if (rule.startsWith("M5_")) return fmtMs(v);
   return fmtPct(v);
+}
+
+/** What each rule counts: M2 counts pieces, M6 reads, M1 products, the others orders. */
+function alertSample(rule: string, n: number): string {
+  if (rule.startsWith("M2_")) return fmtCount(n, OF_PIECES);
+  if (rule.startsWith("M6_")) return fmtCount(n, OF_READS);
+  if (rule.startsWith("M1_")) return fmtCount(n, OF_PRODUCTS);
+  return fmtCount(n, OF_ORDERS);
 }
 
 type Speed = DashboardData["metrics"]["m5Latency"]["cached"];
@@ -468,7 +481,7 @@ function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
         sufficient={m1.sufficient}
         over={checks.accuracy}
         limit={`الحدّ المسموح ${fmtPct(t.correctionRate)}`}
-        detail={m1.reviewed > 0 ? `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, PRODUCTS)} راجعها` : "لم يراجع الموظف أي منتج قرأته رصّة بعد"}
+        detail={m1.reviewed > 0 ? `صحّح الموظف ${ltr(String(m1.corrected))} من ${fmtCount(m1.reviewed, OF_PRODUCTS)} راجعها` : "لم يراجع الموظف أي منتج قرأته رصّة بعد"}
         hint="من المنتجات التي قرأتها رصّة وراجعها الموظف، كم منها احتاج إلى تصحيح؟ كلما قلّت النسبة كانت القراءة أدق."
       />
       <Tile
@@ -480,7 +493,7 @@ function Numbers({ data, checks }: { data: DashboardData; checks: Checks }) {
         sufficient={m6.sufficient}
         over={checks.reads}
         limit={`الحدّ المسموح ${fmtPct(t.failureRate)}`}
-        detail={m6.n > 0 ? `فشلت ${ltr(String(checks.failedReads))} من ${fmtCount(m6.n, READS)}` : "لم تحتج رصّة إلى قراءة أي منتج جديد"}
+        detail={m6.n > 0 ? `فشلت ${ltr(String(checks.failedReads))} من ${fmtCount(m6.n, OF_READS)}` : "لم تحتج رصّة إلى قراءة أي منتج جديد"}
         hint="إذا ارتفعت النسبة فقد تتعطل قراءة المنتجات الجديدة، وسيلزم قياسها يدوياً. الأسباب في بطاقة «أسباب فشل قراءة المنتجات»."
       />
       <Tile
@@ -794,7 +807,7 @@ function correctionTip(p: { ok: number; fixed: number; fields: string[] }) {
   return (
     <>
       <p>
-        {p.fixed === 0 ? `${fmtCount(p.ok + p.fixed, PRODUCTS)}، لم يُصحَّح شيء` : `صحّح الموظف ${ltr(String(p.fixed))} من ${fmtCount(p.ok + p.fixed, PRODUCTS)}`}
+        {p.fixed === 0 ? `${fmtCount(p.ok + p.fixed, PRODUCTS)}، لم يُصحَّح شيء` : `صحّح الموظف ${ltr(String(p.fixed))} من ${fmtCount(p.ok + p.fixed, OF_PRODUCTS)}`}
       </p>
       {p.fields.length > 0 && <p>{p.fields.map((f) => FIELD_LABEL[f] ?? f).join("، ")}</p>}
     </>
@@ -864,7 +877,7 @@ function FailuresCard({ data, checks }: { data: DashboardData; checks: Checks })
             <span className={failed ? "font-medium text-critical" : ""}>
               فشلت <b className="ltr-nums">{failed}</b>
             </span>
-            <span className="text-muted">من أصل {fmtCount(m6.n, READS)} ({fmtPct(m6.value)} فشل)</span>
+            <span className="text-muted">من أصل {fmtCount(m6.n, OF_READS)} ({fmtPct(m6.value)} فشل)</span>
           </p>
           {rows.length === 0 ? (
             <p className="flex items-center justify-center gap-2 py-6 text-sm font-medium text-ok">
@@ -992,7 +1005,7 @@ function CacheCard({ data }: { data: DashboardData }) {
     <Card code="M7-cache" title="منتجات كانت معروفة مسبقاً" hint="المنتج الذي قرأته رصّة مرة تحفظ بياناته، فلا يحتاج قراءة جديدة: تجهيز أسرع وبلا تكلفة.">
       <p className="ltr-nums font-display text-3xl font-bold">{fmtPct(c.cacheHitRate)}</p>
       <p className="mt-1 text-sm text-muted">
-        {total > 0 ? `${ltr(String(c.hits))} من ${fmtCount(total, PRODUCTS)} لم تحتج قراءة، و${ltr(String(c.misses))} قُرئت لأول مرة.` : "لا توجد منتجات في هذه الفترة."}
+        {total > 0 ? `${ltr(String(c.hits))} من ${fmtCount(total, OF_PRODUCTS)} لم تحتج قراءة، و${ltr(String(c.misses))} قُرئت لأول مرة.` : "لا توجد منتجات في هذه الفترة."}
       </p>
     </Card>
   );
