@@ -1,0 +1,18 @@
+# Weekly dependency updates. Versions are pinned exactly, so each update arrives as a PR that CI must pass.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+      timezone: Asia/Riyadh
+    open-pull-requests-limit: 5
+    groups:
+      # Minor and patch updates together, one PR a week; majors stay separate so each can be checked.
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

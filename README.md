@@ -295,7 +295,7 @@ docs/                    decisions, diagrams, stack guides and the report
 |---|---|
 | [docs/decisions.md](docs/decisions.md) | Every technical choice, with its reason and the alternatives |
 | [docs/diagrams.md](docs/diagrams.md) | Development flow, monitoring flow and system architecture |
-| [docs/report/REPORT.md](docs/report/REPORT.md) | Final report ([PDF](docs/report/REPORT.pdf)), with [results](docs/report/results.md), the [AI tools log](docs/report/TOOLS.md) and the slide deck ([PDF](docs/report/deck.pdf)) |
+| [docs/report/REPORT.md](docs/report/REPORT.md) | Final report ([PDF](https://github.com/justAbdulaziz10/Rassah/releases/download/v1.0.0/REPORT.pdf)), with [results](docs/report/results.md) and the [AI tools log](docs/report/TOOLS.md). The slide deck ([PDF](https://github.com/justAbdulaziz10/Rassah/releases/download/v1.0.0/deck.pdf), [PowerPoint](https://github.com/justAbdulaziz10/Rassah/releases/download/v1.0.0/deck.pptx)) and the [demo video](https://github.com/justAbdulaziz10/Rassah/releases/download/v1.0.0/demo.mp4) are attached to the [v1.0.0 release](https://github.com/justAbdulaziz10/Rassah/releases/tag/v1.0.0) |
 | [docs/stack/01-nextjs-typescript.md](docs/stack/01-nextjs-typescript.md) | Next.js app: routes, pages, API handlers, folder layout, UI and RTL |
 | [docs/stack/02-gemini-extraction.md](docs/stack/02-gemini-extraction.md) | Gemini API: extraction prompt, JSON schema, fallback chain, confidence, caching and errors |
 | [docs/stack/03-packing-engine.md](docs/stack/03-packing-engine.md) | Packing engine, independent validator, cost model, packing instructions and split |
@@ -318,7 +318,7 @@ docs/                    decisions, diagrams, stack guides and the report
 | Database and event store | Supabase (Postgres) via `@supabase/supabase-js` |
 | 3D view | `@react-three/fiber` and `@react-three/drei` |
 | Charts | Recharts |
-| Tests and quality | Vitest (283 tests), ESLint, `tsc --noEmit` |
+| Tests and quality | Vitest (285 tests), ESLint, `tsc --noEmit` |
 | Hosting and CI | Vercel (production on `main`, Frankfurt region) and GitHub Actions |
 
 ## Team

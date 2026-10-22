@@ -49,3 +49,8 @@ next-env.d.ts
 
 # benchmark: cached vendor API responses (may be subject to vendor terms)
 /eval/bench-cache/
+
+# Report PDF, slide deck and demo video are release assets, not tracked files
+docs/report/*.pdf
+docs/report/*.pptx
+docs/report/*.mp4

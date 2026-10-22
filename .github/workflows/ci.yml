@@ -23,3 +23,21 @@ jobs:
       - run: npm run build
       # Offline (no network, no secrets). Read-only: prints the summary; the step fails only if the run crashes.
       - run: npm run eval:packing
+
+  # End-to-end: builds and starts the app on the in-memory backend (no secrets, no network calls out),
+  # then drives every page and API flow the way a packer would. Evidence is uploaded when it fails.
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - run: .agents/skills/verify-rassah/scripts/verify.sh local
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-check-evidence
+          path: artifacts/verify/
