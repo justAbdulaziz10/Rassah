@@ -6,7 +6,7 @@ import { MemoryRepo } from "@/lib/db/memory";
 import type { StoredFacts } from "@/lib/db/types";
 import { ENGINE_CONFIG } from "@/lib/engine/config";
 import { prepareUnits } from "@/lib/engine/prepare";
-import { updateProductFacts } from "@/lib/pipeline/facts";
+import { FactChangesSchema, updateProductFacts } from "@/lib/pipeline/facts";
 
 const ESTIMATE: StoredFacts = {
   productId: "p-02",
@@ -39,7 +39,8 @@ async function save(changes: Partial<FactsFormValues>) {
   const repo = new MemoryRepo();
   repo.products.set("p-02", { id: "p-02", name: "علبة", description: "", url: null, category: null, sourceHash: "h-p-02" });
   repo.facts.set("p-02", ESTIMATE);
-  const { facts } = await updateProductFacts({ repo, productId: "p-02", changes, runId: null });
+  // Parsed as the API route parses the request body.
+  const { facts } = await updateProductFacts({ repo, productId: "p-02", changes: FactChangesSchema.parse(changes), runId: null });
   const prepared = prepareUnits([{ productId: "p-02", name: "علبة", qty: 1 }], new Map([["p-02", facts]]), ENGINE_CONFIG);
   if (!prepared.ok) throw new Error("not packable");
   return { facts, unit: prepared.units[0] };
