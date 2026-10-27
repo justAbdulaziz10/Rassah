@@ -51,6 +51,11 @@ export interface ExtractDeps {
    * fit and no retry starts after it, so a slow model cannot push a pack past the route's limit.
    */
   deadlineAt?: number;
+  /**
+   * Most products the model may read in any rolling 24 h, counted from stored extraction events so
+   * every server instance shares it. Unset means no cap (scripts and evals).
+   */
+  dailyReadCap?: number;
   /** Demo fault injection: fail before any network call. */
   simulateOutage?: boolean;
   sleep?: (ms: number) => Promise<void>;

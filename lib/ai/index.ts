@@ -37,6 +37,7 @@ export function serverExtractDeps(opts: { simulateOutage?: boolean } = {}): Extr
     promptVersion: PROMPT_VERSION,
     priceInputPerM: env.GEMINI_PRICE_INPUT_PER_M,
     priceOutputPerM: env.GEMINI_PRICE_OUTPUT_PER_M,
+    dailyReadCap: env.GEMINI_DAILY_READ_CAP,
     simulateOutage: opts.simulateOutage,
   };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { getOrExtractFacts, mapLimit } from "@/lib/ai/catalog";
 import type { ExtractDeps, GenerateFn } from "@/lib/ai/extractor";
-import type { StoredFacts } from "@/lib/db/types";
+import type { ExtractionEvent, StoredFacts } from "@/lib/db/types";
 import { MemoryRepo } from "@/lib/db/memory";
 import { RESPONSES } from "../fixtures/gemini/responses";
 
@@ -112,6 +112,54 @@ describe("getOrExtractFacts", () => {
     const { repo, deps } = setup();
     const r = await getOrExtractFacts({ repo, productIds: ["p-01", "p-99"], deps, trigger: "order", runId: null });
     expect(r.missingProducts).toEqual(["p-99"]);
+  });
+});
+
+describe("daily read cap", () => {
+  const NOW = "2026-10-28T12:00:00.000Z";
+  const event = (status: ExtractionEvent["status"], createdAt: string): ExtractionEvent => ({
+    runId: null, trigger: "order", productId: "p-x", status, latencyMs: 1, inputTokens: 0, outputTokens: 0, thinkingTokens: 0,
+    costUsd: 0, model: "m", promptVersion: "v1", dimsSource: null, weightSource: null, confidence: null, fragile: null,
+    liquid: null, errorCode: null, errorMessage: null, createdAt,
+  });
+
+  it("reads only what is left in the rolling 24 h and records the rest without calling the model", async () => {
+    const { repo, generate, deps } = setup();
+    await repo.insertExtractionEvents([
+      event("ok", "2026-10-28T01:00:00.000Z"),
+      event("timeout", "2026-10-28T02:00:00.000Z"), // a failed call still counts
+      event("config_error", "2026-10-28T03:00:00.000Z"), // no model call: free
+      event("ok", "2026-10-27T11:00:00.000Z"), // older than 24 h
+    ]);
+    const r = await getOrExtractFacts({
+      repo, productIds: ["p-01", "p-02"], deps: { ...deps, dailyReadCap: 3 }, trigger: "order", runId: null, nowIso: () => NOW,
+    });
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(r.facts.has("p-01")).toBe(true);
+    expect(r.facts.has("p-02")).toBe(false);
+    expect(r.events[1]).toMatchObject({ productId: "p-02", status: "config_error", errorCode: "daily_cap" });
+  });
+
+  it("a cap of 0 turns extraction off", async () => {
+    const { repo, generate, deps } = setup();
+    const r = await getOrExtractFacts({ repo, productIds: ["p-01"], deps: { ...deps, dailyReadCap: 0 }, trigger: "order", runId: null });
+    expect(generate).not.toHaveBeenCalled();
+    expect(r.events[0]).toMatchObject({ status: "config_error", errorCode: "daily_cap" });
+  });
+
+  it("fails closed when the event count cannot be read", async () => {
+    const { repo, generate, deps } = setup();
+    vi.spyOn(repo, "listExtractionEvents").mockRejectedValue(new Error("db down"));
+    await getOrExtractFacts({ repo, productIds: ["p-01"], deps: { ...deps, dailyReadCap: 100 }, trigger: "order", runId: null });
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("does not query the count on a full cache hit", async () => {
+    const { repo, deps } = setup();
+    repo.facts.set("p-01", stored("p-01"));
+    const list = vi.spyOn(repo, "listExtractionEvents");
+    await getOrExtractFacts({ repo, productIds: ["p-01"], deps: { ...deps, dailyReadCap: 1 }, trigger: "order", runId: null });
+    expect(list).not.toHaveBeenCalled();
   });
 });
 

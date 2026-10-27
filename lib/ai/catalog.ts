@@ -5,7 +5,7 @@ import "server-only";
 
 import type { Repo } from "@/lib/db/repo";
 import type { ExtractionEvent, Product, StoredFacts, Trigger } from "@/lib/db/types";
-import { extractFacts, type ExtractDeps } from "./extractor";
+import { extractFacts, GenerateError, type ExtractDeps } from "./extractor";
 
 export interface CatalogRequest {
   repo: Repo;
@@ -58,6 +58,35 @@ function isFresh(cached: StoredFacts, product: Product): boolean {
   return cached.sourceHash === product.sourceHash; // page text unchanged since extraction
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+/** Statuses recorded without a model call. */
+const NO_CALL_STATUSES = new Set<ExtractionEvent["status"]>(["config_error", "simulated_outage"]);
+
+/**
+ * Model reads left in the rolling 24 h window. Fails closed: if the count cannot be read, nothing is
+ * left, so a database outage can never turn into unmetered Gemini spend.
+ */
+async function remainingDailyReads(repo: Repo, cap: number, nowIso: string): Promise<number> {
+  try {
+    const since = new Date(Date.parse(nowIso) - DAY_MS).toISOString();
+    const used = (await repo.listExtractionEvents(since)).filter((e) => !NO_CALL_STATUSES.has(e.status)).length;
+    return Math.max(0, cap - used);
+  } catch {
+    return 0;
+  }
+}
+
+/** Over the daily cap the product stays unknown and the skipped read is recorded as config_error. */
+function capReachedDeps(deps: ExtractDeps): ExtractDeps {
+  return {
+    ...deps,
+    maxAttempts: 1,
+    generate: async () => {
+      throw new GenerateError("Daily Gemini read cap reached", "config_error", "daily_cap", false);
+    },
+  };
+}
+
 export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogResult> {
   const nowIso = req.nowIso ?? (() => new Date().toISOString());
   const productIds = [...new Set(req.productIds)]; // a repeated id must not call the model twice
@@ -84,10 +113,13 @@ export async function getOrExtractFacts(req: CatalogRequest): Promise<CatalogRes
 
   const now = req.deps.now ?? (() => performance.now());
   const deps = { ...req.deps, deadlineAt: now() + (req.budgetMs ?? DEFAULT_BUDGET_MS) };
+  const cap = req.deps.dailyReadCap;
+  const allowed = cap === undefined || toExtract.length === 0 ? toExtract.length : await remainingDailyReads(req.repo, cap, nowIso());
+  const blockedDeps = capReachedDeps(deps);
   let degraded = false;
   // Each product is saved as soon as it is read, so a slow neighbour cannot lose it.
   const events = await mapLimit(toExtract, req.concurrency ?? 2, async (product): Promise<ExtractionEvent> => {
-    const { facts: extracted, event } = await extractFacts(product, deps);
+    const { facts: extracted, event } = await extractFacts(product, toExtract.indexOf(product) < allowed ? deps : blockedDeps);
     if (extracted) {
       const stored: StoredFacts = {
         ...extracted,

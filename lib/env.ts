@@ -19,6 +19,8 @@ const GeminiEnvSchema = z.object({
   GEMINI_MODEL: z.string().trim().min(1, "GEMINI_MODEL is missing"),
   GEMINI_PRICE_INPUT_PER_M: z.coerce.number().nonnegative().default(0),
   GEMINI_PRICE_OUTPUT_PER_M: z.coerce.number().nonnegative().default(0),
+  /** Products Gemini may read in any rolling 24 h across all instances; 0 turns extraction off. */
+  GEMINI_DAILY_READ_CAP: z.coerce.number().int().nonnegative().default(30),
 });
 
 const SupabaseEnvSchema = z.object({

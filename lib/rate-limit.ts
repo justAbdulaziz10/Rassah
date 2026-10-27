@@ -2,8 +2,8 @@ import "server-only";
 
 // Per-IP sliding-window rate limit for routes that can trigger Gemini extraction (pack, admin extract).
 // State lives in this server instance's memory: on Vercel each serverless instance counts on its own,
-// and a cold start resets the counters. That is an accepted limit for the demo (docs/decisions.md);
-// a shared limit would need a DB or KV counter.
+// and a cold start resets the counters. That is an accepted limit for the demo (docs/decisions.md).
+// The hard spend bound is the shared daily read cap in lib/ai/catalog.ts.
 
 type RateLimitResult = { ok: true; remaining: number } | { ok: false; retryAfterSec: number };
 

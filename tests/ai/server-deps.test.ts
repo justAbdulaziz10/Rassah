@@ -20,6 +20,14 @@ describe("server extraction settings", () => {
     await expect(deps.generate({ system: "", user: "", schema: {} } as never)).rejects.toMatchObject({ status: "config_error", code: "missing_key" });
   });
 
+  it("caps daily Gemini reads at one catalog by default, and the cap can be set or turned off", () => {
+    vi.stubEnv("GEMINI_API_KEY", "key");
+    vi.stubEnv("GEMINI_MODEL", "gemini-test");
+    expect(serverExtractDeps().dailyReadCap).toBe(30);
+    vi.stubEnv("GEMINI_DAILY_READ_CAP", "0");
+    expect(serverExtractDeps().dailyReadCap).toBe(0);
+  });
+
   it("trims pasted keys and model names", () => {
     vi.stubEnv("GEMINI_API_KEY", "AIzaKEY\n");
     vi.stubEnv("GEMINI_MODEL", "gemini-test ");

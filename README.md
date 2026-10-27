@@ -189,7 +189,7 @@ When a metric crosses its limit, an alert opens, from info up to critical. It sh
 
 **Known limitations and next steps:**
 
-- **No login on the write APIs.** There are no accounts or per-merchant data, and everyone shares one database. The per-IP rate limits live in process memory, so they slow abuse down but are not a hard cap. Next: authentication and per-merchant isolation.
+- **No login on the write APIs.** There are no accounts or per-merchant data, and everyone shares one database. The per-IP rate limits live in process memory, so they slow abuse down but are not a hard cap. Gemini spend has its own hard cap: `GEMINI_DAILY_READ_CAP` product reads per rolling 24 h, shared through the database. Next: authentication and per-merchant isolation.
 - **Ground truth is AI-drafted.** The extraction ground truth was drafted with AI help and not independently reviewed, so treat the extraction accuracy numbers as indicative.
 - **Estimates and the split are approximate.** Estimated sizes carry a 15% margin and the packing steps say to check the fit. The multi-carton split is validated but not proven to be the cheapest. Next: a cheaper split search and stacking-load rules.
 - **The vendor benchmark has not run against the vendors.** `npm run bench` needs Paccurate and 3DBinPacking keys; results so far compare Rassah with a naive packer only.
@@ -255,6 +255,7 @@ Copy `.env.example` to `.env.local`. Never commit real values, and never give a 
 | `GEMINI_MODEL` | for live extraction | `gemini-3.5-flash-lite` |
 | `GEMINI_PRICE_INPUT_PER_M` | optional | USD per 1M input tokens, for the cost metric: `0.30` |
 | `GEMINI_PRICE_OUTPUT_PER_M` | optional | USD per 1M output tokens, including thinking: `2.50` |
+| `GEMINI_DAILY_READ_CAP` | optional | Most products Gemini may read in any rolling 24 h, shared by every instance (counted from `extraction_events`). Default `30`, one full catalog; `0` turns extraction off |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | for the database | Server-side database access |
 | `DATA_BACKEND` | optional | `memory` runs on `data/*.json` in process memory, with no Supabase (local only, ignored on Vercel) |
 | `MEMORY_SEED_FACTS` | optional | Memory mode only: `auto` (default: seed only when there is no Gemini key), `true` or `false`. Seeded facts have origin `seeded` and are never shown as AI output |
